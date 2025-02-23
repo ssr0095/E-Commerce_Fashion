@@ -1,13 +1,11 @@
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { ShopContext } from "../context/ShopContext";
 import Title from "../components/Title";
 import axios from "axios";
 import { toast } from "react-toastify";
 import QRCode from "../components/QrCode";
 import { assets } from "../assets/assets";
-
 import { useParams } from "react-router-dom";
-import process from "process";
 import SmallNavBar from "../components/SmallNavBar";
 
 const Payment = () => {
