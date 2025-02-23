@@ -4,8 +4,10 @@ import path from "path";
 
 export default defineConfig({
   plugins: [react()],
-  rollupOptions: {
-    external: ["qrcode.react"],
+  build: {
+    rollupOptions: {
+      external: ["qrcode.react"],
+    },
   },
   resolve: {
     alias: {
