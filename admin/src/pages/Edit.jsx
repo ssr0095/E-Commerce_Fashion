@@ -274,15 +274,15 @@ const Edit = ({ token, id, setEditDialogOpen }) => {
         />
       </div>
 
-      <div className="grid gap-2 w-full">
+      <div className="grid sm:grid-cols-2 gap-2 w-full">
         <div>
           <p className="mb-2">Product theme</p>
           <Select
             className="w-full"
-            onChange={(e) => setTheme(e.target.value)}
-            value={theme}
+            onValueChange={(value) => setTheme(value)}
+            // value={theme}
           >
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger>
               <SelectValue placeholder="Select theme" />
             </SelectTrigger>
             <SelectContent>
@@ -299,10 +299,10 @@ const Edit = ({ token, id, setEditDialogOpen }) => {
         <div>
           <p className="mb-2">Product category</p>
           <Select
-            onChange={(e) => setCategory(e.target.value)}
-            value={category}
+            onValueChange={(value) => setCategory(value)}
+            // value={category}
           >
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger>
               <SelectValue placeholder="Select category" />
             </SelectTrigger>
             <SelectContent>
@@ -316,11 +316,11 @@ const Edit = ({ token, id, setEditDialogOpen }) => {
         <div>
           <p className="mb-2">Sub category</p>
           <Select
-            onChange={(e) => setSubCategory(e.target.value)}
-            value={subCategory}
+            onValueChange={(value) => setSubCategory(value)}
+            // value={subCategory}
           >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select subCategory" />
+            <SelectTrigger>
+              <SelectValue placeholder="Select sub category" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="Topwear">Topwear</SelectItem>
@@ -333,12 +333,12 @@ const Edit = ({ token, id, setEditDialogOpen }) => {
         <div>
           <p className="mb-2">Tag</p>
           <Select
-            onChange={(e) => setTag(e.target.value)}
+            onValueChange={(value) => setTag(value)}
             className="w-full px-3 py-2"
-            value={tag}
+            // value={tag}
           >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select thg" />
+            <SelectTrigger>
+              <SelectValue placeholder="Select tag" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="New">New</SelectItem>

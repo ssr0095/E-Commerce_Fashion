@@ -185,7 +185,7 @@ const Add = ({ token }) => {
           <p className="mb-2">Product theme</p>
           <Select
             className="w-full"
-            onChange={(e) => setTheme(e.target.value)}
+            onValueChange={(value) => setTheme(value)}
             // value={theme}
           >
             <SelectTrigger>
@@ -205,7 +205,7 @@ const Add = ({ token }) => {
         <div>
           <p className="mb-2">Product category</p>
           <Select
-            onChange={(e) => setCategory(e.target.value)}
+            onValueChange={(value) => setCategory(value)}
             // value={category}
           >
             <SelectTrigger>
@@ -222,7 +222,7 @@ const Add = ({ token }) => {
         <div>
           <p className="mb-2">Sub category</p>
           <Select
-            onChange={(e) => setSubCategory(e.target.value)}
+            onValueChange={(value) => setSubCategory(value)}
             // value={subCategory}
           >
             <SelectTrigger>
@@ -239,7 +239,7 @@ const Add = ({ token }) => {
         <div>
           <p className="mb-2">Tag</p>
           <Select
-            onChange={(e) => setTag(e.target.value)}
+            onValueChange={(value) => setTag(value)}
             className="w-full px-3 py-2"
             // value={tag}
           >

@@ -89,7 +89,10 @@ const adminLogin = async (req, res) => {
       email === process.env.ADMIN_EMAIL &&
       password === process.env.ADMIN_PASSWORD
     ) {
-      const token = jwt.sign(email + password, process.env.JWT_SECRET);
+      // Properly sign the token
+      const token = jwt.sign({ email }, process.env.JWT_SECRET, {
+        expiresIn: "2h",
+      });
       res.json({ success: true, token });
     } else {
       res.json({ success: false, message: "Invalid credentials" });

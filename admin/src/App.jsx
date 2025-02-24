@@ -5,7 +5,7 @@ import { Routes, Route } from "react-router-dom";
 // import Add from "./pages/Add";
 // import List from "./pages/List";
 // import Orders from "./pages/Orders";
-import Login from "./components/Login";
+// import Login from "./components/Login";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Loading from "./components/Loading";
@@ -27,6 +27,7 @@ const App = () => {
   const Add = lazy(() => import("./pages/Add"));
   const List = lazy(() => import("./pages/List"));
   const Orders = lazy(() => import("./pages/Orders"));
+  const Login = lazy(() => import("./pages/Login"));
 
   return (
     <div className="bg-gray-50 min-h-screen">
