@@ -4,6 +4,9 @@ import path from "path";
 
 export default defineConfig({
   plugins: [react()],
+  optimizeDeps: {
+    include: ["qrcode.react"],
+  },
   build: {
     rollupOptions: {
       external: ["qrcode.react"],
