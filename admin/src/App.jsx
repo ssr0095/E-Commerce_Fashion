@@ -27,7 +27,7 @@ const App = () => {
   const Add = lazy(() => import("./pages/Add"));
   const List = lazy(() => import("./pages/List"));
   const Orders = lazy(() => import("./pages/Orders"));
-  const Login = lazy(() => import("./pages/Login"));
+  const Login = lazy(() => import("./components/Login"));
 
   return (
     <div className="bg-gray-50 min-h-screen">
