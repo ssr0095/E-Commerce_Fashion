@@ -9,7 +9,6 @@ const userSchema = new mongoose.Schema(
     has_placed_first_order: { type: Boolean, default: false },
     coupon: { type: String, unique: true, sparse: true, default: "" },
     isCouponActive: { type: Boolean, default: false },
-    paymentScreenshot: { type: String, default: "" },
   },
   { minimize: false }
 );

@@ -11,9 +11,11 @@ import {
   verifyStripe,
   verifyRazorpay,
   updatePaymentStatus,
+  addScreenShot,
 } from "../controllers/orderController.js";
 import adminAuth from "../middleware/adminAuth.js";
 import authUser from "../middleware/auth.js";
+import upload from "../middleware/multer.js";
 
 const orderRouter = express.Router();
 
@@ -35,5 +37,12 @@ orderRouter.post("/getuserorder", authUser, getUserOrder);
 // verify payment
 orderRouter.post("/verifyStripe", authUser, verifyStripe);
 orderRouter.post("/verifyRazorpay", authUser, verifyRazorpay);
+
+orderRouter.post(
+  "/addScreenShot",
+  upload.single("image"),
+  authUser,
+  addScreenShot
+);
 
 export default orderRouter;

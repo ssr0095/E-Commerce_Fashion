@@ -8,7 +8,7 @@ const orderSchema = new mongoose.Schema({
   status: { type: String, required: true, default: "Order Placed" },
   paymentMethod: { type: String, required: true },
   payment: { type: Number, required: true, default: -1 },
-  // screenshot: { type: String, required: false, default: "" },
+  paymentScreenshot: { type: String, default: "" },
   date: { type: Number, required: true },
 });
 

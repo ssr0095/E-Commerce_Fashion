@@ -11,10 +11,6 @@ import SmallNavBar from "../components/SmallNavBar";
 const Payment = () => {
   const { token, navigate, backendUrl, currency } = useContext(ShopContext);
 
-  // if (cartItems.length == undefined) {
-  //   redirect("/");
-  // }
-
   const [image, setImage] = useState(false);
   const [isImageUploaded, setIsImageUploaded] = useState(false);
   const [order, setOrder] = useState(false);
@@ -63,7 +59,7 @@ const Payment = () => {
       formData.append("orderId", orderId);
       // console.log(token);
       const response = await axios.post(
-        backendUrl + "/api/user/addScreenShot",
+        backendUrl + "/api/order/addScreenShot",
         formData,
         { headers: { token } }
       );

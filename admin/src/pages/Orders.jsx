@@ -5,9 +5,19 @@ import axios from "axios";
 import { backendUrl, currency } from "../App";
 import { toast } from "react-toastify";
 import { assets } from "../assets/assets";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 const Orders = ({ token }) => {
   const [orders, setOrders] = useState([]);
+  const [image, setImage] = useState("");
+  const [imagePreivewOpen, setImagePreivewOpen] = useState(false);
 
   const fetchAllOrders = async () => {
     if (!token) {
@@ -73,6 +83,7 @@ const Orders = ({ token }) => {
   return (
     <div className=" max-sm:px-6">
       <h3>Order Page</h3>
+
       <div>
         {orders.map((order, index) => (
           <div
@@ -142,7 +153,32 @@ const Orders = ({ token }) => {
               <p>Date : {new Date(order.date).toLocaleDateString()}</p>
             </div>
             <div className="w-full flex-1 flex-col items-center gap-3 max-lg:col-start-2 max-lg:col-span-2">
-              <p className="my-2">Payment status</p>
+              <p className="my-2 flex items-center gap-2">
+                Payment status
+                <span
+                  className="p-2 rounded-full active:bg-gray-100 hover:bg-gray-200"
+                  onClick={() => {
+                    setImage(order.paymentScreenshot);
+                    setImagePreivewOpen(true);
+                  }}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="lucide lucide-eye"
+                  >
+                    <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                </span>
+              </p>
               <select
                 onChange={(event) => PstatusHandler(event, order._id)}
                 value={order.payment}
@@ -167,6 +203,29 @@ const Orders = ({ token }) => {
           </div>
         ))}
       </div>
+      <Dialog open={imagePreivewOpen} onOpenChange={setImagePreivewOpen}>
+        <DialogContent className="max-sm:w-[80%] max-h-[80%] rounded-md">
+          <DialogHeader>
+            <DialogTitle className="mb-3">Payment screenshot</DialogTitle>
+          </DialogHeader>
+
+          {image && (
+            <div className="w-full h-[50vh] flex items-center justify-center overflow-scroll no-scrollbar">
+              <img
+                src={image}
+                alt="Preview"
+                width={192}
+                className="w-48 object-cover rounded-md shadow-lg "
+              />
+            </div>
+          )}
+          <DialogFooter>
+            <Button onClick={() => setImagePreivewOpen(false)} className="mb-2">
+              Done
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

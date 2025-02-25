@@ -2,7 +2,7 @@ import orderModel from "../models/orderModel.js";
 import userModel from "../models/userModel.js";
 import Stripe from "stripe";
 import razorpay from "razorpay";
-
+import { v2 as cloudinary } from "cloudinary";
 // global variables
 const currency = "inr";
 const deliveryCharge = 10;
@@ -278,6 +278,48 @@ const updatePaymentStatus = async (req, res) => {
   }
 };
 
+const addScreenShot = async (req, res) => {
+  try {
+    const { orderId } = req.body;
+    // console.log(userId + ": user");
+    // console.log(token + ": token");
+    if (!req.file) {
+      return res
+        .status(400)
+        .json({ success: false, message: "No file uploaded" });
+    }
+
+    const image = req.file; // Extract the uploaded file
+
+    // Upload image to Cloudinary
+    const result = await cloudinary.uploader.upload(image.path, {
+      resource_type: "image",
+    });
+
+    const imageUrl = result.secure_url;
+    // console.log(imageUrl);
+    const order = await orderModel.findByIdAndUpdate(orderId, {
+      paymentScreenshot: imageUrl,
+      payment: -1,
+    });
+
+    if (!order) {
+      return res.json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+    res.json({
+      success: true,
+      message: "Screenshot uploaded successfully",
+      image: imageUrl,
+    });
+  } catch (error) {
+    console.error("Upload Error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 export {
   verifyRazorpay,
   verifyStripe,
@@ -290,4 +332,5 @@ export {
   updateStatus,
   updatePaymentStatus,
   getUserOrder,
+  addScreenShot,
 };
