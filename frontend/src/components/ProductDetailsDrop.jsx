@@ -13,8 +13,12 @@ const ProductDetailsDrop = () => {
         <AccordionContent>
           <div className="text-sm text-gray-500 flex flex-col gap-1">
             <p>100% Original product.</p>
-            <p>Cash on delivery is available on this product.</p>
-            <p>Easy return and exchange policy within 7 days.</p>
+            <p>Cash on delivery is not available on this product.</p>
+            {/* <p>Easy return and exchange policy within 7 days.</p> */}
+            <p>
+              Wash care: Machine wash in cold water, Use a mild detergent, Dry
+              in the shade, and do not iron directly or scrub on print.
+            </p>
           </div>
         </AccordionContent>
       </AccordionItem>

@@ -246,7 +246,7 @@ const Collection = () => {
               }}
             >
               <SelectTrigger className="min-w-32 max-w-[40%] lg:max-w-[30%]">
-                <SelectValue placeholder="Filter" />
+                <SelectValue placeholder="Sort" />
               </SelectTrigger>
               <SelectContent className="">
                 <SelectItem value="relavent">Sort by: Relavent</SelectItem>

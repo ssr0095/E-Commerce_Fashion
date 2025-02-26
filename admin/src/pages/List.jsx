@@ -20,7 +20,9 @@ const List = ({ token }) => {
 
   const fetchList = async () => {
     try {
-      const response = await axios.get(backendUrl + "/api/product/list");
+      const response = await axios.get(
+        backendUrl + `/api/product/list?admin=${true}`
+      );
       if (response.data.success) {
         setList(response.data.products.reverse());
       } else {
@@ -76,7 +78,13 @@ const List = ({ token }) => {
             className="grid grid-cols-[1fr_2fr_1fr_1fr_1fr_1fr] items-center py-2 px-4 border-b text-sm hover:bg-gray-50 bg-white"
             key={index}
           >
-            <img className="w-12" src={item.image[0]} alt="" />
+            <img
+              className="size-12"
+              width={48}
+              height={48}
+              src={item.image[0]}
+              alt="cloth"
+            />
             <p>{item.name}</p>
             <p>{item.category}</p>
             <p>

@@ -56,26 +56,28 @@ const Navbar = () => {
         </p> */}
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-white">
           <p className="max-sm:text-xs text-sm/6">
-            <strong className="font-semibold">Limited Time Offer</strong>
-            <svg
-              viewBox="0 0 2 2"
-              aria-hidden="true"
-              className="mx-2 inline size-0.5 fill-current"
-            >
-              <circle r={1} cx={1} cy={1} />
-            </svg>
-            Apply Code -{" "}
-            <strong className="font-semibold">
-              {import.meta.env.VITE_COUSINS_COUPION}
-            </strong>{" "}
+            <span className="max-sm:hidden">
+              <strong className="font-semibold">Limited Time Offer</strong>
+              <svg
+                viewBox="0 0 2 2"
+                aria-hidden="true"
+                className="mx-2 inline size-0.5 fill-current"
+              >
+                <circle r={1} cx={1} cy={1} />
+              </svg>
+              Apply Code -{" "}
+              <strong className="font-semibold">
+                {import.meta.env.VITE_COUSINS_COUPION}
+              </strong>{" "}
+            </span>
             Get 10% Off on First Order
           </p>
-          <a
+          <Link
             href="/collection"
-            className="flex-none rounded-full bg-gray-900 px-3.5 py-1 max-sm:text-xs text-sm font-semibold text-white shadow-xs hover:bg-gray-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
+            className="flex items-center rounded-full bg-gray-900 px-3.5 py-1 max-sm:text-xs text-sm font-semibold text-white shadow-xs hover:bg-gray-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
           >
             Shop now <span aria-hidden="true">&rarr;</span>
-          </a>
+          </Link>
         </div>
       </div>
 

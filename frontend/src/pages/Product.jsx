@@ -136,7 +136,7 @@ const Product = () => {
         </div>
 
         {/* ---------- Description & Review Section ------------- */}
-        <div className="mt-20">
+        {/* <div className="mt-20">
           <div className="flex">
             <b className="border px-5 py-3 text-sm">Description</b>
             <p className="border px-5 py-3 text-sm">Reviews (122)</p>
@@ -158,7 +158,7 @@ const Product = () => {
               dedicated page with relevant information.
             </p>
           </div>
-        </div>
+        </div> */}
 
         {/* --------- display related products ---------- */}
 

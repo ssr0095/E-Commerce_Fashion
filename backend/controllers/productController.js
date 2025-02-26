@@ -157,8 +157,13 @@ const listProducts = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const custom = req.query.custom == "true";
+    const admin = req.query.admin == "true";
     const skip = (page - 1) * limit;
-    console.log(req.query.custom);
+    // console.log(req.query.custom);
+    if (admin) {
+      const products = await productModel.find({});
+      return res.json({ success: true, products });
+    }
     if (custom) {
       const products = await productModel.find({ customizable: true });
       res.json({ success: true, products });

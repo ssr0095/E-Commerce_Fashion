@@ -13,12 +13,20 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const Orders = ({ token }) => {
   const [orders, setOrders] = useState([]);
   const [image, setImage] = useState("");
   const [imagePreivewOpen, setImagePreivewOpen] = useState(false);
-
+  // const [paymentStatus, setPaymentStatus] = useState("");
+  // const [orderStatus, setOrderStatus] = useState("");
   const fetchAllOrders = async () => {
     if (!token) {
       return null;
@@ -41,14 +49,15 @@ const Orders = ({ token }) => {
     }
   };
 
-  const statusHandler = async (event, orderId) => {
+  const statusHandler = async (value, orderId) => {
     try {
       const response = await axios.post(
         backendUrl + "/api/order/status",
-        { orderId, status: event.target.value },
+        { orderId, status: value },
         { headers: { token } }
       );
       if (response.data.success) {
+        // setOrderStatus(value);
         toast.success(response.data.message);
         await fetchAllOrders();
       }
@@ -58,14 +67,16 @@ const Orders = ({ token }) => {
     }
   };
 
-  const PstatusHandler = async (event, orderId) => {
+  const PstatusHandler = async (value, orderId) => {
     try {
       const response = await axios.post(
         backendUrl + "/api/order/paymentstatus",
-        { orderId, payment: event.target.value },
+        { orderId, payment: value },
         { headers: { token } }
       );
       if (response.data.success) {
+        // setPaymentStatus(value);
+
         toast.success(response.data.message);
 
         await fetchAllOrders();
@@ -179,26 +190,38 @@ const Orders = ({ token }) => {
                   </svg>
                 </span>
               </p>
-              <select
-                onChange={(event) => PstatusHandler(event, order._id)}
+              <Select
+                onValueChange={(value) => PstatusHandler(value, order._id)}
                 value={order.payment}
                 className="w-full p-2 font-semibold"
               >
-                <option value="-1">Processing</option>
-                <option value="1">Success</option>
-                <option value="0">Failed</option>
-              </select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={-1}>Processing</SelectItem>
+                  <SelectItem value={1}>Success</SelectItem>
+                  <SelectItem value={0}>Failed</SelectItem>
+                </SelectContent>
+              </Select>
               <p className=" my-2">Order status</p>
-              <select
-                onChange={(event) => statusHandler(event, order._id)}
+              <Select
+                onValueChange={(value) => statusHandler(value, order._id)}
                 value={order.status}
                 className="w-full p-2 font-semibold"
               >
-                <option value="Order Placed">Order Placed</option>
-                <option value="Shipped">Shipped</option>
-                <option value="Out for delivery">Out for delivery</option>
-                <option value="Delivered">Delivered</option>
-              </select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Order Placed">Order Placed</SelectItem>
+                  <SelectItem value="Shipped">Shipped</SelectItem>
+                  <SelectItem value="Out for delivery">
+                    Out for delivery
+                  </SelectItem>
+                  <SelectItem value="Delivered">Delivered</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         ))}
@@ -209,7 +232,7 @@ const Orders = ({ token }) => {
             <DialogTitle className="mb-3">Payment screenshot</DialogTitle>
           </DialogHeader>
 
-          {image && (
+          {image ? (
             <div className="w-full h-[50vh] flex items-center justify-center overflow-scroll no-scrollbar">
               <img
                 src={image}
@@ -218,6 +241,8 @@ const Orders = ({ token }) => {
                 className="w-48 object-cover rounded-md shadow-lg "
               />
             </div>
+          ) : (
+            <p>No image added</p>
           )}
           <DialogFooter>
             <Button onClick={() => setImagePreivewOpen(false)} className="mb-2">
