@@ -4,7 +4,13 @@ import path from "path";
 
 export default defineConfig({
   plugins: [react()],
-  server: { port: 5174 },
+  base: "/",
+  build: {
+    outDir: "dist",
+  },
+  server: {
+    historyApiFallback: true, // Important for React Router
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
