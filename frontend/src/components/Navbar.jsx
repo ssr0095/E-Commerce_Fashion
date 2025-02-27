@@ -73,7 +73,7 @@ const Navbar = () => {
             Get 10% Off on First Order
           </p>
           <Link
-            href="/collection"
+            to="/collection"
             className="flex items-center rounded-full bg-gray-900 px-3.5 py-1 max-sm:text-xs text-sm font-semibold text-white shadow-xs hover:bg-gray-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
           >
             Shop now <span aria-hidden="true">&rarr;</span>

@@ -4,13 +4,12 @@ import path from "path";
 
 export default defineConfig({
   plugins: [react()],
-  optimizeDeps: {
-    include: ["qrcode.react"],
-  },
+  base: "/",
   build: {
-    rollupOptions: {
-      external: ["qrcode.react"],
-    },
+    outDir: "dist",
+  },
+  server: {
+    historyApiFallback: true, // Important for React Router
   },
   resolve: {
     alias: {

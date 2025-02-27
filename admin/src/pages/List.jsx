@@ -146,12 +146,12 @@ const List = ({ token }) => {
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent>
+        <DialogContent className="w-[80%] rounded-lg">
           <DialogHeader>
             <DialogTitle>Confirm Deletion</DialogTitle>
           </DialogHeader>
           <p>Are you sure you want to delete this product?</p>
-          <DialogFooter>
+          <DialogFooter className="flex gap-2">
             <Button
               variant="outline"
               onClick={() => setDeleteDialogOpen(false)}
