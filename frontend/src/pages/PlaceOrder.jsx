@@ -200,7 +200,6 @@ const PlaceOrder = () => {
               placeholder="First name"
             />
             <input
-              required
               onChange={onChangeHandler}
               name="lastName"
               value={formData.lastName}

@@ -94,7 +94,7 @@ export const CategoryItem = ({ name, image }) => {
         />
       </div>
       <p className="w-fit absolute bottom-5 left-5 bg-white px-4 z-10 py-2 border border-gray-700 text-xs lg:text-sm text-center hover:underline underline-offset-2">
-        {name.toUpperCase()}{" "}
+        {name?.toUpperCase()}{" "}
         <span className="hidden group-hover:inline-block"> &rarr;</span>
       </p>
     </Link>

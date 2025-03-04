@@ -17,14 +17,11 @@ const Cart = () => {
     discount,
     setDiscount,
     getCartAmount,
+    token,
   } = useContext(ShopContext);
 
   const [cartData, setCartData] = useState([]);
   const [couponCode, setCouponCode] = useState("");
-
-  if (cartItems.length < 1) {
-    navigate("/");
-  }
 
   const onChangeHandler = (event) => {
     const value = event.target.value;
@@ -89,7 +86,7 @@ const Cart = () => {
                 <div className=" flex items-start gap-6">
                   <img
                     className="w-16 sm:w-20"
-                    src={productData.image[0]}
+                    src={productData?.image[0]}
                     alt=""
                   />
                   <div>
@@ -167,6 +164,8 @@ const Cart = () => {
                 onClick={() => {
                   if (getCartAmount() < 1) {
                     toast.error("No items added");
+                  } else if (!token) {
+                    navigate("/login");
                   } else {
                     navigate("/place-order");
                   }

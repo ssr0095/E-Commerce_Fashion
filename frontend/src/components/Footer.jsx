@@ -7,14 +7,11 @@ const Footer = () => {
       <div className="my-6">
         <img src={assets.logo} className="mb-5 w-32" alt="" />
         <p className="w-full md:w-11/12 text-gray-600 text-sm">
-          CousinsFashion is all about stylish, high-quality fashion that suits
-          every occasion. We offer a handpicked collection of trendy clothing
-          and accessories for men and women, blending comfort with style.
-          Whether it's casual wear, party outfits, or ethnic fashion, we’ve got
-          you covered. Enjoy hassle-free shopping with easy payments and fast
-          delivery. Need something custom-made? Chat with us on WhatsApp for
-          exclusive designs. Dress with confidence, shop with ease—only at
-          CousinsFashion!
+          CousinsFashion brings you stylish, high-quality fashion for every
+          occasion. Explore trendy clothing and accessories for men and women,
+          blending comfort with style. Shop hassle-free with easy payments, fast
+          delivery, and custom designs via WhatsApp. Dress with confidence—only
+          at CousinsFashion!
         </p>
       </div>
       <hr />

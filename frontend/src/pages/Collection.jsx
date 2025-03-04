@@ -143,11 +143,13 @@ const Collection = () => {
   // }, [hasMore]);
 
   return (
-    <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
-      <SmallNavBar navs={["Collection"]} />
+    <div className="px-2 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
+      <div className="px-2">
+        <SmallNavBar navs={["Collection"]} />
+      </div>
       <div className="flex flex-col sm:flex-row gap-1 sm:gap-10 pt-10 border-t">
         {/* Filter Options */}
-        <div className="min-w-60">
+        <div className="min-w-60 px-4">
           <p
             onClick={() => setShowFilter(!showFilter)}
             className="my-2 text-xl flex items-center cursor-pointer gap-2"
@@ -198,7 +200,7 @@ const Collection = () => {
           </div>
           {/* SubCategory Filter */}
           <div
-            className={`border border-gray-300 pl-5 py-3 my-5 ${
+            className={`border border-gray-300 px-4 pl-5 py-3 my-5 ${
               showFilter ? "" : "hidden"
             } sm:block`}
           >
@@ -258,7 +260,7 @@ const Collection = () => {
 
           {/* Map Products */}
           <div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 gap-y-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 gap-y-4">
               {filterProducts.map((item, index) => (
                 <ProductItem
                   key={index}

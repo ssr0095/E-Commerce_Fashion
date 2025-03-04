@@ -273,21 +273,21 @@ const Navbar = () => {
               COLLECTION
             </NavLink>
             <NavLink
+              to="/customize"
+              onClick={() => setVisible(false)}
+              className="py-2 pl-6 border"
+            >
+              CUSTOMIZE
+            </NavLink>
+            <NavLink
               onClick={() => setVisible(false)}
               className="py-2 pl-6 border"
               to="/about"
             >
               ABOUT
             </NavLink>
-            <NavLink
-              onClick={() => setVisible(false)}
-              className="py-2 pl-6 border"
-              to="/contact"
-            >
-              CONTACT
-            </NavLink>
             <Link
-              to="https://wa.me/9361065174?text=I'm%20interested%20in%20your%20car%20for%20sale"
+              to="https://wa.me/8248586654?text=Hey!%20I%20saw%20your%20collection%20and%20loved%20it.%20Can%20you%20help%20me%20with%20sizes%20and%20pricing?"
               target="_black"
               className="py-2 pl-6 border"
             >

@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+// import Loader from "../components/CompLoader";
 
 const List = ({ token }) => {
   const [list, setList] = useState([]);
@@ -63,6 +64,9 @@ const List = ({ token }) => {
   return (
     <div className="w-full max-sm:px-6 overflow-x-scroll relative">
       <p className="mb-2">All Products List</p>
+      {/* {list ? (
+        <Loader />
+      ) : ( */}
       <div className="flex flex-col min-w-[560px] overflow-x-scroll md:min-w-[80%] no-scrollbar">
         <div className="w-full sticky top-0 left-0 grid grid-cols-[1fr_2fr_1fr_1fr_1fr_1fr] items-center py-2 px-4 border-b-2  bg-white text-sm">
           <b>Image</b>
@@ -143,6 +147,7 @@ const List = ({ token }) => {
           </div>
         ))}
       </div>
+      {/* )} */}
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
