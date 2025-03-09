@@ -23,8 +23,8 @@ const Add = ({ token }) => {
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [price, setPrice] = useState(0);
-  const [discount, setDiscount] = useState(0);
+  const [price, setPrice] = useState("");
+  const [discount, setDiscount] = useState("");
   const [tag, setTag] = useState("");
   const [theme, setTheme] = useState("");
   const [category, setCategory] = useState("");
@@ -69,8 +69,8 @@ const Add = ({ token }) => {
         setImage4(false);
         setName("");
         setDescription("");
-        setPrice(0);
-        setDiscount(0);
+        setPrice("");
+        setDiscount("");
         setBestseller(false);
         setCustomizable(false);
         setTag("");
@@ -110,6 +110,7 @@ const Add = ({ token }) => {
               type="file"
               id="image1"
               hidden
+              required
             />
           </Label>
           <Label htmlFor="image2">
@@ -186,7 +187,7 @@ const Add = ({ token }) => {
           <Select
             className="w-full"
             onValueChange={(value) => setTheme(value)}
-            // value={theme}
+            required
           >
             <SelectTrigger>
               <SelectValue placeholder="Select theme" />
@@ -204,10 +205,7 @@ const Add = ({ token }) => {
 
         <div>
           <p className="mb-2">Product category</p>
-          <Select
-            onValueChange={(value) => setCategory(value)}
-            // value={category}
-          >
+          <Select onValueChange={(value) => setCategory(value)} required>
             <SelectTrigger>
               <SelectValue placeholder="Select category" />
             </SelectTrigger>
@@ -221,10 +219,7 @@ const Add = ({ token }) => {
 
         <div>
           <p className="mb-2">Sub category</p>
-          <Select
-            onValueChange={(value) => setSubCategory(value)}
-            // value={subCategory}
-          >
+          <Select onValueChange={(value) => setSubCategory(value)} required>
             <SelectTrigger>
               <SelectValue placeholder="Select sub category" />
             </SelectTrigger>
@@ -241,6 +236,7 @@ const Add = ({ token }) => {
           <Select
             onValueChange={(value) => setTag(value)}
             className="w-full px-3 py-2"
+            required
             // value={tag}
           >
             <SelectTrigger>
@@ -262,6 +258,7 @@ const Add = ({ token }) => {
             className="w-full px-3 py-2 sm:w-[120px]"
             type="Number"
             placeholder="25"
+            required
           />
         </div>
         <div>
@@ -272,6 +269,7 @@ const Add = ({ token }) => {
             className="w-full px-3 py-2 sm:w-[120px]"
             type="Number"
             placeholder="20"
+            required
           />
         </div>
       </div>

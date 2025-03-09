@@ -32,7 +32,7 @@ const ProductItem = ({
           alt=""
         />
       </div> */}
-      <div className="w-full h-[40vh] group overflow-hidden relative">
+      <div className="w-full h-[45vh] group overflow-hidden relative">
         <img
           src={image[0]}
           alt="Default"
