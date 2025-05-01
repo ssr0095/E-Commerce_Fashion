@@ -11,14 +11,17 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import Loader from "../components/CompLoader";
 
 const List = ({ token }) => {
   const [list, setList] = useState([]);
   const [productId, setProductId] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   // const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchList = async (forceRefresh = false) => {
+    setIsLoading(true);
     const cacheKey = "cachedProductList";
     const cacheTimeKey = "cachedProductListTime";
     const cacheExpiry = 5 * 60 * 1000;
@@ -34,6 +37,7 @@ const List = ({ token }) => {
       now - cachedTime < cacheExpiry
     ) {
       setList(JSON.parse(cachedData));
+      setIsLoading(false);
       return;
     }
 
@@ -41,6 +45,7 @@ const List = ({ token }) => {
       const response = await axios.get(
         `${backendUrl}/api/product/list?admin=true`
       );
+      setIsLoading(false);
       if (response.data.success) {
         const reversed = response.data.products.reverse();
         setList(reversed);
@@ -55,12 +60,15 @@ const List = ({ token }) => {
   };
 
   const removeProduct = async () => {
+    setIsLoading(true);
     try {
       const response = await axios.post(
         `${backendUrl}/api/product/remove`,
         { id: productId },
         { headers: { token } }
       );
+      setIsLoading(false);
+
       if (response.data.success) {
         toast.success(response.data.message);
         await fetchList(true); // force refresh cache
@@ -81,6 +89,8 @@ const List = ({ token }) => {
   return (
     <div className="w-full max-sm:px-6 overflow-x-auto relative">
       <p className="mb-2">All Products List</p>
+      {isLoading && <Loader />}
+
       <div className="flex flex-col min-w-[560px] md:min-w-[80%] no-scrollbar">
         <div className="grid grid-cols-[1fr_2fr_1fr_1fr_1fr] px-4 py-2 border-b-2 bg-white text-sm sticky top-0">
           <b>Image</b>

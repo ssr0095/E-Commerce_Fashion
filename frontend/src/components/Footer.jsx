@@ -5,7 +5,7 @@ const Footer = () => {
   return (
     <footer className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw] bg-gray-50 border-t  mt-40">
       <div className="my-6">
-        <img src={assets.logo} className="mb-5 w-32" alt="" />
+        <img src={assets.logo} className="mb-5 w-32" alt="logo" />
         <p className="w-full md:w-11/12 text-gray-600 text-sm">
           CousinsFashion brings you stylish, high-quality fashion for every
           occasion. Explore trendy clothing and accessories for men and women,
@@ -19,27 +19,49 @@ const Footer = () => {
         <div>
           <p className="text-xl font-medium mb-5">COMPANY</p>
           <ul className="flex flex-col gap-1 text-gray-600">
-            <a href="/">Home</a>
-            <a href="/about">About us</a>
-            <a href="/collection">Collection</a>
-            <a href="#">Privacy policy</a>
+            <a href="/" alt="#">
+              Home
+            </a>
+            <a href="/about" alt="#">
+              About us
+            </a>
+            <a href="/collection" alt="#">
+              Collection
+            </a>
+            <a href="#" alt="#">
+              Privacy policy
+            </a>
           </ul>
         </div>
         <div>
           <p className="text-xl font-medium mb-5">CATEGORY</p>
           <ul className="flex flex-col gap-1 text-gray-600">
-            <a href="#">Men</a>
-            <a href="#">Women</a>
-            <a href="#">Aesthetic</a>
-            <a href="#">Street style</a>
+            <a href="#" alt="#">
+              Men
+            </a>
+            <a href="#" alt="#">
+              Women
+            </a>
+            <a href="#" alt="#">
+              Aesthetic
+            </a>
+            <a href="#" alt="#">
+              Street style
+            </a>
           </ul>
         </div>
         <div>
           <p className="text-xl font-medium mb-5">LEGAL</p>
           <ul className="flex flex-col gap-1 text-gray-600">
-            <a href="#">Privacy policy</a>
-            <a href="#">Terms & Conditions</a>
-            <a href="#">Shipping Policy</a>
+            <a href="#" alt="#">
+              Privacy policy
+            </a>
+            <a href="#" alt="#">
+              Terms & Conditions
+            </a>
+            <a href="#" alt="#">
+              Shipping Policy
+            </a>
           </ul>
         </div>
 
@@ -48,6 +70,7 @@ const Footer = () => {
           <ul className="flex flex-col gap-1 text-gray-600">
             <a
               className="flex items-center gap-2  hover:underline"
+              alt="whatsapp"
               href="https://wa.me/8248586654?text=Hey!%20I%20saw%20your%20collection%20and%20loved%20it.%20Can%20you%20help%20me%20with%20sizes%20and%20pricing?"
             >
               <svg
@@ -95,7 +118,11 @@ const Footer = () => {
       <div className="w-full flex items-center justify-end gap-3 mb-2">
         <p className="text-sm">CONNECT WITH US</p>
         <ul className="flex items-center gap-1 text-gray-600">
-          <a href="https://www.instagram.com/cousins_.fashion?igsh=aGZmaXRpNmJ2NWQ2">
+          <a
+            href="https://www.instagram.com/cousins_.fashion?igsh=aGZmaXRpNmJ2NWQ2"
+            className="p-2"
+            alt="instargam"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="20"
@@ -113,8 +140,8 @@ const Footer = () => {
               <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
             </svg>
           </a>
-          <a href="#">O</a>
-          <a href="#">O</a>
+          {/* <a href="#">O</a>
+          <a href="#">O</a> */}
         </ul>
       </div>
 

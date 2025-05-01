@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { assets } from "../assets/assets";
+import Loader from "../components/CompLoader";
 import axios from "axios";
 import { backendUrl } from "../App";
 import { toast } from "react-toastify";
@@ -16,6 +17,7 @@ import {
 } from "@/components/ui/select";
 
 const Add = ({ token }) => {
+  const [isLoading, setIsLoading] = useState(false);
   const [image1, setImage1] = useState(false);
   const [image2, setImage2] = useState(false);
   const [image3, setImage3] = useState(false);
@@ -55,11 +57,15 @@ const Add = ({ token }) => {
       image3 && formData.append("image3", image3);
       image4 && formData.append("image4", image4);
 
+      setIsLoading(true);
+
       const response = await axios.post(
         backendUrl + "/api/product/add",
         formData,
         { headers: { token } }
       );
+
+      setIsLoading(false);
 
       if (response.data.success) {
         toast.success(response.data.message);
@@ -90,8 +96,9 @@ const Add = ({ token }) => {
   return (
     <form
       onSubmit={onSubmitHandler}
-      className="flex flex-col w-full items-start gap-3 max-sm:px-6"
+      className="relative flex flex-col w-full items-start gap-3 max-sm:px-6"
     >
+      {isLoading && <Loader />}
       {/* IMAGES */}
       <div>
         <p className="mb-2">Upload Image</p>
@@ -103,7 +110,7 @@ const Add = ({ token }) => {
               src={!image1 ? assets.upload_area : URL.createObjectURL(image1)}
               width={80}
               height={160}
-              alt=""
+              alt="upload1"
             />
             <input
               onChange={(e) => setImage1(e.target.files[0])}
@@ -119,7 +126,7 @@ const Add = ({ token }) => {
               src={!image2 ? assets.upload_area : URL.createObjectURL(image2)}
               width={80}
               // height={100}
-              alt=""
+              alt="upload2"
             />
             <input
               onChange={(e) => setImage2(e.target.files[0])}
@@ -132,7 +139,7 @@ const Add = ({ token }) => {
             <img
               className="w-18 h-20 sm:w-20 sm:h-[90px] overflow-hidden"
               src={!image3 ? assets.upload_area : URL.createObjectURL(image3)}
-              alt=""
+              alt="upload3"
             />
             <input
               onChange={(e) => setImage3(e.target.files[0])}
@@ -145,7 +152,7 @@ const Add = ({ token }) => {
             <img
               className="w-18 h-20 sm:w-20 sm:h-[90px] overflow-hidden"
               src={!image4 ? assets.upload_area : URL.createObjectURL(image4)}
-              alt=""
+              alt="upload4"
             />
             <input
               onChange={(e) => setImage4(e.target.files[0])}

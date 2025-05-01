@@ -142,7 +142,7 @@ const Navbar = () => {
               }}
               src={assets.search_icon}
               className="w-5 cursor-pointer"
-              alt=""
+              alt="search"
             />
             <div className="group relative shrink-0">
               {!token && (
@@ -150,7 +150,7 @@ const Navbar = () => {
                   onClick={() => navigate("/login")}
                   className="w-[17px] cursor-pointer"
                   src={assets.profile_icon}
-                  alt=""
+                  alt="profile"
                 />
               )}
               {/* Dropdown Menu */}
@@ -161,7 +161,7 @@ const Navbar = () => {
                       onClick={() => (token ? null : navigate("/login"))}
                       className="w-[17px] cursor-pointer"
                       src={assets.profile_icon}
-                      alt=""
+                      alt="profile"
                     />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56">
@@ -226,7 +226,7 @@ const Navbar = () => {
               )}
             </div>
             <Link to="/cart" className="relative">
-              <img src={assets.cart_icon} className="w-5 min-w-5" alt="" />
+              <img src={assets.cart_icon} className="w-5 min-w-5" alt="cart" />
               <p className="absolute right-[-5px] bottom-[-5px] w-4 text-center leading-4 bg-black text-white aspect-square rounded-full text-[8px]">
                 {getCartCount()}
               </p>
@@ -236,13 +236,17 @@ const Navbar = () => {
               target="_black"
               className="shrink-0 max-md:hidden"
             >
-              <img src={assets.whatsapp_icon_02} className="w-7" alt="" />
+              <img
+                src={assets.whatsapp_icon_02}
+                className="w-7"
+                alt="whatsapp"
+              />
             </Link>
             <img
               onClick={() => setVisible(true)}
               src={assets.menu_icon}
               className="w-5 cursor-pointer md:hidden"
-              alt=""
+              alt="menubar"
             />
           </div>
         </nav>

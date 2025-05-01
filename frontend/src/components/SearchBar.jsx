@@ -27,7 +27,7 @@ const SearchBar = () => {
           type="text"
           placeholder="Search"
         />
-        <img className="w-4" src={assets.search_icon} alt="" />
+        <img className="w-4" src={assets.search_icon} alt="search" />
       </div>
       <img
         onClick={() => {
@@ -36,7 +36,7 @@ const SearchBar = () => {
         }}
         className="inline w-3 cursor-pointer"
         src={assets.cross_icon}
-        alt=""
+        alt="cancel"
       />
     </div>
   ) : null;

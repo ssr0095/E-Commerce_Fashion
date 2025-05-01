@@ -171,7 +171,7 @@ const Edit = ({ token, id, setEditDialogOpen }) => {
                   ? URL.createObjectURL(newImages[0])
                   : assets.upload_area
               }
-              alt=""
+              alt="upload1"
             />
             {/* {console.log(image1 + "ig" + product)} */}
             <input
@@ -193,7 +193,7 @@ const Edit = ({ token, id, setEditDialogOpen }) => {
                   ? URL.createObjectURL(newImages[1])
                   : assets.upload_area
               }
-              alt=""
+              alt="upload2"
             />
             {console.log(oldImages, newImages)}
             <input
@@ -215,7 +215,7 @@ const Edit = ({ token, id, setEditDialogOpen }) => {
                   ? URL.createObjectURL(newImages[2])
                   : assets.upload_area
               }
-              alt=""
+              alt="upload3"
             />
             <input
               onChange={(e) =>
@@ -236,7 +236,7 @@ const Edit = ({ token, id, setEditDialogOpen }) => {
                   ? URL.createObjectURL(newImages[3])
                   : assets.upload_area
               }
-              alt=""
+              alt="upload4"
             />
             <input
               onChange={(e) =>

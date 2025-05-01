@@ -4,23 +4,22 @@
 @tailwind components;
 @tailwind utilities;
 
-a.active hr {
-  display: block;
-}
-
 * {
   font-family: Outfit;
 }
 
-.prata-regular {
-  font-family: "Prata", serif;
-  font-weight: 400;
-  font-style: normal;
+body {
+  user-select: none;
 }
 
 ::-webkit-scrollbar {
   display: none;
 }
+
+a.active hr {
+  display: block;
+}
+
 @layer utilities {
   .input {
     @apply block w-full border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-gray-900;

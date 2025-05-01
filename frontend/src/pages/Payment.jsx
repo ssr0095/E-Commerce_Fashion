@@ -99,7 +99,7 @@ const Payment = () => {
                 <img
                   className={!image ? "w-6 h-6" : "w-full h-fit bg-contain"}
                   src={!image ? assets.upload_area : URL.createObjectURL(image)}
-                  alt=""
+                  alt="upload"
                   width={24}
                   height={24}
                 />

@@ -18,15 +18,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import Loader from "../components/CompLoader";
 
 const Orders = ({ token }) => {
   const [orders, setOrders] = useState([]);
   const [image, setImage] = useState("");
   const [imagePreivewOpen, setImagePreivewOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchAllOrders = async (forceRefresh = false) => {
     if (!token) return;
-
+    setIsLoading(true);
     const cacheKey = "cachedOrders";
     const cacheTimeKey = "cachedOrdersTime";
     const cacheExpiry = 2 * 60 * 1000; // 2 minutes
@@ -42,6 +44,7 @@ const Orders = ({ token }) => {
       now - cachedTime < cacheExpiry
     ) {
       setOrders(JSON.parse(cachedData));
+      setIsLoading(false);
       return;
     }
 
@@ -51,6 +54,7 @@ const Orders = ({ token }) => {
         {},
         { headers: { token } }
       );
+      setIsLoading(false);
       if (response.data.success) {
         const reversedOrders = response.data.orders.reverse();
         setOrders(reversedOrders);
@@ -65,12 +69,14 @@ const Orders = ({ token }) => {
   };
 
   const statusHandler = async (value, orderId) => {
+    setIsLoading(true);
     try {
       const response = await axios.post(
         backendUrl + "/api/order/status",
         { orderId, status: value },
         { headers: { token } }
       );
+      setIsLoading(false);
       if (response.data.success) {
         toast.success(response.data.message);
         await fetchAllOrders(true); // force refresh
@@ -81,12 +87,14 @@ const Orders = ({ token }) => {
   };
 
   const PstatusHandler = async (value, orderId) => {
+    setIsLoading(true);
     try {
       const response = await axios.post(
         backendUrl + "/api/order/paymentstatus",
         { orderId, payment: value },
         { headers: { token } }
       );
+      setIsLoading(false);
       if (response.data.success) {
         toast.success(response.data.message);
         await fetchAllOrders(true); // force refresh
@@ -103,6 +111,7 @@ const Orders = ({ token }) => {
   return (
     <div className="max-sm:px-6">
       <h3>Order Page</h3>
+      {isLoading && <Loader />}
       {orders.map((order, index) => (
         <div
           key={index}

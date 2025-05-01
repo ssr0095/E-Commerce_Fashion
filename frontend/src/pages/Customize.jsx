@@ -24,12 +24,13 @@ const Customize = () => {
             <a
               href="https://wa.me/8248586654?text=Hey!%20I%20saw%20your%20collection%20and%20loved%20it.%20Can%20you%20help%20me%20with%20customization%20and%20pricing?"
               target="_blank"
+              alt="whatsapp"
               // rel="noopener noreferrer"
               className="flex items-center gap-3 justify-center bg-green-500 text-white px-6 py-3 rounded-lg text-lg font-medium shadow-md transition hover:bg-green-600"
             >
               {/* <span>
               </span>{" "} */}
-              <img src={assets.whatsapp_icon_01} width={24} />
+              <img src={assets.whatsapp_icon_01} width={24} alt="whatsapp" />
               Chat on Whatsapp
             </a>
           </div>
