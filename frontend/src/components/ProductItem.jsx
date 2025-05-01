@@ -32,14 +32,15 @@ const ProductItem = ({
           alt=""
         />
       </div> */}
-      <div className="w-full h-[45vh] group overflow-hidden relative">
+      <div className="w-full aspect-[3/4] group overflow-hidden relative">
         <img
           src={image[0]}
-          alt="Default"
-          className={`w-full h-full object-cover transition duration-300 ${
+          alt={name}
+          className={`absolute top-0 left-0 w-full h-full object-cover transition duration-300 ${
             image[1] && "group-hover:opacity-0"
           }`}
         />
+
         {image[1] && (
           <img
             src={image[1]}
@@ -72,6 +73,7 @@ const ProductItem = ({
     </Link>
   );
 };
+
 export const CategoryItem = ({ name, image }) => {
   const { setSearch, setShowSearch, navigate } = useContext(ShopContext);
 

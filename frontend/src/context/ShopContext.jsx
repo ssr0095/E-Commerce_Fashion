@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -19,6 +19,7 @@ const ShopContextProvider = (props) => {
   const [smallNav, setSmallNav] = useState(["Home"]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const productCache = useRef({});
 
   const navigate = useNavigate();
 
@@ -122,15 +123,29 @@ const ShopContextProvider = (props) => {
   };
 
   const getProductsData = async (page) => {
+    const cacheKey = `page_${page}`;
+
+    if (productCache.current[cacheKey]) {
+      setProducts((prevProducts) => [
+        ...prevProducts,
+        ...productCache.current[cacheKey],
+      ]);
+      return;
+    }
+
     try {
       const response = await axios.get(
         `${backendUrl}/api/product/list?page=${page}&limit=8`
       );
+
       if (response.data.success) {
-        setProducts((prevProducts) => [
-          ...prevProducts,
-          ...response.data.products,
-        ]);
+        const newProducts = response.data.products;
+
+        // Update cache
+        productCache.current[cacheKey] = newProducts;
+
+        // Update state
+        setProducts((prevProducts) => [...prevProducts, ...newProducts]);
         setHasMore(response.data.hasMore);
       } else {
         toast.error(response.data.message);

@@ -13,6 +13,13 @@ import {
   DropdownMenuShortcut,
 } from "@/components/ui/dropdown-menu";
 
+const navItems = [
+  { name: "HOME", path: "/" },
+  { name: "COLLECTION", path: "/collection" },
+  { name: "CUSTOMIZE", path: "/customize" },
+  { name: "ABOUT", path: "/about" },
+];
+
 const Navbar = () => {
   const [visible, setVisible] = useState(false);
   const [user, setUser] = useState(false);
@@ -42,6 +49,8 @@ const Navbar = () => {
 
     fetchUser();
   }, [userInfo]);
+
+  const handleCloseSidebar = () => setVisible(false);
 
   return (
     <>
@@ -240,60 +249,42 @@ const Navbar = () => {
       </header>
 
       {/* Sidebar menu for small screens */}
-      <div className="flex items-center justify-between font-medium">
-        <div
-          className={`absolute top-0 right-0 bottom-0 overflow-hidden bg-white z-50 transition-all ${
-            visible ? "w-full" : "w-0"
-          }`}
-        >
-          <div className="flex flex-col text-gray-600">
-            <div
-              onClick={() => setVisible(false)}
-              className="flex items-center gap-4 p-3 cursor-pointer"
-            >
-              <img
-                className="h-4 rotate-180"
-                src={assets.dropdown_icon}
-                alt=""
-              />
-              <p>Back</p>
-            </div>
-            <NavLink
-              onClick={() => setVisible(false)}
-              className="py-2 pl-6 border"
-              to="/"
-            >
-              HOME
-            </NavLink>
-            <NavLink
-              onClick={() => setVisible(false)}
-              className="py-2 pl-6 border"
-              to="/collection"
-            >
-              COLLECTION
-            </NavLink>
-            <NavLink
-              to="/customize"
-              onClick={() => setVisible(false)}
-              className="py-2 pl-6 border"
-            >
-              CUSTOMIZE
-            </NavLink>
-            <NavLink
-              onClick={() => setVisible(false)}
-              className="py-2 pl-6 border"
-              to="/about"
-            >
-              ABOUT
-            </NavLink>
-            <Link
-              to="https://wa.me/8248586654?text=Hey!%20I%20saw%20your%20collection%20and%20loved%20it.%20Can%20you%20help%20me%20with%20sizes%20and%20pricing?"
-              target="_black"
-              className="py-2 pl-6 border"
-            >
-              WHATS APP
-            </Link>
+      <div
+        className={`fixed top-0 right-0 h-full w-full bg-white z-50 transition-transform duration-300 ease-in-out transform ${
+          visible ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        <div className="p-4 flex flex-col gap-3 text-gray-800">
+          <div
+            className="flex items-center gap-3 cursor-pointer"
+            onClick={handleCloseSidebar}
+          >
+            <img
+              src={assets.dropdown_icon}
+              alt="Close"
+              className="h-4 rotate-180"
+            />
+            <span>Back</span>
           </div>
+          {navItems.map((item) => (
+            <NavLink
+              key={item.name}
+              to={item.path}
+              onClick={handleCloseSidebar}
+              className="py-2 pl-4 border-b"
+            >
+              {item.name}
+            </NavLink>
+          ))}
+          <Link
+            to="https://wa.me/8248586654?text=Hey!%20I%20saw%20your%20collection%20and%20loved%20it."
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={handleCloseSidebar}
+            className="py-2 pl-4 border-b"
+          >
+            WHATSAPP
+          </Link>
         </div>
       </div>
     </>

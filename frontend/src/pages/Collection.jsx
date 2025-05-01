@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { ShopContext } from "../context/ShopContext";
 import { assets } from "../assets/assets";
 import Title from "../components/Title";
@@ -14,49 +14,50 @@ import {
 } from "@/components/ui/select";
 
 const Collection = () => {
-  const {
-    products,
-    search,
-    showSearch,
-    hasMore,
-    getProductsData,
-    // page,
-    // setPage,
-  } = useContext(ShopContext);
+  const { products, search, showSearch, hasMore, getProductsData } =
+    useContext(ShopContext);
+
   const [showFilter, setShowFilter] = useState(false);
   const [filterProducts, setFilterProducts] = useState([]);
   const [category, setCategory] = useState([]);
   const [subCategory, setSubCategory] = useState([]);
   const [sortType, setSortType] = useState("relavent");
-  // let page = 1;
-  // const loaderRef = useRef(null);
   const [page, setPage] = useState(2);
-  // console.log(hasMore);
+  const [loading, setLoading] = useState(false);
 
   const toggleCategory = (e) => {
-    if (category.includes(e.target.value)) {
-      setCategory((prev) => prev.filter((item) => item !== e.target.value));
-    } else {
-      setCategory((prev) => [...prev, e.target.value]);
-    }
+    const { value } = e.target;
+    setCategory((prev) =>
+      prev.includes(value)
+        ? prev.filter((item) => item !== value)
+        : [...prev, value]
+    );
   };
 
   const toggleSubCategory = (e) => {
-    if (subCategory.includes(e.target.value)) {
-      setSubCategory((prev) => prev.filter((item) => item !== e.target.value));
-    } else {
-      setSubCategory((prev) => [...prev, e.target.value]);
-    }
+    const { value } = e.target;
+    setSubCategory((prev) =>
+      prev.includes(value)
+        ? prev.filter((item) => item !== value)
+        : [...prev, value]
+    );
+  };
+
+  const clearFilters = () => {
+    setCategory([]);
+    setSubCategory([]);
+    setSortType("relavent");
   };
 
   const applyFilter = () => {
-    let productsCopy = products.slice();
+    let productsCopy = [...products];
 
     if (showSearch && search) {
+      const query = search.toLowerCase().trim();
       productsCopy = productsCopy.filter(
         (item) =>
-          item.name.toLowerCase().includes(search.toLowerCase().trim()) ||
-          item?.theme.toLowerCase().includes(search.toLowerCase().trim())
+          item.name.toLowerCase().includes(query) ||
+          item?.theme.toLowerCase().includes(query)
       );
     }
 
@@ -76,23 +77,18 @@ const Collection = () => {
   };
 
   const sortProduct = () => {
-    let fpCopy = [...filterProducts]; // Create a new array
+    let fpCopy = [...filterProducts];
 
-    switch (sortType) {
-      case "low-high":
-        fpCopy.sort((a, b) => a.price - b.price);
-        break;
-
-      case "high-low":
-        fpCopy.sort((a, b) => b.price - a.price);
-        break;
-
-      default:
-        applyFilter();
-        return; // Exit the function to prevent unnecessary state updates
+    if (sortType === "low-high") {
+      fpCopy.sort((a, b) => a.price - b.price);
+    } else if (sortType === "high-low") {
+      fpCopy.sort((a, b) => b.price - a.price);
+    } else {
+      applyFilter();
+      return;
     }
 
-    setFilterProducts(fpCopy); // Update state with a new sorted array
+    setFilterProducts(fpCopy);
   };
 
   useEffect(() => {
@@ -103,44 +99,13 @@ const Collection = () => {
     sortProduct();
   }, [sortType]);
 
-  // useEffect(() => {
-  //   getProductsData(page);
-  // }, [page]);
-
-  // useEffect(() => {
-  //   getProductsData(page);
-  // }, [page]);
-
-  // useEffect(() => {
-  //   applyFilter();
-  // }, [category, subCategory, search, showSearch, products]);
-
-  // useEffect(() => {
-  //   sortProduct();
-  // }, [sortType, filterProducts]);
-
-  // console.log(products);
-
-  // useEffect(() => {
-  //   const observer = new IntersectionObserver(
-  //     (entries) => {
-  //       if (entries[0].isIntersecting && hasMore) {
-  //         setPage((prevPage) => prevPage + 1);
-  //       }
-  //     },
-  //     { threshold: 1.0 }
-  //   );
-
-  //   if (loaderRef.current) {
-  //     observer.observe(loaderRef.current);
-  //   }
-
-  //   return () => {
-  //     if (loaderRef.current) {
-  //       observer.unobserve(loaderRef.current);
-  //     }
-  //   };
-  // }, [hasMore]);
+  const handleSeeMore = async () => {
+    setLoading(true);
+    await getProductsData(page);
+    setPage((prev) => prev + 1);
+    setSortType("relavent");
+    setLoading(false);
+  };
 
   return (
     <div className="px-2 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
@@ -148,20 +113,57 @@ const Collection = () => {
         <SmallNavBar navs={["Collection"]} />
       </div>
       <div className="flex flex-col sm:flex-row gap-1 sm:gap-10 pt-10 border-t">
-        {/* Filter Options */}
         <div className="min-w-60 px-4">
-          <p
-            onClick={() => setShowFilter(!showFilter)}
-            className="my-2 text-xl flex items-center cursor-pointer gap-2"
-          >
-            FILTERS
-            <img
-              className={`h-3 sm:hidden ${showFilter ? "rotate-90" : ""}`}
-              src={assets.dropdown_icon}
-              alt=""
-            />
+          <p className="my-2 text-xl flex items-center justify-between cursor-pointer">
+            <div
+              className=" flex items-center gap-2"
+              onClick={() => setShowFilter(!showFilter)}
+            >
+              FILTERS
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="lucide lucide-list-filter-plus-icon lucide-list-filter-plus w-5"
+              >
+                <path d="M10 18h4" />
+                <path d="M11 6H3" />
+                <path d="M15 6h6" />
+                <path d="M18 9V3" />
+                <path d="M7 12h8" />
+              </svg>
+            </div>
+            <div>
+              <Button
+                onClick={clearFilters}
+                className="w-full rounded-full md:hidden"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="lucide lucide-circle-x-icon lucide-circle-x w-3"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="m15 9-6 6" />
+                  <path d="m9 9 6 6" />
+                </svg>
+                Clear
+              </Button>
+            </div>
           </p>
-          {/* Category Filter */}
           <div
             className={`border border-gray-300 pl-5 py-3 mt-6 ${
               showFilter ? "" : "hidden"
@@ -169,36 +171,20 @@ const Collection = () => {
           >
             <p className="mb-3 text-sm font-medium">CATEGORIES</p>
             <div className="flex flex-col gap-2 text-sm font-light text-gray-700">
-              <p className="flex gap-2">
-                <input
-                  className="w-3"
-                  type="checkbox"
-                  value={"Men"}
-                  onChange={toggleCategory}
-                />{" "}
-                Men
-              </p>
-              <p className="flex gap-2">
-                <input
-                  className="w-3"
-                  type="checkbox"
-                  value={"Women"}
-                  onChange={toggleCategory}
-                />{" "}
-                Women
-              </p>
-              <p className="flex gap-2">
-                <input
-                  className="w-3"
-                  type="checkbox"
-                  value={"Kids"}
-                  onChange={toggleCategory}
-                />{" "}
-                kids
-              </p>
+              {["Men", "Women", "Kids"].map((cat) => (
+                <label className="flex gap-2" key={cat}>
+                  <input
+                    className="w-3"
+                    type="checkbox"
+                    value={cat}
+                    checked={category.includes(cat)}
+                    onChange={toggleCategory}
+                  />
+                  {cat}
+                </label>
+              ))}
             </div>
           </div>
-          {/* SubCategory Filter */}
           <div
             className={`border border-gray-300 px-4 pl-5 py-3 my-5 ${
               showFilter ? "" : "hidden"
@@ -206,51 +192,37 @@ const Collection = () => {
           >
             <p className="mb-3 text-sm font-medium">TYPE</p>
             <div className="flex flex-col gap-2 text-sm font-light text-gray-700">
-              <p className="flex gap-2">
-                <input
-                  className="w-3"
-                  type="checkbox"
-                  value={"Topwear"}
-                  onChange={toggleSubCategory}
-                />{" "}
-                Topwear
-              </p>
-              <p className="flex gap-2">
-                <input
-                  className="w-3"
-                  type="checkbox"
-                  value={"Bottomwear"}
-                  onChange={toggleSubCategory}
-                />{" "}
-                Bottomwear
-              </p>
-              <p className="flex gap-2">
-                <input
-                  className="w-3"
-                  type="checkbox"
-                  value={"Winterwear"}
-                  onChange={toggleSubCategory}
-                />{" "}
-                Winterwear
-              </p>
+              {["Topwear", "Bottomwear", "Winterwear"].map((type) => (
+                <label className="flex gap-2" key={type}>
+                  <input
+                    className="w-3"
+                    type="checkbox"
+                    value={type}
+                    checked={subCategory.includes(type)}
+                    onChange={toggleSubCategory}
+                  />
+                  {type}
+                </label>
+              ))}
             </div>
           </div>
+
+          <Button
+            onClick={clearFilters}
+            className="w-full rounded-none mt-4 max-md:hidden"
+          >
+            Clear Filters
+          </Button>
         </div>
 
-        {/* Right Side */}
         <div className="flex-1">
           <div className="flex justify-between items-center text-base sm:text-2xl mb-4">
             <Title text1={"ALL"} text2={"COLLECTIONS"} />
-            {/* Porduct Sort */}
-            <Select
-              onValueChange={(value) => {
-                setSortType(value);
-              }}
-            >
+            <Select onValueChange={setSortType}>
               <SelectTrigger className="min-w-32 max-w-[40%] lg:max-w-[30%]">
                 <SelectValue placeholder="Sort" />
               </SelectTrigger>
-              <SelectContent className="">
+              <SelectContent>
                 <SelectItem value="relavent">Sort by: Relavent</SelectItem>
                 <SelectItem value="low-high">Sort by: Low to High</SelectItem>
                 <SelectItem value="high-low">Sort by: High to Low</SelectItem>
@@ -258,46 +230,43 @@ const Collection = () => {
             </Select>
           </div>
 
-          {/* Map Products */}
           <div>
             <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2 gap-y-4">
-              {filterProducts.map((item, index) => (
-                <ProductItem
-                  key={index}
-                  name={item.name}
-                  id={item._id}
-                  price={item.price}
-                  image={item.image}
-                  tag={item.tag}
-                  description={item.description}
-                  discount={item.discount}
-                />
-              ))}
+              {filterProducts.length > 0 ? (
+                filterProducts.map((item, index) => (
+                  <ProductItem
+                    key={index}
+                    name={item.name}
+                    id={item._id}
+                    price={item.price}
+                    image={item.image}
+                    tag={item.tag}
+                    description={item.description}
+                    discount={item.discount}
+                  />
+                ))
+              ) : (
+                <div className="col-span-full text-center py-10 text-gray-500">
+                  No products found.
+                </div>
+              )}
             </div>
+
             {hasMore && (
               <div className="w-full flex items-center justify-center mt-14 px-4 relative">
                 <div className="w-full flex items-center justify-center z-10">
                   <Button
-                    onClick={() => {
-                      setPage((prev) => prev + 1);
-                      getProductsData(page);
-                      setSortType("relavent");
-                    }}
+                    onClick={handleSeeMore}
                     variant="outline"
                     className="rounded-none"
+                    disabled={loading}
                   >
-                    {console.log(page)}
-                    See more
+                    {loading ? "Loading..." : "See more"}
                   </Button>
                 </div>
-                <hr className="absolute top-[50%] left-0 w-full  z-0" />
+                <hr className="absolute top-[50%] left-0 w-full z-0" />
               </div>
             )}
-            {/* {hasMore && (
-              <div ref={loaderRef} className="text-center p-4">
-                Loading more products...
-              </div>
-            )} */}
           </div>
         </div>
       </div>
