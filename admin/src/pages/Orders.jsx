@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { backendUrl, currency } from "../App";
 import { toast } from "react-toastify";
-import { assets } from "../assets/assets";
+// import { assets } from "../assets/assets";
+import { PackageCheck } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -115,9 +116,9 @@ const Orders = ({ token }) => {
       {orders.map((order, index) => (
         <div
           key={index}
-          className="grid grid-cols-1 sm:grid-cols-[0.5fr_2fr_1fr] lg:grid-cols-[0.5fr_2fr_1fr_1fr] gap-3 items-start border-2 border-gray-200 p-5 md:p-8 my-3 text-sm text-gray-700 bg-white"
+          className="grid max-sm:grid-cols-[1fr_1fr] sm:grid-cols-[0.5fr_2fr_1fr] gap-4 items-start border-2 border-gray-200 p-5 md:p-8 my-3 text-sm text-gray-700 bg-white"
         >
-          <img className="w-12" src={assets.parcel_icon} alt="parcel" />
+          <PackageCheck className="max-sm:hidden size-10" />
           <div>
             {order.items.map((item, i) => (
               <p className="py-0.5" key={i}>
@@ -125,7 +126,7 @@ const Orders = ({ token }) => {
                 {i < order.items.length - 1 ? "," : ""}
               </p>
             ))}
-            <p className="mt-3 mb-2 font-medium">
+            <p className="mt-3 mb-2 font-bold">
               {order.address.firstName + " " + order.address.lastName}
             </p>
             <p>{order.address.street},</p>
@@ -154,7 +155,7 @@ const Orders = ({ token }) => {
             </p>
             <p>Date: {new Date(order.date).toLocaleDateString()}</p>
           </div>
-          <div className="w-full flex-1 flex-col items-center gap-3 max-lg:col-start-2 max-lg:col-span-2">
+          <div className="w-full flex-1 flex-col items-center gap-3 sm:col-start-2 col-span-2">
             <p className="my-2 flex items-center gap-2">
               Payment status
               <span
