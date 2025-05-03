@@ -15,7 +15,9 @@ const Coupon = () => {
           </div>
         </div>
         <div className="w-full flex items-center justify-between border-t border-gray-300 ">
-          <p className="text-gray-500  p-4 ">COUSINS3424</p>
+          <p className="text-gray-500  p-4 ">
+            {import.meta.env.VITE_COUSINS_COUPION}
+          </p>
           <p
             className="font-semibold  p-4 cursor-pointer hover:bg-gray-100 active:bg-gray-200"
             onClick={async () =>

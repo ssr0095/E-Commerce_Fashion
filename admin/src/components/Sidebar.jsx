@@ -1,7 +1,7 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { assets } from "../assets/assets";
-
+// import { assets } from "../assets/assets";
+import { Package, LibraryBig, CirclePlus } from "lucide-react";
 const Sidebar = () => {
   const Active = ({ isActive }) => {
     return isActive
@@ -13,15 +13,18 @@ const Sidebar = () => {
       <div className="md:sticky top-0 left-0 flex h-fit w-full shrink-0 items-center bg-gray-100 md:h-svh md:w-[20vw] md:items-start md:justify-end md:border md:border-y-0 md:bg-white">
         <div className="flex h-fit w-full items-center gap-5 p-6 md:w-4/5 md:flex-col md:p-0 md:pt-10">
           <NavLink to="/add" className={Active}>
-            <img src={assets.add_icon} className="w-3 md:w-5" alt="menu" />
+            <CirclePlus className="w-4 md:w-5" />
+            {/* <img src={assets.add_icon} className="w-3 md:w-5" alt="menu" /> */}
             <p className="text-xs text-gray-500 md:text-sm">Add items</p>
           </NavLink>
           <NavLink to="/list" className={Active}>
-            <img src={assets.order_icon} className="w-3 md:w-5" alt="menu" />
+            <LibraryBig className="w-4 md:w-5" />
+            {/* <img src={assets.order_icon} className="w-3 md:w-5" alt="menu" /> */}
             <p className="text-xs text-gray-500 md:text-sm">List items</p>
           </NavLink>
           <NavLink to="/orders" className={Active}>
-            <img src={assets.order_icon} className="w-3 md:w-5" alt="menu" />
+            <Package className="w-4 md:w-5" />
+            {/* <img src={assets.order_icon} className="w-3 md:w-5" alt="menu" /> */}
             <p className="text-xs text-gray-500 md:text-sm">Orders</p>
           </NavLink>
         </div>

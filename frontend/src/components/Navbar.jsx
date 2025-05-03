@@ -3,6 +3,14 @@ import { assets } from "../assets/assets";
 import { Link, NavLink } from "react-router-dom";
 import { ShopContext } from "../context/ShopContext";
 import {
+  House,
+  LibraryBig,
+  Settings2,
+  Building2,
+  ArrowLeft,
+  AlignRight,
+} from "lucide-react";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
@@ -14,10 +22,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const navItems = [
-  { name: "HOME", path: "/" },
-  { name: "COLLECTION", path: "/collection" },
-  { name: "CUSTOMIZE", path: "/customize" },
-  { name: "ABOUT", path: "/about" },
+  { name: "HOME", path: "/", icon: <House className="w-5" /> },
+  {
+    name: "COLLECTION",
+    path: "/collection",
+    icon: <LibraryBig className="w-5" />,
+  },
+  {
+    name: "CUSTOMIZE",
+    path: "/customize",
+    icon: <Settings2 className="w-5" />,
+  },
+  { name: "ABOUT", path: "/about", icon: <Building2 className="w-5" /> },
 ];
 
 const Navbar = () => {
@@ -242,11 +258,9 @@ const Navbar = () => {
                 alt="whatsapp"
               />
             </Link>
-            <img
+            <AlignRight
               onClick={() => setVisible(true)}
-              src={assets.menu_icon}
-              className="w-5 cursor-pointer md:hidden"
-              alt="menubar"
+              className="w-6 cursor-pointer md:hidden"
             />
           </div>
         </nav>
@@ -263,11 +277,7 @@ const Navbar = () => {
             className="flex items-center gap-3 cursor-pointer"
             onClick={handleCloseSidebar}
           >
-            <img
-              src={assets.dropdown_icon}
-              alt="Close"
-              className="h-4 rotate-180"
-            />
+            <ArrowLeft className="w-5" />
             <span>Back</span>
           </div>
           {navItems.map((item) => (
@@ -275,8 +285,9 @@ const Navbar = () => {
               key={item.name}
               to={item.path}
               onClick={handleCloseSidebar}
-              className="py-2 pl-4 border-b"
+              className="flex items-center justify-start gap-4 py-2 pl-4 border-b"
             >
+              {item.icon}
               {item.name}
             </NavLink>
           ))}
@@ -285,8 +296,9 @@ const Navbar = () => {
             target="_blank"
             rel="noopener noreferrer"
             onClick={handleCloseSidebar}
-            className="py-2 pl-4 border-b"
+            className="flex items-center justify-start gap-4 py-2 pl-4 border-b"
           >
+            <img src={assets.whatsapp_icon_02} className="w-6" alt="whatsapp" />
             WHATSAPP
           </Link>
         </div>

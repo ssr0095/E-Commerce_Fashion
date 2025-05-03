@@ -13,25 +13,9 @@ const ProductItem = ({
   isCustomizable = false,
 }) => {
   const { currency } = useContext(ShopContext);
-  // console.log(tag);
-  return (
-    <Link
-      onClick={() => scrollTo(0, 0)}
-      className="text-gray-700 cursor-pointer"
-      to={
-        isCustomizable
-          ? `https://wa.me/8248586654?text=Hey!%20I%20saw%20your%20collection%20and%20loved%20it.%20Can%20you%20help%20me%20with%20sizes%20and%20pricing?  
-`
-          : `/product/${id}`
-      }
-    >
-      {/* <div className=" overflow-hidden">
-        <img
-          className="hover:scale-110 transition ease-in-out"
-          src={image[0]}
-          alt=""
-        />
-      </div> */}
+
+  const ProductCard = (
+    <>
       <div className="w-full aspect-[3/4] group overflow-hidden relative">
         <img
           src={image[0]}
@@ -49,27 +33,48 @@ const ProductItem = ({
           />
         )}
       </div>
+
       <p className="w-fit mt-1 px-2 bg-blue-50 border border-blue-200 text-gray-800 text-sm">
         {tag}
       </p>
 
       <p className="pt-1 text-md text-gray-800 font-semibold">{name}</p>
       <p className="pb-2 text-sm truncate">{description}</p>
+
       <div className="w-full flex items-center justify-between">
         <div className="flex-1 flex items-center gap-3">
           <p className="line-through text-md font-medium">
             {currency}
             {price + Math.round((discount / 100) * price)}
           </p>
-          <p className=" text-lg text-gray-800 font-semibold">
+          <p className="text-lg text-gray-800 font-semibold">
             {currency}
             {price}
           </p>
         </div>
-        <p className="flex flex-col xl:flex-row  w-fit max-xl:px-1 px-2 py-1 gap-x-1 bg-black text-white text-xs max-xl:text-[10px]">
-          {discount}% <span> OFF</span>
+        <p className="flex flex-col xl:flex-row w-fit max-xl:px-1 px-2 py-1 gap-x-1 bg-black text-white text-xs max-xl:text-[10px]">
+          {discount}% <span>OFF</span>
         </p>
       </div>
+    </>
+  );
+
+  return isCustomizable ? (
+    <a
+      href="https://wa.me/8248586654?text=Hey!%20I%20saw%20your%20collection%20and%20loved%20it.%20Can%20you%20help%20me%20with%20sizes%20and%20pricing?"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-gray-700 cursor-pointer"
+    >
+      {ProductCard}
+    </a>
+  ) : (
+    <Link
+      to={`/product/${id}`}
+      onClick={() => scrollTo(0, 0)}
+      className="text-gray-700 cursor-pointer"
+    >
+      {ProductCard}
     </Link>
   );
 };
@@ -82,13 +87,14 @@ export const CategoryItem = ({ name, image }) => {
     setSearch(val);
     navigate("/collection");
   };
+
   return (
     <Link
       onClick={() => toMove(name)}
       className="relative text-gray-700 cursor-pointer w-full bg-gray-200 group"
       to={`/collection`}
     >
-      <div className=" overflow-hidden flex items-center">
+      <div className="overflow-hidden flex items-center">
         <img
           className="w-full hover:scale-105 transition ease-in-out duration-500"
           src={image}

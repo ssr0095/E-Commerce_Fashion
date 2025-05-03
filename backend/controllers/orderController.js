@@ -4,8 +4,8 @@ import Stripe from "stripe";
 import razorpay from "razorpay";
 import { v2 as cloudinary } from "cloudinary";
 // global variables
-const currency = "inr";
-const deliveryCharge = 10;
+const currency = process.env.CURRENCY;
+const deliveryCharge = process.env.DELIVERY_FEE;
 
 // gateway initialize
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);

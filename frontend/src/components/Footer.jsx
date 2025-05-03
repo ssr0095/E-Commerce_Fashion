@@ -115,9 +115,9 @@ const Footer = () => {
         </div>
       </div>
 
-      <div className="w-full flex items-center justify-end gap-3 mb-2">
+      <div className="w-full flex items-center justify-end gap-1 mb-2">
         <p className="text-sm">CONNECT WITH US</p>
-        <ul className="flex items-center gap-1 text-gray-600">
+        <ul className="flex items-center text-gray-600">
           <a
             href="https://www.instagram.com/cousins_.fashion?igsh=aGZmaXRpNmJ2NWQ2"
             className="p-2"

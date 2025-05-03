@@ -1,8 +1,8 @@
-import { useContext, useEffect } from "react";
+// import { useContext, useEffect } from "react";
 import Title from "../components/Title";
 import { assets } from "../assets/assets";
-import NewsletterBox from "../components/NewsletterBox";
-import { ShopContext } from "../context/ShopContext";
+// import NewsletterBox from "../components/NewsletterBox";
+// import { ShopContext } from "../context/ShopContext";
 import SmallNavBar from "../components/SmallNavBar";
 
 const About = () => {
@@ -21,7 +21,7 @@ const About = () => {
 
       <div className="my-10 flex flex-col md:flex-row gap-16">
         <img
-          className="w-full md:max-w-[450px]"
+          className="w-full md:max-w-[450px] aspect-[3/4]"
           src={assets.about_img}
           alt="about"
         />

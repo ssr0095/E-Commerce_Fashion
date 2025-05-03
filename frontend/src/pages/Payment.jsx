@@ -7,9 +7,11 @@ import QRCode from "../components/QrCode";
 import { assets } from "../assets/assets";
 import { useParams } from "react-router-dom";
 import SmallNavBar from "../components/SmallNavBar";
+import Loader from "../components/CompLoader";
 
 const Payment = () => {
   const { token, navigate, backendUrl, currency } = useContext(ShopContext);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [image, setImage] = useState(false);
   const [isImageUploaded, setIsImageUploaded] = useState(false);
@@ -22,12 +24,15 @@ const Payment = () => {
       if (!token) {
         return null;
       }
+      setIsLoading(true);
 
       const response = await axios.post(
         backendUrl + "/api/order/getuserorder",
         { orderId },
         { headers: { token } }
       );
+      setIsLoading(false);
+
       if (response.data.success) {
         setOrder(response.data.order);
 
@@ -36,7 +41,7 @@ const Payment = () => {
         });
       }
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       toast.error(error.message);
     }
   };
@@ -49,7 +54,9 @@ const Payment = () => {
 
   const onSubmitHandler = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     if (!image || image == null || image == undefined) {
+      setIsLoading(false);
       return toast.error("Image not added");
     }
     try {
@@ -64,6 +71,7 @@ const Payment = () => {
         { headers: { token } }
       );
       // console.log(response?.data + " k o");
+      setIsLoading(false);
 
       if (response.data.success) {
         setIsImageUploaded(true);
@@ -72,7 +80,7 @@ const Payment = () => {
         toast.error(response.data.message);
       }
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       toast.error(error.message);
     }
   };
@@ -83,6 +91,8 @@ const Payment = () => {
 
   return (
     <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
+      {isLoading && <Loader />}
+
       <SmallNavBar navs={["Orders", "Payment"]} />
 
       <div className="border-t pt-7">
@@ -141,7 +151,7 @@ const Payment = () => {
             <QRCode
               upiId={import.meta.env.VITE_UPI}
               amount={`${order?.amount}`}
-              name="SABARI GIRI"
+              name={import.meta.env.VITE_BANKNAME}
             />
           </div>
         </div>

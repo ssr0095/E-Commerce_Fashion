@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { backendUrl, currency } from "../App";
 import { toast } from "react-toastify";
-import Edit from "./Edit";
+// import Edit from "./Edit";
 import {
   Dialog,
   DialogContent,

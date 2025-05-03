@@ -116,7 +116,7 @@ const applyCoupon = async (req, res) => {
       return res.json({
         success: true,
         message: "Coupon applied",
-        discount: 10,
+        // discount: 10,
       });
     }
 
@@ -132,7 +132,7 @@ const applyCoupon = async (req, res) => {
       });
     }
 
-    return res.json({ success: true, message: "Coupon applied", discount: 10 });
+    return res.json({ success: true, message: "Coupon applied" });
   } catch (error) {
     console.log(error);
     return res.json({ success: false, message: error.message });

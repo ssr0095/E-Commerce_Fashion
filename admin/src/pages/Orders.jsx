@@ -41,7 +41,7 @@ const Orders = ({ token }) => {
       !forceRefresh &&
       cachedData &&
       cachedTime &&
-      now - cachedTime < cacheExpiry
+      now - Number(cachedTime) < cacheExpiry
     ) {
       setOrders(JSON.parse(cachedData));
       setIsLoading(false);

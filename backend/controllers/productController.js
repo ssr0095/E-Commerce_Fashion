@@ -43,7 +43,7 @@ const addProduct = async (req, res) => {
       price: Number(price),
       subCategory,
       bestseller: bestseller === "true",
-      sizes: sizes,
+      sizes: Array.isArray(sizes) ? sizes : [sizes],
       image: imagesUrl,
       tag,
       theme,

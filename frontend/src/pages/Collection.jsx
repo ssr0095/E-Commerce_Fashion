@@ -5,6 +5,7 @@ import Title from "../components/Title";
 import ProductItem from "../components/ProductItem";
 import SmallNavBar from "../components/SmallNavBar";
 import { Button } from "@/components/ui/button";
+import { ListFilterPlus, CircleXIcon } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -54,10 +55,17 @@ const Collection = () => {
 
     if (showSearch && search) {
       const query = search.toLowerCase().trim();
+      const regex = new RegExp(`\\b${query}\\b`, "i"); // word boundary match, case-insensitive
+
       productsCopy = productsCopy.filter(
         (item) =>
-          item.name.toLowerCase().includes(query) ||
-          item?.theme.toLowerCase().includes(query)
+          item.name?.toLowerCase().includes(query) ||
+          regex.test(item.theme?.toLowerCase()) ||
+          item.theme?.toLowerCase().startsWith(query) ||
+          regex.test(item.category?.toLowerCase()) ||
+          item.category?.toLowerCase().startsWith(query) ||
+          regex.test(item.subCategory?.toLowerCase()) ||
+          item.subCategory?.toLowerCase().startsWith(query)
       );
     }
 
@@ -114,56 +122,24 @@ const Collection = () => {
       </div>
       <div className="flex flex-col sm:flex-row gap-1 sm:gap-10 pt-10 border-t">
         <div className="min-w-60 px-4">
-          <p className="my-2 text-xl flex items-center justify-between cursor-pointer">
+          <div className="my-2 text-xl flex items-center justify-between max-sm:cursor-pointer">
             <div
               className=" flex items-center gap-2"
               onClick={() => setShowFilter(!showFilter)}
             >
               FILTERS
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="lucide lucide-list-filter-plus-icon lucide-list-filter-plus w-5"
-              >
-                <path d="M10 18h4" />
-                <path d="M11 6H3" />
-                <path d="M15 6h6" />
-                <path d="M18 9V3" />
-                <path d="M7 12h8" />
-              </svg>
+              <ListFilterPlus className="w-6 p-1 rounded-sm max-sm:bg-gray-100" />
             </div>
             <div>
               <Button
                 onClick={clearFilters}
                 className="w-full rounded-full md:hidden"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="lucide lucide-circle-x-icon lucide-circle-x w-3"
-                >
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="m15 9-6 6" />
-                  <path d="m9 9 6 6" />
-                </svg>
+                <CircleXIcon />
                 Clear
               </Button>
             </div>
-          </p>
+          </div>
           <div
             className={`border border-gray-300 pl-5 py-3 mt-6 ${
               showFilter ? "" : "hidden"
@@ -230,6 +206,7 @@ const Collection = () => {
             </Select>
           </div>
 
+          {/* -----------Products---------- */}
           <div>
             <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2 gap-y-4">
               {filterProducts.length > 0 ? (

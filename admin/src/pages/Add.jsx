@@ -50,7 +50,7 @@ const Add = ({ token }) => {
       formData.append("category", category);
       formData.append("subCategory", subCategory);
       formData.append("bestseller", bestseller);
-      formData.append("sizes", JSON.stringify(sizes));
+      sizes.forEach((size) => formData.append("sizes", size));
 
       image1 && formData.append("image1", image1);
       image2 && formData.append("image2", image2);
@@ -101,66 +101,48 @@ const Add = ({ token }) => {
       {isLoading && <Loader />}
       {/* IMAGES */}
       <div>
-        <p className="mb-2">Upload Image</p>
+        <p className="mb-2 font-medium">Upload Image</p>
 
-        <div className="flex items-center gap-2">
-          <Label htmlFor="image1">
-            <img
-              className="w-18 h-20 sm:w-20 sm:h-[90px] overflow-hidden"
-              src={!image1 ? assets.upload_area : URL.createObjectURL(image1)}
-              width={80}
-              height={160}
-              alt="upload1"
-            />
-            <input
-              onChange={(e) => setImage1(e.target.files[0])}
-              type="file"
-              id="image1"
-              hidden
-              required
-            />
-          </Label>
-          <Label htmlFor="image2">
-            <img
-              className="w-18 h-20 sm:w-20 sm:h-[90px] overflow-hidden"
-              src={!image2 ? assets.upload_area : URL.createObjectURL(image2)}
-              width={80}
-              // height={100}
-              alt="upload2"
-            />
-            <input
-              onChange={(e) => setImage2(e.target.files[0])}
-              type="file"
-              id="image2"
-              hidden
-            />
-          </Label>
-          <Label htmlFor="image3">
-            <img
-              className="w-18 h-20 sm:w-20 sm:h-[90px] overflow-hidden"
-              src={!image3 ? assets.upload_area : URL.createObjectURL(image3)}
-              alt="upload3"
-            />
-            <input
-              onChange={(e) => setImage3(e.target.files[0])}
-              type="file"
-              id="image3"
-              hidden
-            />
-          </Label>
-          <Label htmlFor="image4">
-            <img
-              className="w-18 h-20 sm:w-20 sm:h-[90px] overflow-hidden"
-              src={!image4 ? assets.upload_area : URL.createObjectURL(image4)}
-              alt="upload4"
-            />
-            <input
-              onChange={(e) => setImage4(e.target.files[0])}
-              type="file"
-              id="image4"
-              hidden
-            />
-          </Label>
+        <div className="w-full flex items-start gap-4 flex-wrap">
+          {[image1, image2, image3, image4].map((image, index) => {
+            const imageId = `image${index + 1}`;
+            return (
+              <Label
+                key={imageId}
+                htmlFor={imageId}
+                className="w-[80px] aspect-[3/4] cursor-pointer rounded border border-gray-300 overflow-hidden"
+              >
+                <img
+                  src={!image ? assets.upload_area : URL.createObjectURL(image)}
+                  alt={`upload${index + 1}`}
+                  className="w-full h-full object-cover"
+                />
+                <input
+                  type="file"
+                  id={imageId}
+                  hidden
+                  required={index === 0}
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+                    switch (index) {
+                      case 0:
+                        setImage1(file);
+                        break;
+                      case 1:
+                        setImage2(file);
+                        break;
+                      case 2:
+                        setImage3(file);
+                        break;
+                      case 3:
+                        setImage4(file);
+                        break;
+                    }
+                  }}
+                />
+              </Label>
+            );
+          })}
         </div>
       </div>
 
@@ -192,7 +174,7 @@ const Add = ({ token }) => {
         <div>
           <p className="mb-2">Product theme</p>
           <Select
-            className="w-full"
+            value={theme}
             onValueChange={(value) => setTheme(value)}
             required
           >
@@ -212,7 +194,11 @@ const Add = ({ token }) => {
 
         <div>
           <p className="mb-2">Product category</p>
-          <Select onValueChange={(value) => setCategory(value)} required>
+          <Select
+            value={category}
+            onValueChange={(value) => setCategory(value)}
+            required
+          >
             <SelectTrigger>
               <SelectValue placeholder="Select category" />
             </SelectTrigger>
@@ -226,7 +212,11 @@ const Add = ({ token }) => {
 
         <div>
           <p className="mb-2">Sub category</p>
-          <Select onValueChange={(value) => setSubCategory(value)} required>
+          <Select
+            value={subCategory}
+            onValueChange={(value) => setSubCategory(value)}
+            required
+          >
             <SelectTrigger>
               <SelectValue placeholder="Select sub category" />
             </SelectTrigger>
@@ -241,10 +231,10 @@ const Add = ({ token }) => {
         <div>
           <p className="mb-2">Tag</p>
           <Select
+            value={tag}
             onValueChange={(value) => setTag(value)}
             className="w-full px-3 py-2"
             required
-            // value={tag}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select tag" />
