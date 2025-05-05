@@ -10,7 +10,7 @@ const ProductItem = ({
   description,
   tag,
   discount,
-  isCustomizable = false,
+  // isCustomizable = false,
 }) => {
   const { currency } = useContext(ShopContext);
 
@@ -58,17 +58,7 @@ const ProductItem = ({
       </div>
     </>
   );
-
-  return isCustomizable ? (
-    <a
-      href="https://wa.me/8248586654?text=Hey!%20I%20saw%20your%20collection%20and%20loved%20it.%20Can%20you%20help%20me%20with%20sizes%20and%20pricing?"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="text-gray-700 cursor-pointer"
-    >
-      {ProductCard}
-    </a>
-  ) : (
+  return (
     <Link
       to={`/product/${id}`}
       onClick={() => scrollTo(0, 0)}
@@ -77,6 +67,25 @@ const ProductItem = ({
       {ProductCard}
     </Link>
   );
+
+  // return isCustomizable ? (
+  //   <a
+  //     href="https://wa.me/8248586654?text=Hey!%20I%20saw%20your%20collection%20and%20loved%20it.%20Can%20you%20help%20me%20with%20sizes%20and%20pricing?"
+  //     target="_blank"
+  //     rel="noopener noreferrer"
+  //     className="text-gray-700 cursor-pointer"
+  //   >
+  //     {ProductCard}
+  //   </a>
+  // ) : (
+  //   <Link
+  //     to={`/product/${id}`}
+  //     onClick={() => scrollTo(0, 0)}
+  //     className="text-gray-700 cursor-pointer"
+  //   >
+  //     {ProductCard}
+  //   </Link>
+  // );
 };
 
 export const CategoryItem = ({ name, image }) => {

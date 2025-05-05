@@ -158,13 +158,15 @@ const Orders = ({ token }) => {
           <div className="w-full flex-1 flex-col items-center gap-3 sm:col-start-2 col-span-2">
             <p className="my-2 flex items-center gap-2">
               Payment status
-              <span
-                className="p-2 rounded-full active:bg-gray-100 hover:bg-gray-200"
+              <Button
+                className="px-3 py-0.5"
+                variant="outline"
                 onClick={() => {
                   setImage(order.paymentScreenshot);
                   setImagePreivewOpen(true);
                 }}
               >
+                Screen shot
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"
@@ -180,7 +182,7 @@ const Orders = ({ token }) => {
                   <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
                   <circle cx="12" cy="12" r="3" />
                 </svg>
-              </span>
+              </Button>
             </p>
             <Select
               onValueChange={(value) => PstatusHandler(value, order._id)}

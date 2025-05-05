@@ -11,7 +11,8 @@ import {
   verifyStripe,
   verifyRazorpay,
   updatePaymentStatus,
-  addScreenShot,
+  addPaymentScreenshot,
+  addDesignImage,
 } from "../controllers/orderController.js";
 import adminAuth from "../middleware/adminAuth.js";
 import authUser from "../middleware/auth.js";
@@ -39,10 +40,16 @@ orderRouter.post("/verifyStripe", authUser, verifyStripe);
 orderRouter.post("/verifyRazorpay", authUser, verifyRazorpay);
 
 orderRouter.post(
-  "/addScreenShot",
-  upload.single("image"),
+  "/addPaymentScreenshot",
+  upload.single("paymentImage"),
   authUser,
-  addScreenShot
+  addPaymentScreenshot
+);
+orderRouter.post(
+  "/addDesignImage",
+  upload.single("designImage"),
+  authUser,
+  addDesignImage
 );
 
 export default orderRouter;

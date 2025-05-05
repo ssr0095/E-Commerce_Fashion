@@ -37,6 +37,7 @@ const ShopContextProvider = (props) => {
   const [hasMore, setHasMore] = useState(true);
 
   const productCache = useRef({});
+  const customizableProductCache = useRef([]);
 
   const navigate = useNavigate();
 
@@ -131,7 +132,9 @@ const ShopContextProvider = (props) => {
 
   const getCartAmount = () => {
     return Object.entries(cartItems).reduce((total, [itemId, sizes]) => {
-      const itemInfo = products.find((product) => product._id === itemId);
+      const allProducts = [...products, ...customizableProducts]; // merge both
+      // const found = allProducts.find((item) => item._id === productId);
+      const itemInfo = allProducts.find((product) => product._id === itemId);
       if (!itemInfo) return total;
       return (
         total +
@@ -143,14 +146,15 @@ const ShopContextProvider = (props) => {
   const getProductsData = async (page) => {
     const cacheKey = `page_${page}`;
 
-    // Use cache if available
     if (productCache.current[cacheKey]) {
       const cachedProducts = productCache.current[cacheKey];
       setProducts((prev) => {
         const existingIds = new Set(prev.map((p) => p._id));
-        const filtered = cachedProducts.filter((p) => !existingIds.has(p._id));
+        const filtered = cachedProducts.filter(
+          (p) => !existingIds.has(p._id) && !p.customizable
+        );
         const updated = [...prev, ...filtered];
-        persistProducts(updated); // Persist updated list
+        persistProducts(updated);
         return updated;
       });
       return;
@@ -162,16 +166,14 @@ const ShopContextProvider = (props) => {
       );
 
       if (res.data.success) {
-        const newProducts = res.data.products;
-
-        // Save to cache
+        const newProducts = res.data.products.filter((p) => !p.customizable);
         productCache.current[cacheKey] = newProducts;
 
         setProducts((prev) => {
           const existingIds = new Set(prev.map((p) => p._id));
           const filtered = newProducts.filter((p) => !existingIds.has(p._id));
           const updated = [...prev, ...filtered];
-          persistProducts(updated); // Persist updated list
+          persistProducts(updated);
           return updated;
         });
 
@@ -185,10 +187,27 @@ const ShopContextProvider = (props) => {
   };
 
   const getCustomizableProductsData = async () => {
+    if (customizableProductCache.current.length) {
+      setCustomizableProducts(customizableProductCache.current);
+      return;
+    }
+
+    const stored = localStorage.getItem("customizable_products");
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      customizableProductCache.current = parsed;
+      setCustomizableProducts(parsed);
+      return;
+    }
+
     try {
       const res = await axios.get(`${backendUrl}/api/product/list?custom=true`);
       if (res.data.success) {
-        setCustomizableProducts((prev) => [...prev, ...res.data.products]);
+        // const filtered = res.data.products.filter((p) => p.isCustomizable);
+        const filtered = res.data.products;
+        customizableProductCache.current = filtered;
+        setCustomizableProducts(filtered);
+        localStorage.setItem("customizable_products", JSON.stringify(filtered));
       } else {
         toast.error(res.data.message);
       }
@@ -242,6 +261,14 @@ const ShopContextProvider = (props) => {
           productCache.current[key] = data;
         });
       }
+    }
+
+    const customStored = JSON.parse(
+      localStorage.getItem("customizable_products")
+    );
+    if (customStored) {
+      setCustomizableProducts(customStored);
+      customizableProductCache.current = customStored;
     }
   }, []);
 

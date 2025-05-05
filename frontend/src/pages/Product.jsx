@@ -9,19 +9,19 @@ import ProductDetailsDrop from "../components/ProductDetailsDrop";
 
 const Product = () => {
   const { productId } = useParams();
-  const { products, currency, addToCart, navigate } = useContext(ShopContext);
+  const { products, currency, addToCart, navigate, customizableProducts } =
+    useContext(ShopContext);
   const [productData, setProductData] = useState(false);
   const [image, setImage] = useState("");
   const [size, setSize] = useState(null);
 
   const fetchProductData = async () => {
-    products.map((item) => {
-      if (item._id === productId) {
-        setProductData(item);
-        setImage(item?.image[0]);
-        return null;
-      }
-    });
+    const allProducts = [...products, ...customizableProducts]; // merge both
+    const found = allProducts.find((item) => item._id === productId);
+    if (found) {
+      setProductData(found);
+      setImage(found?.image[0]);
+    }
   };
 
   const buy = () => {
@@ -98,7 +98,7 @@ const Product = () => {
             </p>
             <div className="flex flex-col gap-4 my-8">
               <p className="font-medium">Select Size</p>
-              <div className="flex gap-2 flex-wrap">
+              <div className="flex gap-2 items-center overflow-scroll">
                 {productData?.sizes.map((item, index) => (
                   <button
                     key={index}
@@ -119,6 +119,7 @@ const Product = () => {
               onClick={() => addToCart(productData?._id, size)}
               className="min-w-[30%] w-full bg-black text-white px-8 py-3 text-sm mb-2 active:bg-gray-700"
             >
+              {/* {console.log(productData?._id, size)} */}
               ADD TO CART
             </button>
             <button

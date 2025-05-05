@@ -57,10 +57,10 @@ const addProduct = async (req, res) => {
     const product = new productModel(productData);
     await product.save();
 
-    res.json({ success: true, message: "Product Added" });
+    return res.json({ success: true, message: "Product Added" });
   } catch (error) {
     console.log(error);
-    res.json({ success: false, message: error.message });
+    return res.json({ success: false, message: error.message });
   }
 };
 
@@ -166,16 +166,16 @@ const listProducts = async (req, res) => {
     }
     if (custom) {
       const products = await productModel.find({ customizable: true });
-      res.json({ success: true, products });
+      return res.json({ success: true, products });
     } else {
       const products = await productModel.find({}).skip(skip).limit(limit);
       const totalProducts = await productModel.countDocuments();
       const hasMore = skip + products.length < totalProducts;
-      res.json({ success: true, products, hasMore });
+      return res.json({ success: true, products, hasMore });
     }
   } catch (error) {
     console.log(error);
-    res.json({ success: false, message: error.message });
+    return res.json({ success: false, message: error.message });
   }
 };
 
@@ -195,10 +195,10 @@ const singleProduct = async (req, res) => {
   try {
     const { productId } = req.body;
     const product = await productModel.findById(productId);
-    res.json({ success: true, product });
+    return res.json({ success: true, product });
   } catch (error) {
     console.log(error);
-    res.json({ success: false, message: error.message });
+    return res.json({ success: false, message: error.message });
   }
 };
 

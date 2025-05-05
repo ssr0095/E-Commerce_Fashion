@@ -26,7 +26,7 @@ const Add = ({ token }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
-  const [discount, setDiscount] = useState("");
+  const [discount, setDiscount] = useState("10");
   const [tag, setTag] = useState("");
   const [theme, setTheme] = useState("");
   const [category, setCategory] = useState("");
@@ -50,6 +50,7 @@ const Add = ({ token }) => {
       formData.append("category", category);
       formData.append("subCategory", subCategory);
       formData.append("bestseller", bestseller);
+      formData.append("customizable", customizable);
       sizes.forEach((size) => formData.append("sizes", size));
 
       image1 && formData.append("image1", image1);
@@ -76,7 +77,7 @@ const Add = ({ token }) => {
         setName("");
         setDescription("");
         setPrice("");
-        setDiscount("");
+        setDiscount(10);
         setBestseller(false);
         setCustomizable(false);
         setTag("");
@@ -88,7 +89,7 @@ const Add = ({ token }) => {
         toast.error(response.data.message);
       }
     } catch (error) {
-      console.log(error);
+      setIsLoading(false);
       toast.error(error.message);
     }
   };
@@ -184,9 +185,17 @@ const Add = ({ token }) => {
             <SelectContent>
               {/* <SelectGroup> */}
               {/* <SelectLabel>Theme</SelectLabel> */}
-              <SelectItem value="anime">Anime</SelectItem>
               <SelectItem value="aesthetic">Aesthetic</SelectItem>
-              <SelectItem value="others">others</SelectItem>
+              <SelectItem value="streetwear">Streetwear</SelectItem>
+              <SelectItem value="minimalist">Minimalist</SelectItem>
+              <SelectItem value="minimalist">Illustrate</SelectItem>
+              <SelectItem value="vintage">Vintage</SelectItem>
+              <SelectItem value="graphic">Graphic Art</SelectItem>
+              <SelectItem value="bold">Bold & Edgy</SelectItem>
+              <SelectItem value="pastel">Pastel Vibes</SelectItem>
+              <SelectItem value="typography">Typography</SelectItem>
+              <SelectItem value="quirky">Quirky & Fun</SelectItem>
+              <SelectItem value="others">Others</SelectItem>
               {/* </SelectGroup> */}
             </SelectContent>
           </Select>
@@ -205,6 +214,7 @@ const Add = ({ token }) => {
             <SelectContent>
               <SelectItem value="Men">Men</SelectItem>
               <SelectItem value="Women">Women</SelectItem>
+              <SelectItem value="Unisex">Unisex</SelectItem>
               <SelectItem value="Kids">Kids</SelectItem>
             </SelectContent>
           </Select>
@@ -221,9 +231,15 @@ const Add = ({ token }) => {
               <SelectValue placeholder="Select sub category" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Topwear">Topwear</SelectItem>
-              <SelectItem value="Bottomwear">Bottomwear</SelectItem>
-              <SelectItem value="Winterwear">Winterwear</SelectItem>
+              <SelectItem value="T-Shirts">T-Shirts</SelectItem>
+              <SelectItem value="Hoodies">Hoodies</SelectItem>
+              <SelectItem value="Shirts">Shirts</SelectItem>
+              <SelectItem value="Jackets">Jackets</SelectItem>
+              <SelectItem value="Joggers">Joggers</SelectItem>
+              <SelectItem value="Shorts">Shorts</SelectItem>
+              <SelectItem value="Co-ords">Co-ords</SelectItem>
+              <SelectItem value="Oversized">Oversized</SelectItem>
+              <SelectItem value="Sweatshirts">Sweatshirts</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -240,9 +256,12 @@ const Add = ({ token }) => {
               <SelectValue placeholder="Select tag" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="New">New</SelectItem>
-              <SelectItem value="Limited offer">Limited offer</SelectItem>
-              <SelectItem value="Express shipping">Express shipping</SelectItem>
+              <SelectItem value="New Arrival">New Arrival</SelectItem>
+              <SelectItem value="Limited Edition">Limited Edition</SelectItem>
+              <SelectItem value="Trending">Trending</SelectItem>
+              <SelectItem value="Best Seller">Best Seller</SelectItem>
+              <SelectItem value="Express Shipping">Express Shipping</SelectItem>
+              <SelectItem value="Back in Stock">Back in Stock</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -254,7 +273,7 @@ const Add = ({ token }) => {
             value={price}
             className="w-full px-3 py-2 sm:w-[120px]"
             type="Number"
-            placeholder="25"
+            placeholder="₹250"
             required
           />
         </div>
@@ -265,7 +284,7 @@ const Add = ({ token }) => {
             value={discount}
             className="w-full px-3 py-2 sm:w-[120px]"
             type="Number"
-            placeholder="20"
+            placeholder="10%"
             required
           />
         </div>
@@ -275,6 +294,40 @@ const Add = ({ token }) => {
       <div>
         <p className="mb-2">Product Sizes</p>
         <div className="flex gap-3">
+          <div
+            onClick={() =>
+              setSizes((prev) =>
+                prev.includes("XXS")
+                  ? prev.filter((item) => item !== "XXS")
+                  : [...prev, "XXS"]
+              )
+            }
+          >
+            <p
+              className={`${
+                sizes.includes("XXS") ? "bg-green-200" : "bg-slate-200"
+              } px-3 py-1 cursor-pointer`}
+            >
+              XXS
+            </p>
+          </div>
+          <div
+            onClick={() =>
+              setSizes((prev) =>
+                prev.includes("XS")
+                  ? prev.filter((item) => item !== "XS")
+                  : [...prev, "XS"]
+              )
+            }
+          >
+            <p
+              className={`${
+                sizes.includes("XS") ? "bg-green-200" : "bg-slate-200"
+              } px-3 py-1 cursor-pointer`}
+            >
+              XS
+            </p>
+          </div>
           <div
             onClick={() =>
               setSizes((prev) =>

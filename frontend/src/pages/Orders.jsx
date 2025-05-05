@@ -6,6 +6,7 @@ import { assets } from "../assets/assets";
 import SmallNavBar from "../components/SmallNavBar";
 import Loader from "../components/CompLoader";
 import { toast } from "react-toastify";
+import { PackageCheck, ArrowRight } from "lucide-react";
 
 const Orders = () => {
   const { backendUrl, token, currency, navigate } = useContext(ShopContext);
@@ -46,23 +47,23 @@ const Orders = () => {
       setIsLoading(false);
 
       if (response.data.success) {
-        const allOrdersItem = [];
+        // const allOrdersItem = [];
 
-        response.data.orders.forEach((order) => {
-          order.items.forEach((item) => {
-            allOrdersItem.push({
-              ...item,
-              status: order.status,
-              payment: order.payment,
-              paymentMethod: order.paymentMethod,
-              date: order.date,
-              orderId: order._id,
-            });
-          });
-        });
-
-        setOrders(allOrdersItem);
-        localStorage.setItem(cacheKey, JSON.stringify(allOrdersItem));
+        // response.data.orders.forEach((order) => {
+        //   order.items.forEach((item) => {
+        //     allOrdersItem.push({
+        //       ...item,
+        //       status: order.status,
+        //       payment: order.payment,
+        //       paymentMethod: order.paymentMethod,
+        //       date: order.date,
+        //       orderId: order._id,
+        //     });
+        //   });
+        // });
+        setOrders(response.data.orders);
+        // setOrders(allOrdersItem);
+        localStorage.setItem(cacheKey, JSON.stringify(response.data.orders));
         localStorage.setItem(cacheTimeKey, now.toString());
       } else {
         toast.error(response.data.message);
@@ -88,50 +89,67 @@ const Orders = () => {
         </div>
 
         <div className="flex flex-col-reverse">
-          {orders.map((item, index) => (
+          {orders.map((order, index) => (
             <div
-              key={item._id + item.size || index + item.size}
-              className="py-4 border-t border-b text-gray-700 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4"
+              key={order._id || index}
+              className="grid max-md:grid-cols-[1fr_1fr] md:grid-cols-[0.3fr_0.8fr_0.8fr_1fr_0.8fr] gap-4 items-start border-b-2 border-gray-200 py-5 md:py-8 text-sm text-gray-700 bg-white"
             >
-              <div className="flex items-start gap-6 text-sm">
-                <img
-                  className="w-14 sm:w-16 aspect-[3/4]"
-                  src={item.image?.[0]}
-                  alt={item.name}
-                />
-                <div>
-                  <p className="sm:text-base font-medium">{item.name}</p>
-                  <div className="flex items-center gap-3 mt-1 text-base text-gray-700">
-                    <p>
+              {/* ------------ */}
+              <PackageCheck className="max-md:hidden size-12 self-start" />
+              {/* ------------ */}
+              <div>
+                {order.items.map((item, i) => (
+                  <p className="text-xs md:text-sm text-gray-700" key={i}>
+                    <span className="truncate">{item.name}</span> x{" "}
+                    {item.quantity}{" "}
+                    <span className="px-1 py-0.5 mx-1 rounded bg-gray-100">
+                      {item.size}
+                    </span>
+                    <span className="font-medium">
                       {currency}
                       {item.price}
-                    </p>
-                    <p>Quantity: {item.quantity}</p>
-                    <p>Size: {item.size}</p>
-                  </div>
-                  <p className="mt-1">
-                    Date:{" "}
-                    <span className="text-gray-400">
-                      {new Date(item.date).toDateString()}
+                    </span>
+                    {i < order.items.length - 1 ? "," : ""}
+                  </p>
+                ))}
+              </div>
+              {/* ------------ */}
+              <div>
+                <div className="flex items-start flex-col text-xs md:text-md text-gray-700">
+                  <p className="">
+                    Items :{" "}
+                    <span className="text-gray-500">{order.items.length}</span>
+                  </p>
+                  <p className="text-xs sm:text-[15px] my-2">
+                    Amount:{" "}
+                    <span className="font-bold">
+                      {currency}
+                      {order.amount}
                     </span>
                   </p>
-                  <p className="mt-1">
+                  <p className="">
+                    Date:{" "}
+                    <span className="text-gray-500">
+                      {new Date(order.date).toDateString()}
+                    </span>
+                  </p>
+                  <p className="">
                     Payment:{" "}
-                    <span className="text-gray-400">{item.paymentMethod}</span>
+                    <span className="text-gray-500">{order.paymentMethod}</span>
                   </p>
                 </div>
               </div>
-
+              {/* ------------------- */}
               <div
-                className="flex items-center text-xs gap-2 border px-4 py-2 font-medium rounded-sm hover:bg-gray-100 active:bg-gray-200 cursor-default"
-                onClick={() => navigate(`/payment/${item.orderId}`)}
+                className="flex items-center justify-center text-xs gap-2 border px-4 py-2 max-md:col-span-2 font-medium rounded-sm hover:bg-gray-100 active:bg-gray-200 cursor-default"
+                onClick={() => navigate(`/payment/${order._id}`)}
               >
-                {item.payment === 1 ? (
+                {order.payment === 1 ? (
                   <>
                     <img src={assets.ok_icon} alt="ok" width={20} height={20} />
                     Payment success
                   </>
-                ) : item.payment === -1 ? (
+                ) : order.payment === -1 ? (
                   <>
                     <img
                       src={assets.process_icon}
@@ -153,27 +171,22 @@ const Orders = () => {
                   </>
                 )}
                 <div className="flex-1 flex justify-end">
-                  <img
-                    src={assets.right_icon}
-                    alt="go"
-                    width={20}
-                    height={20}
-                  />
+                  <ArrowRight className="w-5 text-gray-400" />
                 </div>
               </div>
-
-              <div className="md:w-1/2 flex justify-between lg:justify-evenly">
-                <div className="w-[50%] md:w-[30%] group flex items-center flex-col gap-2 overflow-visible sticky z-0 border pl-3 pr-4 py-2 text-sm font-medium rounded-sm hover:bg-gray-100 cursor-default">
+              {/* ------------ */}
+              <div className="flex flex-col items-center justify-evenly max-md:gap-3 gap-5 max-md:col-span-2">
+                <div className="w-full md:w-[70%] group flex items-center flex-col gap-2 overflow-visible sticky z-0 border pl-3 pr-4 py-2 text-sm font-medium rounded-sm hover:bg-gray-100 cursor-default">
                   Status
-                  <div className="group-hover:flex hidden absolute -top-24 -right-20 bg-white w-fit items-center flex-col gap-2 z-10 border pl-3 pr-4 py-2 text-sm font-medium rounded-sm">
+                  <div className="group-hover:flex hidden absolute -top-24 -right-3 md:-top-24  md:-left-20 bg-white w-fit items-center flex-col gap-2 z-10 border pl-3 pr-4 py-2 text-sm font-medium rounded-sm">
                     <span className="z-20 absolute top-[15%] left-[16.5px] w-1 h-[70%] align-middle border-gray-300 border-dashed border-2 border-y-0 border-r-0"></span>
                     <p className="flex z-30 items-center gap-2 w-full">
                       <img
                         src={
-                          item.payment === 1 ||
-                          item.status === "Shipped" ||
-                          item.status === "Out for delivery" ||
-                          item.status === "Delivered"
+                          order.payment === 1 ||
+                          order.status === "Shipped" ||
+                          order.status === "Out for delivery" ||
+                          order.status === "Delivered"
                             ? assets.ok_icon
                             : assets.round_icon
                         }
@@ -186,9 +199,9 @@ const Orders = () => {
                     <p className="flex items-center gap-2 w-full z-30">
                       <img
                         src={
-                          item.status === "Shipped" ||
-                          item.status === "Out for delivery" ||
-                          item.status === "Delivered"
+                          order.status === "Shipped" ||
+                          order.status === "Out for delivery" ||
+                          order.status === "Delivered"
                             ? assets.ok_icon
                             : assets.round_icon
                         }
@@ -201,8 +214,8 @@ const Orders = () => {
                     <p className="flex items-center gap-2 w-full z-30">
                       <img
                         src={
-                          item.status === "Out for delivery" ||
-                          item.status === "Delivered"
+                          order.status === "Out for delivery" ||
+                          order.status === "Delivered"
                             ? assets.ok_icon
                             : assets.round_icon
                         }
@@ -215,7 +228,7 @@ const Orders = () => {
                     <p className="flex items-center gap-2 w-full z-30">
                       <img
                         src={
-                          item.status === "Delivered"
+                          order.status === "Delivered"
                             ? assets.ok_icon
                             : assets.round_icon
                         }
@@ -227,10 +240,10 @@ const Orders = () => {
                     </p>
                   </div>
                 </div>
-
+                {/* ------------ */}
                 <button
                   onClick={() => loadOrders()}
-                  className="border px-4 py-2 text-sm font-medium rounded-sm hover:bg-gray-100 active:bg-gray-200 cursor-default"
+                  className="w-full md:w-[70%] border px-4 py-2 text-sm font-medium rounded-sm hover:bg-gray-100 active:bg-gray-200 cursor-default"
                 >
                   Track Order
                 </button>

@@ -9,6 +9,9 @@ const orderSchema = new mongoose.Schema({
   paymentMethod: { type: String, required: true },
   payment: { type: Number, required: true, default: -1 },
   paymentScreenshot: { type: String, default: "" },
+  isCustomizable: { type: Boolean, required: true, default: false },
+  customDesignImage: { type: String, default: "" },
+  customDesignDetail: { type: String, default: "" },
   date: { type: Number, required: true },
 });
 

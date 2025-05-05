@@ -278,44 +278,65 @@ const updatePaymentStatus = async (req, res) => {
   }
 };
 
-const addScreenShot = async (req, res) => {
+const addPaymentScreenshot = async (req, res) => {
   try {
     const { orderId } = req.body;
-    // console.log(userId + ": user");
-    // console.log(token + ": token");
+
     if (!req.file) {
       return res
         .status(400)
-        .json({ success: false, message: "No file uploaded" });
+        .json({ success: false, message: "Payment screenshot not uploaded" });
     }
 
-    const image = req.file; // Extract the uploaded file
-
-    // Upload image to Cloudinary
-    const result = await cloudinary.uploader.upload(image.path, {
+    const result = await cloudinary.uploader.upload(req.file.path, {
       resource_type: "image",
     });
 
-    const imageUrl = result.secure_url;
-    // console.log(imageUrl);
     const order = await orderModel.findByIdAndUpdate(orderId, {
-      paymentScreenshot: imageUrl,
+      paymentScreenshot: result.secure_url,
       payment: -1,
     });
 
     if (!order) {
-      return res.json({
-        success: false,
-        message: "Order not found",
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
     }
-    res.json({
-      success: true,
-      message: "Screenshot uploaded successfully",
-      image: imageUrl,
-    });
+
+    res.json({ success: true, message: "Payment screenshot uploaded" });
   } catch (error) {
-    console.error("Upload Error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+const addDesignImage = async (req, res) => {
+  try {
+    const { orderId, designDetail } = req.body;
+
+    if (!req.file || !designDetail) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Design image or detail missing" });
+    }
+
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      resource_type: "image",
+    });
+
+    const order = await orderModel.findByIdAndUpdate(orderId, {
+      isCustomizable: true,
+      customDesignImage: result.secure_url,
+      customDesignDetail: designDetail,
+    });
+
+    if (!order) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
+    }
+
+    res.json({ success: true, message: "Design uploaded successfully" });
+  } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -332,5 +353,6 @@ export {
   updateStatus,
   updatePaymentStatus,
   getUserOrder,
-  addScreenShot,
+  addPaymentScreenshot,
+  addDesignImage,
 };

@@ -9,6 +9,7 @@ import SmallNavBar from "../components/SmallNavBar";
 const Cart = () => {
   const {
     products,
+    customizableProducts,
     currency,
     cartItems,
     updateQuantity,
@@ -19,7 +20,7 @@ const Cart = () => {
     getCartAmount,
     token,
   } = useContext(ShopContext);
-
+  const allProducts = [...products, ...customizableProducts];
   const [cartData, setCartData] = useState([]);
   const [couponCode, setCouponCode] = useState("");
 
@@ -47,8 +48,10 @@ const Cart = () => {
   };
 
   useEffect(() => {
-    if (products.length > 0) {
+    const allProducts = [...products, ...customizableProducts];
+    if (allProducts.length > 0) {
       const tempData = [];
+
       for (const items in cartItems) {
         for (const item in cartItems[items]) {
           if (cartItems[items][item] > 0) {
@@ -60,9 +63,10 @@ const Cart = () => {
           }
         }
       }
+
       setCartData(tempData);
     }
-  }, [cartItems, products]);
+  }, [cartItems, products, customizableProducts]);
 
   return (
     <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
@@ -74,7 +78,7 @@ const Cart = () => {
 
         <div>
           {cartData?.map((item, index) => {
-            const productData = products?.find(
+            const productData = allProducts?.find(
               (product) => product._id === item._id
             );
 

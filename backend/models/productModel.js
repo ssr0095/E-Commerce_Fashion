@@ -12,7 +12,7 @@ const productSchema = new mongoose.Schema({
   sizes: { type: Array, required: true },
   bestseller: { type: Boolean },
   customizable: { type: Boolean },
-  discount: { type: Number, default: 20 },
+  discount: { type: Number, default: 10 },
   date: { type: Number, required: true },
 });
 
