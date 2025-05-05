@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { NavLink } from "react-router-dom";
+// import { NavLink } from "react-router-dom";
 import { ShopContext } from "../context/ShopContext";
 
 const NavigationBar = () => {
@@ -8,9 +8,12 @@ const NavigationBar = () => {
   const NavItems = [
     "Men",
     "Women",
-    "Anime",
+    "Streetwear",
     "Aesthetic",
-    "Street wear",
+    "Illustrate",
+    "Typography",
+    "Vintage",
+    "Minimalist",
     "Others",
   ];
 
