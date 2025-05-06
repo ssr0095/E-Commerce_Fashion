@@ -270,7 +270,7 @@ const Payment = () => {
             <Button
               className="bg-gray-950 text-white rounded-none shadow-sm outline-none duration-75 hover:bg-gray-800  active:bg-gray-900 my-14 px-8 w-48  py-2"
               onClick={onSubmitPaymentImageHandler}
-              disabled={!isDesignImageUploaded}
+              disabled={isCustom && !isDesignImageUploaded}
             >
               Upload
             </Button>
