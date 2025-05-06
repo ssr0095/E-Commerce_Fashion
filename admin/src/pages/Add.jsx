@@ -291,9 +291,9 @@ const Add = ({ token }) => {
       </div>
 
       {/* SIZES */}
-      <div className="overflow-scroll">
+      <div className="w-full">
         <p className="mb-2">Product Sizes</p>
-        <div className="flex gap-3">
+        <div className="flex gap-3 overflow-scroll">
           <div
             onClick={() =>
               setSizes((prev) =>
