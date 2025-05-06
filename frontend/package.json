@@ -4,7 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "docker:dev": "docker-compose -f docker-compose.dev.yaml up --build",
+    "docker:prod": "docker-compose -f docker-compose.prod.yaml up --build",
+    "docker:dev:watch": "docker compose -f docker-compose.watch.yaml watch",
+    "dev": "vite --host",
     "build": "vite build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"

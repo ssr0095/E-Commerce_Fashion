@@ -1,0 +1,44 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    env_file:
+      - ./frontend/.env
+    # No ports - Vercel will handle this
+    networks:
+      - external-net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    env_file:
+      - ./backend/.env
+    networks:
+      - external-net
+    depends_on:
+      - db
+
+  admin:
+    build:
+      context: ./admin
+      dockerfile: Dockerfile.prod
+    env_file:
+      - ./admin/.env
+    networks:
+      - external-net
+
+  db:
+    image: mongo:latest
+    ports:
+      - 27017:27017
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
+
+networks:
+  external-net:
+    driver: bridge

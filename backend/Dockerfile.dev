@@ -1,0 +1,23 @@
+# Node image with debugging tools (Uses full Node image (not Alpine) for better debugging)
+FROM node:22.14.0
+
+# Enable debug mode
+ENV NODE_ENV=development
+ENV DEBUG=express:*
+
+# Set working directory
+WORKDIR /app
+
+# Install dependencies first for better caching
+COPY package.json package-lock.json ./
+
+RUN npm install
+
+# Copy the rest of the source files into the image.(excluded in .dockerignore)
+COPY . .
+
+# Expose the port that the application listens on. (Vite's default port)
+EXPOSE 8000
+
+# Start with nodemon for live reload
+CMD ["npx", "nodemon", "--inspect=0.0.0.0", "src/server.js"]
