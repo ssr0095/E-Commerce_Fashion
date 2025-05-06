@@ -291,7 +291,7 @@ const Add = ({ token }) => {
       </div>
 
       {/* SIZES */}
-      <div>
+      <div className="overflow-scroll">
         <p className="mb-2">Product Sizes</p>
         <div className="flex gap-3">
           <div
