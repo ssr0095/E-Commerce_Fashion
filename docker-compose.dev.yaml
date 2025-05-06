@@ -24,8 +24,8 @@ services:
       - /app/node_modules
     env_file:
       - ./backend/.env
-    depends_on:
-      - db
+    # depends_on:
+    #   - db
 
   admin:
     build:
@@ -39,15 +39,15 @@ services:
     env_file:
       - ./admin/.env
 
-  db:
-    image: mongo:latest
-    ports:
-      - 27017:27017
-    volumes:
-      - mongo-data:/data/db
+#   db:
+#     image: mongo:latest
+#     ports:
+#       - 27017:27017
+#     volumes:
+#       - mongo-data:/data/db
 
-volumes:
-  mongo-data:
+# volumes:
+#   mongo-data:
 
 # The commented out section below is an example of how to define a PostgreSQL
 # database that your application can use. `depends_on` tells Docker Compose to

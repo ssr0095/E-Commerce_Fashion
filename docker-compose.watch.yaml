@@ -24,8 +24,8 @@ services:
     ports: ["8000:8000"]
     env_file:
       - ./backend/.env
-    depends_on:
-      - db
+    # depends_on:
+    #   - db
 
   admin:
     build: ./admin
@@ -39,12 +39,12 @@ services:
     env_file:
       - ./admin/.env
 
-  db:
-    image: mongo:latest
-    ports:
-      - 27017:27017
-    volumes:
-      - mongo-data:/data/db
+#   db:
+#     image: mongo:latest
+#     ports:
+#       - 27017:27017
+#     volumes:
+#       - mongo-data:/data/db
 
-volumes:
-  mongo-data:
+# volumes:
+#   mongo-data:

@@ -20,4 +20,4 @@ COPY . .
 EXPOSE 8000
 
 # Start with nodemon for live reload
-CMD ["npx", "nodemon", "--inspect=0.0.0.0", "src/server.js"]
+CMD ["npx", "nodemon", "--inspect=0.0.0.0", "server.js"]
