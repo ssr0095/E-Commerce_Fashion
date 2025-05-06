@@ -3,7 +3,7 @@ import axios from "axios";
 import { backendUrl, currency } from "../App";
 import { toast } from "react-toastify";
 // import { assets } from "../assets/assets";
-import { PackageCheck } from "lucide-react";
+import { PackageCheck, Eye, Settings2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -26,6 +26,10 @@ const Orders = ({ token }) => {
   const [image, setImage] = useState("");
   const [imagePreivewOpen, setImagePreivewOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isCustom, setIsCustom] = useState(false);
+  const [customImage, setCustomImage] = useState("");
+  const [customDetail, setCustomDetail] = useState("");
+  const [customOpen, setCustomOpen] = useState(false);
 
   const fetchAllOrders = async (forceRefresh = false) => {
     if (!token) return;
@@ -105,6 +109,27 @@ const Orders = ({ token }) => {
     }
   };
 
+  const ImageDownload = async () => {
+    try {
+      const response = await fetch(customImage, { mode: "cors" });
+      const blob = await response.blob();
+      const mimeType = blob.type; // e.g., 'image/jpeg', 'image/png'
+
+      let extension = "jpg";
+      if (mimeType === "image/png") extension = "png";
+      else if (mimeType === "image/webp") extension = "webp";
+      // Add more types if needed
+
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `custom-design-${Date.now()}.${extension}`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
   useEffect(() => {
     fetchAllOrders();
   }, [token]);
@@ -113,112 +138,124 @@ const Orders = ({ token }) => {
     <div className="max-sm:px-6">
       <h3>Order Page</h3>
       {isLoading && <Loader />}
-      {orders.map((order, index) => (
-        <div
-          key={index}
-          className="grid max-sm:grid-cols-[1fr_1fr] sm:grid-cols-[0.5fr_2fr_1fr] gap-4 items-start border-2 border-gray-200 p-5 md:p-8 my-3 text-sm text-gray-700 bg-white"
-        >
-          <PackageCheck className="max-sm:hidden size-10" />
-          <div>
-            {order.items.map((item, i) => (
-              <p className="py-0.5" key={i}>
-                {item.name} x {item.quantity} <span>{item.size}</span>
-                {i < order.items.length - 1 ? "," : ""}
+      {orders.map((order, index) => {
+        const customizableItem = order.isCustomizable;
+        return (
+          <div
+            key={index}
+            className="grid max-sm:grid-cols-[1fr_1fr] sm:grid-cols-[0.5fr_2fr_1fr] gap-4 items-start border-2 border-gray-200 p-5 md:p-8 my-3 text-sm text-gray-700 bg-white"
+          >
+            <PackageCheck className="max-sm:hidden size-10" />
+            <div>
+              {order.items.map((item, i) => (
+                <p className="py-0.5" key={i}>
+                  {item.name} x {item.quantity} <span>{item.size}</span>
+                  {i < order.items.length - 1 ? "," : ""}
+                </p>
+              ))}
+              <p className="mt-3 mb-2 font-bold">
+                {order.address.firstName + " " + order.address.lastName}
               </p>
-            ))}
-            <p className="mt-3 mb-2 font-bold">
-              {order.address.firstName + " " + order.address.lastName}
-            </p>
-            <p>{order.address.street},</p>
-            <p>{`${order.address.city}, ${order.address.state}, ${order.address.country}, ${order.address.zipcode}`}</p>
-            <p>{order.address.phone}</p>
-          </div>
-          <div>
-            <p className="text-sm sm:text-[15px]">
-              Items : {order.items.length}
-            </p>
-            <p className="text-sm sm:text-[15px] my-2">
-              Amount:{" "}
-              <span className="font-bold">
-                {currency}
-                {order.amount}
-              </span>
-            </p>
-            <p>Method: {order.paymentMethod}</p>
-            <p>
-              Payment:{" "}
-              {order.payment === 1
-                ? "Done"
-                : order.payment === -1
-                ? "Pending"
-                : "Failed"}
-            </p>
-            <p>Date: {new Date(order.date).toLocaleDateString()}</p>
-          </div>
-          <div className="w-full flex-1 flex-col items-center gap-3 sm:col-start-2 col-span-2">
-            <p className="my-2 flex items-center gap-2">
-              Payment status
-              <Button
-                className="px-3 py-0.5"
-                variant="outline"
-                onClick={() => {
-                  setImage(order.paymentScreenshot);
-                  setImagePreivewOpen(true);
-                }}
-              >
-                Screen shot
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="lucide lucide-eye"
+              <p>{order.address.street},</p>
+              <p>{`${order.address.city}, ${order.address.state}, ${order.address.country}, ${order.address.zipcode}`}</p>
+              <p>{order.address.phone}</p>
+            </div>
+            <div>
+              <p className="text-sm sm:text-[15px]">
+                Items : {order.items.length}
+              </p>
+              <p className="text-sm sm:text-[15px] my-2">
+                Amount:{" "}
+                <span className="font-bold">
+                  {currency}
+                  {order.amount}
+                </span>
+              </p>
+              <p>Method: {order.paymentMethod}</p>
+              <p>
+                Payment:{" "}
+                {order.payment === 1
+                  ? "Done"
+                  : order.payment === -1
+                  ? "Pending"
+                  : "Failed"}
+              </p>
+              <p>Date: {new Date(order.date).toLocaleDateString()}</p>
+            </div>
+            <div className="w-full flex-1 flex-col items-center gap-3 sm:col-start-2 col-span-2">
+              <p className="my-2 flex items-center gap-2">
+                Payment status
+                <Button
+                  className="px-3 py-0.5"
+                  variant="default"
+                  onClick={() => {
+                    setImage(order.paymentScreenshot);
+                    setImagePreivewOpen(true);
+                  }}
                 >
-                  <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
-                  <circle cx="12" cy="12" r="3" />
-                </svg>
-              </Button>
-            </p>
-            <Select
-              onValueChange={(value) => PstatusHandler(value, order._id)}
-              value={order.payment}
-              className="w-full p-2 font-semibold"
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={-1}>Processing</SelectItem>
-                <SelectItem value={1}>Success</SelectItem>
-                <SelectItem value={0}>Failed</SelectItem>
-              </SelectContent>
-            </Select>
-            <p className=" my-2">Order status</p>
-            <Select
-              onValueChange={(value) => statusHandler(value, order._id)}
-              value={order.status}
-              className="w-full p-2 font-semibold"
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Order Placed">Order Placed</SelectItem>
-                <SelectItem value="Shipped">Shipped</SelectItem>
-                <SelectItem value="Out for delivery">
-                  Out for delivery
-                </SelectItem>
-                <SelectItem value="Delivered">Delivered</SelectItem>
-              </SelectContent>
-            </Select>
+                  Screen shot
+                  <Eye />
+                </Button>
+              </p>
+              <Select
+                onValueChange={(value) => PstatusHandler(value, order._id)}
+                value={order.payment}
+                className="w-full p-2 font-semibold"
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={-1}>Processing</SelectItem>
+                  <SelectItem value={1}>Success</SelectItem>
+                  <SelectItem value={0}>Failed</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className=" my-2">Order status</p>
+              <Select
+                onValueChange={(value) => statusHandler(value, order._id)}
+                value={order.status}
+                className="w-full p-2 font-semibold"
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Order Placed">Order Placed</SelectItem>
+                  <SelectItem value="Shipped">Shipped</SelectItem>
+                  <SelectItem value="Out for delivery">
+                    Out for delivery
+                  </SelectItem>
+                  <SelectItem value="Delivered">Delivered</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {/* Customization Button */}
+              {customizableItem && (
+                <Button
+                  variant="default"
+                  className="mt-3"
+                  onClick={() => {
+                    setCustomImage(
+                      order.customDesignImage.replace(
+                        "/upload/",
+                        "/upload/fl_attachment/"
+                      )
+                    );
+                    setCustomDetail(order.customDesignDetail);
+                    setCustomOpen(true);
+                  }}
+                >
+                  Customization
+                  <Settings2 />
+                </Button>
+              )}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
+
+      {/* Payment Screenshot Dialog */}
       <Dialog open={imagePreivewOpen} onOpenChange={setImagePreivewOpen}>
         <DialogContent className="max-sm:w-[80%] max-h-[80%] rounded-md">
           <DialogHeader>
@@ -238,6 +275,50 @@ const Orders = ({ token }) => {
           )}
           <DialogFooter>
             <Button onClick={() => setImagePreivewOpen(false)}>Done</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Customization Dialog */}
+      <Dialog open={customOpen} onOpenChange={setCustomOpen}>
+        <DialogContent className="max-sm:w-[80%] max-h-[80%] overflow-y-auto rounded-md">
+          <DialogHeader>
+            <DialogTitle className="mb-3">Custom Design</DialogTitle>
+          </DialogHeader>
+          {customImage ? (
+            <div className="w-full flex flex-col items-center gap-4 overflow-auto">
+              <img
+                src={customImage}
+                alt="custom design"
+                width={192}
+                className="w-48 object-cover rounded-md shadow-lg"
+              />{" "}
+              {/* Download Button */}
+              {/* <a
+                target="_blank"
+                href={customImage}
+                download={`custom-design-${Date.now()}.jpg`}
+                className="mt-2"
+              >
+                ......
+              </a> */}
+              <Button
+                variant="default"
+                className="w-48"
+                onClick={ImageDownload}
+              >
+                Download
+              </Button>
+              <div className="w-full self-start text-sm p-3 rounded-md border border-gray-400">
+                <p className="font-medium">Detail</p>
+                <p className="text-gray-700">{customDetail}</p>
+              </div>
+            </div>
+          ) : (
+            <p>No customization found</p>
+          )}
+          <DialogFooter>
+            <Button onClick={() => setCustomOpen(false)}>Close</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -27,6 +27,8 @@ const Payment = () => {
   const [designImage, setDesignImage] = useState(false);
   const [designDetail, setDesignDetail] = useState("");
   const [isDesignImageUploaded, setDesignIsImageUploaded] = useState(false);
+  const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/avif"];
+  const maxSize = 3 * 1024 * 1024; // 3MB
 
   const loadOrderData = async () => {
     try {
@@ -62,12 +64,38 @@ const Payment = () => {
     }
   };
 
+  const validateFile = (file, input) => {
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Only JPG, PNG, AVIF, or WEBP images are allowed.");
+      input.value = "";
+      return false;
+    }
+    if (file.size > maxSize) {
+      toast.error("File size must be less than 3MB.");
+      input.value = "";
+      return false;
+    }
+    return true;
+  };
+
   const handleFileChange = (e) => {
-    setPaymentImage(e.target.files[0]);
+    const fileInput = e.target;
+    const file = fileInput.files?.[0];
+    if (!file) return;
+
+    if (!validateFile(file, fileInput)) return;
+
+    setPaymentImage(file);
   };
 
   const handleDesinFileChange = (e) => {
-    setDesignImage(e.target.files[0]);
+    const fileInput = e.target;
+    const file = fileInput.files?.[0];
+    if (!file) return;
+
+    if (!validateFile(file, fileInput)) return;
+
+    setDesignImage(file);
   };
 
   const onSubmitDesignImageHandler = async () => {
@@ -103,10 +131,20 @@ const Payment = () => {
   const onSubmitPaymentImageHandler = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "image/avif",
+    ];
 
     if (!paymentImage) {
       setIsLoading(false);
       return toast.error("Payment screenshot not added");
+    }
+    if (!allowedTypes.includes(file.type)) {
+      alert("Only JPG, PNG, or WEBP images are allowed.");
+      return;
     }
     if (isCustom) {
       if (!isDesignImageUploaded) {
@@ -166,7 +204,7 @@ const Payment = () => {
               <Label htmlFor="designImage">Upload design</Label>
               <Input
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp,image/avif"
                 onChange={handleDesinFileChange}
                 name="designImage"
                 id="designImage"
@@ -222,7 +260,7 @@ const Payment = () => {
               </div>
               <input
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp,image/avif"
                 onChange={handleFileChange}
                 name="paymentImage"
                 id="paymentImage"

@@ -10,13 +10,11 @@ export default defineConfig({
   },
   server: {
     historyApiFallback: true, // Important for React Router
+    port: 5174,
   },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  server: {
-    port: 5173 // Use 5174 when env var exists
-  }
 });

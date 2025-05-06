@@ -34,6 +34,22 @@ const Add = ({ token }) => {
   const [bestseller, setBestseller] = useState(false);
   const [customizable, setCustomizable] = useState(false);
   const [sizes, setSizes] = useState([]);
+  const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/avif"];
+  const maxSize = 3 * 1024 * 1024; // 3MB
+
+  const validateFile = (file, input) => {
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Only JPG, PNG, AVIF, or WEBP images are allowed.");
+      input.value = "";
+      return false;
+    }
+    if (file.size > maxSize) {
+      toast.error("File size must be less than 3MB.");
+      input.value = "";
+      return false;
+    }
+    return true;
+  };
 
   const onSubmitHandler = async (e) => {
     e.preventDefault();
@@ -122,9 +138,15 @@ const Add = ({ token }) => {
                   type="file"
                   id={imageId}
                   hidden
+                  accept="image/jpeg,image/png,image/webp,image/avif"
                   required={index === 0}
                   onChange={(e) => {
-                    const file = e.target.files[0];
+                    const fileInput = e.target;
+                    const file = fileInput.files?.[0];
+                    if (!file) return;
+
+                    if (!validateFile(file, fileInput)) return;
+
                     switch (index) {
                       case 0:
                         setImage1(file);
