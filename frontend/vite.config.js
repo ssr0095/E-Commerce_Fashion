@@ -10,6 +10,7 @@ export default defineConfig({
   },
   server: {
     historyApiFallback: true, // Important for React Router
+    port: 5173,
   },
   resolve: {
     alias: {

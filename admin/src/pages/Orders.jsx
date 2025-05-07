@@ -317,9 +317,9 @@ const Orders = ({ token }) => {
           ) : (
             <p>No customization found</p>
           )}
-          <DialogFooter>
+          {/* <DialogFooter>
             <Button onClick={() => setCustomOpen(false)}>Close</Button>
-          </DialogFooter>
+          </DialogFooter> */}
         </DialogContent>
       </Dialog>
     </div>

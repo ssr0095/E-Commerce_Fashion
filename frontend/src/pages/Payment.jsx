@@ -12,6 +12,7 @@ import { Textarea } from "../components/ui/textarea";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Button } from "../components/ui/button";
+import imageCompression from "browser-image-compression";
 
 const Payment = () => {
   const { token, navigate, backendUrl, currency } = useContext(ShopContext);
@@ -78,6 +79,14 @@ const Payment = () => {
     return true;
   };
 
+  const compressImage = async (file) => {
+    const options = { 
+      maxSizeMB: 1,          // Compress to ≤1MB
+      maxWidthOrHeight: 1920 // Resize if needed
+    };
+    return await imageCompression(file, options);
+  };
+
   const handleFileChange = (e) => {
     const fileInput = e.target;
     const file = fileInput.files?.[0];
@@ -106,7 +115,7 @@ const Payment = () => {
     try {
       const designFormData = new FormData();
       designFormData.append("orderId", orderId);
-      designFormData.append("designImage", designImage);
+      designFormData.append("designImage", await compressImage(designImage));
       designFormData.append("designDetail", designDetail);
 
       const response = await axios.post(

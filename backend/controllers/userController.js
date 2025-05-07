@@ -4,7 +4,35 @@ import jwt from "jsonwebtoken";
 import userModel from "../models/userModel.js";
 
 const createToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET);
+  return jwt.sign(
+    { id }, 
+    process.env.JWT_SECRET,
+    { expiresIn: '1h' } // Token expires in 1 hour
+  );
+};
+
+const createRefreshToken = (id) => {
+  return jwt.sign(
+    { id },
+    process.env.JWT_REFRESH_SECRET,
+    { expiresIn: '7d' } // Refresh token lasts 7 days
+  );
+};
+
+const refreshToken = async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+    if (!refreshToken) return res.status(400).json({ success: false, message: "Refresh token required" });
+
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    const newToken = createToken(decoded.id);
+    const newRefreshToken = createRefreshToken(decoded.id);
+    
+    res.json({ success: true, token: newToken, refreshToken: newRefreshToken });
+  } catch (error) {
+    console.log(error)
+    res.status(401).json({ success: false, message: "Invalid refresh token" });
+  }
 };
 
 // Route for user login
@@ -22,7 +50,12 @@ const loginUser = async (req, res) => {
 
     if (isMatch) {
       const token = createToken(user._id);
-      res.json({ success: true, token });
+      const refreshToken = createRefreshToken(user._id);
+      res.json({ 
+        success: true, 
+        token,
+        refreshToken 
+      });
     } else {
       res.json({ success: false, message: "Invalid credentials" });
     }
@@ -70,8 +103,8 @@ const registerUser = async (req, res) => {
     const user = await newUser.save();
 
     const token = createToken(user._id);
-
-    res.json({ success: true, token });
+    const refreshToken = createRefreshToken(user._id);
+    res.json({ success: true, token, refreshToken });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
@@ -100,7 +133,8 @@ const adminLogin = async (req, res) => {
 
 // Apply Coupon on New User's First Order
 const applyCoupon = async (req, res) => {
-  const { userId, couponCode } = req.body;
+  const userId = req.user.id;
+  const { couponCode } = req.body;
 
   try {
     const user = await userModel.findById(userId);
@@ -140,14 +174,14 @@ const applyCoupon = async (req, res) => {
 };
 
 const getUserInfo = async (req, res) => {
-  const { userId } = req.body;
-  console.log(userId);
+  const userId = req.user.id;
+  // console.log(userId);
 
   try {
     const resp = await userModel.findById(userId);
 
-    console.log(resp);
-    if (!resp.name) {
+    // console.log(resp);
+    if (!resp) {
       return res.json({
         success: false,
         message: "User not fount",
@@ -167,4 +201,4 @@ const getUserInfo = async (req, res) => {
   }
 };
 
-export { loginUser, registerUser, adminLogin, applyCoupon, getUserInfo };
+export { loginUser, registerUser, adminLogin, applyCoupon, getUserInfo,refreshToken };

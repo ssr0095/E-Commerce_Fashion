@@ -6,6 +6,7 @@ import SmallNavBar from "../components/SmallNavBar";
 import { toast } from "react-toastify";
 import Coupon from "../components/Coupon";
 import ProductDetailsDrop from "../components/ProductDetailsDrop";
+import { ScrollArea } from "../components/ui/scroll-area"
 
 const Product = () => {
   const { productId } = useParams();
@@ -51,7 +52,7 @@ const Product = () => {
                   onClick={() => setImage(item)}
                   src={item}
                   key={index}
-                  className="w-[24%] sm:w-full sm:mb-3 flex-shrink-0 cursor-pointer"
+                  className="w-[24%] sm:w-full aspect-[3/4] sm:mb-3 flex-shrink-0 cursor-pointer"
                   alt="image"
                 />
               ))}
@@ -96,9 +97,10 @@ const Product = () => {
             <p className="mt-5 text-gray-500 md:w-4/5">
               {productData?.description}
             </p>
-            <div className="flex flex-col gap-4 my-8">
+            <div className="w-full flex flex-col gap-4 my-8">
               <p className="font-medium">Select Size</p>
-              <div className="flex gap-2 items-center overflow-scroll">
+              {/* <ScrollArea> */}
+              <div className="w-full flex gap-2 max-sm:overflow-scroll">
                 {productData?.sizes.map((item, index) => (
                   <button
                     key={index}
@@ -113,6 +115,7 @@ const Product = () => {
                   </button>
                 ))}
               </div>
+              {/* </ScrollArea> */}
             </div>
 
             <button

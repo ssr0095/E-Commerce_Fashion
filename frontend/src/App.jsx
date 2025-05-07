@@ -1,23 +1,11 @@
 import React, { Suspense, lazy } from "react";
 import { Routes, Route } from "react-router-dom";
-// import Home from "./pages/Home";
-// import Collection from "./pages/Collection";
-// import About from "./pages/About";
-// import Contact from "./pages/Contact";
-// import Product from "./pages/Product";
-// import Cart from "./pages/Cart";
-// import Login from "./pages/Login";
-// import PlaceOrder from "./pages/PlaceOrder";
-// import Orders from "./pages/Orders";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import SearchBar from "./components/SearchBar";
 import Loading from "./components/Loading";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-// import Verify from "./pages/Verify";
-// import Payment from "./pages/Payment";
-// import Customize from "./pages/Customize";
 
 const App = () => {
   const Home = lazy(() => import("./pages/Home"));

@@ -1,11 +1,13 @@
 import multer from "multer";
 
-const storage = multer.diskStorage({
-    filename:function(req,file,callback){
-        callback(null,file.originalname)
-    }
-})
+// Store files in memory as buffers (no disk storage needed)
+const storage = multer.memoryStorage();
 
-const upload = multer({storage})
+const upload = multer({ 
+  storage,
+  limits: {
+    fileSize: 3 * 1024 * 1024, // 3MB limit per file
+  },
+});
 
-export default upload
+export default upload;

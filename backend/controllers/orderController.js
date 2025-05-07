@@ -2,7 +2,9 @@ import orderModel from "../models/orderModel.js";
 import userModel from "../models/userModel.js";
 import Stripe from "stripe";
 import razorpay from "razorpay";
-import { v2 as cloudinary } from "cloudinary";
+import { uploadToR2 } from "../config/cloudflare.js";
+import { v4 as uuidv4 } from "uuid";
+
 // global variables
 const currency = process.env.CURRENCY;
 const deliveryCharge = process.env.DELIVERY_FEE;
@@ -18,7 +20,8 @@ const razorpayInstance = new razorpay({
 // Placing orders using COD Method
 const placeOrder = async (req, res) => {
   try {
-    const { userId, items, amount, address } = req.body;
+    const userId = req.user.id;
+    const { items, amount, address } = req.body;
 
     const orderData = {
       userId,
@@ -52,7 +55,8 @@ const placeOrder = async (req, res) => {
 // Placing orders using COD Method
 const placeOrderGooglePay = async (req, res) => {
   try {
-    const { userId, items, amount, address } = req.body;
+    const userId = req.user.id;
+    const { items, amount, address } = req.body;
 
     const orderData = {
       userId,
@@ -87,7 +91,8 @@ const placeOrderGooglePay = async (req, res) => {
 // Placing orders using Stripe Method
 const placeOrderStripe = async (req, res) => {
   try {
-    const { userId, items, amount, address } = req.body;
+    const userId = req.user.id;
+    const { items, amount, address } = req.body;
     const { origin } = req.headers;
 
     const orderData = {
@@ -141,7 +146,8 @@ const placeOrderStripe = async (req, res) => {
 
 // Verify Stripe
 const verifyStripe = async (req, res) => {
-  const { orderId, success, userId } = req.body;
+  const userId = req.user.id;
+  const { orderId, success} = req.body;
 
   try {
     if (success === "true") {
@@ -161,7 +167,8 @@ const verifyStripe = async (req, res) => {
 // Placing orders using Razorpay Method
 const placeOrderRazorpay = async (req, res) => {
   try {
-    const { userId, items, amount, address } = req.body;
+    const userId = req.user.id;
+    const { items, amount, address } = req.body;
 
     const orderData = {
       userId,
@@ -197,7 +204,8 @@ const placeOrderRazorpay = async (req, res) => {
 
 const verifyRazorpay = async (req, res) => {
   try {
-    const { userId, razorpay_order_id } = req.body;
+    const userId = req.user.id;
+    const { razorpay_order_id } = req.body;
 
     const orderInfo = await razorpayInstance.orders.fetch(razorpay_order_id);
     if (orderInfo.status === "paid") {
@@ -227,7 +235,7 @@ const allOrders = async (req, res) => {
 // User Order Data For Forntend
 const userOrders = async (req, res) => {
   try {
-    const { userId } = req.body;
+    const userId = req.user.id;
 
     const orders = await orderModel.find({ userId });
     res.json({ success: true, orders });
@@ -283,29 +291,42 @@ const addPaymentScreenshot = async (req, res) => {
     const { orderId } = req.body;
 
     if (!req.file) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Payment screenshot not uploaded" });
+      return res.status(400).json({ 
+        success: false, 
+        message: "Payment screenshot not uploaded" 
+      });
     }
 
-    const result = await cloudinary.uploader.upload(req.file.path, {
-      resource_type: "image",
-    });
+    // Upload to R2
+    const fileName = `payments/${uuidv4()}-${req.file.originalname}`;
+    const imageUrl = await uploadToR2(
+      req.file.buffer,
+      fileName,
+      req.file.mimetype
+    );
 
+    // Update order
     const order = await orderModel.findByIdAndUpdate(orderId, {
-      paymentScreenshot: result.secure_url,
+      paymentScreenshot: imageUrl,
       payment: -1,
     });
 
     if (!order) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Order not found" });
+      return res.status(404).json({ 
+        success: false, 
+        message: "Order not found" 
+      });
     }
 
-    res.json({ success: true, message: "Payment screenshot uploaded" });
+    res.json({ 
+      success: true, 
+      message: "Payment screenshot uploaded" 
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
   }
 };
 
@@ -314,30 +335,43 @@ const addDesignImage = async (req, res) => {
     const { orderId, designDetail } = req.body;
 
     if (!req.file || !designDetail) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Design image or detail missing" });
+      return res.status(400).json({ 
+        success: false, 
+        message: "Design image or detail missing" 
+      });
     }
 
-    const result = await cloudinary.uploader.upload(req.file.path, {
-      resource_type: "image",
-    });
+    // Upload to R2
+    const fileName = `designs/${uuidv4()}-${req.file.originalname}`;
+    const imageUrl = await uploadToR2(
+      req.file.buffer,
+      fileName,
+      req.file.mimetype
+    );
 
+    // Update order
     const order = await orderModel.findByIdAndUpdate(orderId, {
       isCustomizable: true,
-      customDesignImage: result.secure_url,
+      customDesignImage: imageUrl,
       customDesignDetail: designDetail,
     });
 
     if (!order) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Order not found" });
+      return res.status(404).json({ 
+        success: false, 
+        message: "Order not found" 
+      });
     }
 
-    res.json({ success: true, message: "Design uploaded successfully" });
+    res.json({ 
+      success: true, 
+      message: "Design uploaded successfully" 
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
   }
 };
 

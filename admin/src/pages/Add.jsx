@@ -2,12 +2,14 @@ import React, { useState } from "react";
 import { assets } from "../assets/assets";
 import Loader from "../components/CompLoader";
 import axios from "axios";
+import imageCompression from "browser-image-compression";
 import { backendUrl } from "../App";
 import { toast } from "react-toastify";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -51,8 +53,26 @@ const Add = ({ token }) => {
     return true;
   };
 
+  const compressImage = async (file) => {
+    const options = { 
+      maxSizeMB: 2,          // Compress to ≤1MB
+      maxWidthOrHeight: 1920 // Resize if needed
+    };
+    return await imageCompression(file, options);
+  };
+
   const onSubmitHandler = async (e) => {
     e.preventDefault();
+
+        if (!name.trim()) return toast.error("Name not provided");
+        if (!description.trim()) return toast.error("Description not provided");
+        if (!price.trim()) return toast.error("Price not provided");
+        if (!discount.trim()) return toast.error("Discount not provided");
+        if (!theme.trim()) return toast.error("Theme not provided");
+        if (!category.trim()) return toast.error("Category not provided");
+        if (!subCategory.trim()) return toast.error("SubCategory not provided");
+        if (!sizes) return toast.error("Sizes not provided");
+        if (!image1) return toast.error("Upload atleast 1 image");
 
     try {
       const formData = new FormData();
@@ -69,10 +89,10 @@ const Add = ({ token }) => {
       formData.append("customizable", customizable);
       sizes.forEach((size) => formData.append("sizes", size));
 
-      image1 && formData.append("image1", image1);
-      image2 && formData.append("image2", image2);
-      image3 && formData.append("image3", image3);
-      image4 && formData.append("image4", image4);
+      if (image1) formData.append("image1", await compressImage(image1));
+      if (image2) formData.append("image2", await compressImage(image2));
+      if (image3) formData.append("image3", await compressImage(image3));
+      if (image4) formData.append("image4", await compressImage(image4));
 
       setIsLoading(true);
 
@@ -204,13 +224,14 @@ const Add = ({ token }) => {
             <SelectTrigger>
               <SelectValue placeholder="Select theme" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="max-h-[150px]">
               {/* <SelectGroup> */}
               {/* <SelectLabel>Theme</SelectLabel> */}
+              {/* <ScrollArea className="max-h-[150px]"> */}
               <SelectItem value="aesthetic">Aesthetic</SelectItem>
               <SelectItem value="streetwear">Streetwear</SelectItem>
               <SelectItem value="minimalist">Minimalist</SelectItem>
-              <SelectItem value="minimalist">Illustrate</SelectItem>
+              <SelectItem value="illustrate">Illustrate</SelectItem>
               <SelectItem value="vintage">Vintage</SelectItem>
               <SelectItem value="graphic">Graphic Art</SelectItem>
               <SelectItem value="bold">Bold & Edgy</SelectItem>
@@ -219,6 +240,7 @@ const Add = ({ token }) => {
               <SelectItem value="quirky">Quirky & Fun</SelectItem>
               <SelectItem value="others">Others</SelectItem>
               {/* </SelectGroup> */}
+              {/* </ScrollArea> */}
             </SelectContent>
           </Select>
         </div>
@@ -233,11 +255,13 @@ const Add = ({ token }) => {
             <SelectTrigger>
               <SelectValue placeholder="Select category" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="max-h-[150px]">
+            {/* <ScrollArea className="max-h-[150px]"> */}
               <SelectItem value="Men">Men</SelectItem>
               <SelectItem value="Women">Women</SelectItem>
               <SelectItem value="Unisex">Unisex</SelectItem>
               <SelectItem value="Kids">Kids</SelectItem>
+              {/* </ScrollArea> */}
             </SelectContent>
           </Select>
         </div>
@@ -252,7 +276,8 @@ const Add = ({ token }) => {
             <SelectTrigger>
               <SelectValue placeholder="Select sub category" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="max-h-[150px]">
+            {/* <ScrollArea className="max-h-[150px]"> */}
               <SelectItem value="T-Shirts">T-Shirts</SelectItem>
               <SelectItem value="Hoodies">Hoodies</SelectItem>
               <SelectItem value="Shirts">Shirts</SelectItem>
@@ -262,6 +287,7 @@ const Add = ({ token }) => {
               <SelectItem value="Co-ords">Co-ords</SelectItem>
               <SelectItem value="Oversized">Oversized</SelectItem>
               <SelectItem value="Sweatshirts">Sweatshirts</SelectItem>
+              {/* </ScrollArea> */}
             </SelectContent>
           </Select>
         </div>
@@ -277,13 +303,15 @@ const Add = ({ token }) => {
             <SelectTrigger>
               <SelectValue placeholder="Select tag" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="max-h-[150px]">
+            {/* <ScrollArea className="max-h-[150px]"> */}
               <SelectItem value="New Arrival">New Arrival</SelectItem>
               <SelectItem value="Limited Edition">Limited Edition</SelectItem>
               <SelectItem value="Trending">Trending</SelectItem>
               <SelectItem value="Best Seller">Best Seller</SelectItem>
               <SelectItem value="Express Shipping">Express Shipping</SelectItem>
               <SelectItem value="Back in Stock">Back in Stock</SelectItem>
+              {/* </ScrollArea> */}
             </SelectContent>
           </Select>
         </div>
@@ -315,7 +343,8 @@ const Add = ({ token }) => {
       {/* SIZES */}
       <div className="w-full">
         <p className="mb-2">Product Sizes</p>
-        <div className="flex gap-3 overflow-scroll">
+        <ScrollArea >
+        <div className="flex gap-3">
           <div
             onClick={() =>
               setSizes((prev) =>
@@ -440,6 +469,8 @@ const Add = ({ token }) => {
             </p>
           </div>
         </div>
+        <ScrollBar orientation="horizontal" />
+        </ScrollArea>
       </div>
 
       <div className="flex items-center gap-2 mt-2">

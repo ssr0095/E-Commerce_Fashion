@@ -5,6 +5,7 @@ import {
   adminLogin,
   applyCoupon,
   getUserInfo,
+  refreshToken,
 } from "../controllers/userController.js";
 import authUser from "../middleware/auth.js";
 
@@ -15,5 +16,6 @@ userRouter.post("/login", loginUser);
 userRouter.post("/admin", adminLogin);
 userRouter.post("/verifyCode", authUser, applyCoupon);
 userRouter.post("/userInfo", authUser, getUserInfo);
+userRouter.post('/refresh', refreshToken);
 
 export default userRouter;

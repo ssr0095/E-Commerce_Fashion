@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { ShopContext } from "../context/ShopContext";
-import { assets, categoryList, subCategoryList } from "../assets/assets";
+// import { assets } from "../assets/assets";
 import Title from "../components/Title";
 import ProductItem from "../components/ProductItem";
 import SmallNavBar from "../components/SmallNavBar";
@@ -22,9 +22,15 @@ const Collection = () => {
   const [filterProducts, setFilterProducts] = useState([]);
   const [category, setCategory] = useState([]);
   const [subCategory, setSubCategory] = useState([]);
+  const [theme, setTheme] = useState([]); // New state for theme filter
   const [sortType, setSortType] = useState("relavent");
   const [page, setPage] = useState(2);
   const [loading, setLoading] = useState(false);
+
+  // Extract unique themes from products
+  const themeList = [...new Set(products.map(product => product.theme))].filter(Boolean);
+  const categoryList = [...new Set(products.map(product => product.category))].filter(Boolean);
+  const subCategoryList = [...new Set(products.map(product => product.subCategory))].filter(Boolean);
 
   const toggleCategory = (e) => {
     const { value } = e.target;
@@ -44,9 +50,19 @@ const Collection = () => {
     );
   };
 
+  const toggleTheme = (e) => { // New handler for theme filter
+    const { value } = e.target;
+    setTheme((prev) =>
+      prev.includes(value)
+        ? prev.filter((item) => item !== value)
+        : [...prev, value]
+    );
+  };
+
   const clearFilters = () => {
     setCategory([]);
     setSubCategory([]);
+    setTheme([]); // Clear theme filters too
     setSortType("relavent");
   };
 
@@ -55,7 +71,7 @@ const Collection = () => {
 
     if (showSearch && search) {
       const query = search.toLowerCase().trim();
-      const regex = new RegExp(`\\b${query}\\b`, "i"); // word boundary match, case-insensitive
+      const regex = new RegExp(`\\b${query}\\b`, "i");
 
       productsCopy = productsCopy.filter(
         (item) =>
@@ -81,6 +97,12 @@ const Collection = () => {
       );
     }
 
+    if (theme.length > 0) { // New theme filter condition
+      productsCopy = productsCopy.filter((item) =>
+        theme.includes(item.theme)
+      );
+    }
+
     setFilterProducts(productsCopy);
   };
 
@@ -101,7 +123,7 @@ const Collection = () => {
 
   useEffect(() => {
     applyFilter();
-  }, [category, subCategory, search, showSearch, products]);
+  }, [category, subCategory, theme, search, showSearch, products]); // Added theme to dependencies
 
   useEffect(() => {
     sortProduct();
@@ -124,7 +146,7 @@ const Collection = () => {
         <div className="min-w-60 px-4">
           <div className="my-2 text-xl flex items-center justify-between max-sm:cursor-pointer">
             <div
-              className=" flex items-center gap-2"
+              className="flex items-center gap-2"
               onClick={() => setShowFilter(!showFilter)}
             >
               FILTERS
@@ -140,12 +162,13 @@ const Collection = () => {
               </Button>
             </div>
           </div>
+          
           <div
             className={`border border-gray-300 pl-5 py-3 mt-6 ${
               showFilter ? "" : "hidden"
             } sm:block`}
           >
-            <p className="mb-3 text-sm font-medium">CATEGORIES</p>
+            <p className="mb-3 text-sm font-medium">CATEGORY</p>
             <div className="flex flex-col gap-2 text-sm font-light text-gray-700">
               {categoryList.map((cat) => (
                 <label className="flex gap-2" key={cat}>
@@ -161,6 +184,7 @@ const Collection = () => {
               ))}
             </div>
           </div>
+          
           <div
             className={`border border-gray-300 px-4 pl-5 py-3 my-5 ${
               showFilter ? "" : "hidden"
@@ -182,6 +206,31 @@ const Collection = () => {
               ))}
             </div>
           </div>
+          
+          {/* New Theme Filter Section */}
+          {themeList.length > 0 && (
+            <div
+              className={`border border-gray-300 px-4 pl-5 py-3 my-5 ${
+                showFilter ? "" : "hidden"
+              } sm:block`}
+            >
+              <p className="mb-3 text-sm font-medium">THEME</p>
+              <div className="flex flex-col gap-2 text-sm font-light text-gray-700">
+                {themeList.map((themeItem) => (
+                  <label className="flex gap-2" key={themeItem}>
+                    <input
+                      className="w-3"
+                      type="checkbox"
+                      value={themeItem}
+                      checked={theme.includes(themeItem)}
+                      onChange={toggleTheme}
+                    />
+                    {themeItem}
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
 
           <Button
             onClick={clearFilters}
