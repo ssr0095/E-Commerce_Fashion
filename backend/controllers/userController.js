@@ -4,34 +4,65 @@ import jwt from "jsonwebtoken";
 import userModel from "../models/userModel.js";
 
 const createToken = (id) => {
-  return jwt.sign(
-    { id }, 
-    process.env.JWT_SECRET,
-    { expiresIn: '1h' } // Token expires in 1 hour
-  );
+  try {
+    return jwt.sign(
+      { id },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" } // Token expires in 1 hour
+    );
+  } catch (error) {
+    console.error("Token creation error:", error);
+    throw new Error("Failed to create authentication token");
+  }
 };
 
 const createRefreshToken = (id) => {
-  return jwt.sign(
-    { id },
-    process.env.JWT_REFRESH_SECRET,
-    { expiresIn: '7d' } // Refresh token lasts 7 days
-  );
+  try {
+    return jwt.sign(
+      { id },
+      process.env.JWT_REFRESH_SECRET,
+      { expiresIn: "7d" } // Refresh token lasts 7 days
+    );
+  } catch (error) {
+    console.error("Refresh token creation error:", error);
+    throw new Error("Failed to create refresh token");
+  }
 };
 
 const refreshToken = async (req, res) => {
   try {
     const { refreshToken } = req.body;
-    if (!refreshToken) return res.status(400).json({ success: false, message: "Refresh token required" });
+
+    if (!refreshToken) {
+      return res.status(400).json({
+        success: false,
+        message: "Refresh token required",
+      });
+    }
 
     const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
     const newToken = createToken(decoded.id);
     const newRefreshToken = createRefreshToken(decoded.id);
-    
-    res.json({ success: true, token: newToken, refreshToken: newRefreshToken });
+
+    res.json({
+      success: true,
+      token: newToken,
+      refreshToken: newRefreshToken,
+    });
   } catch (error) {
-    console.log(error)
-    res.status(401).json({ success: false, message: "Invalid refresh token" });
+    console.error("Refresh token error:", error);
+
+    if (error.name === "TokenExpiredError") {
+      return res.status(401).json({
+        success: false,
+        message: "Refresh token expired. Please login again.",
+      });
+    }
+
+    res.status(401).json({
+      success: false,
+      message: "Invalid refresh token",
+    });
   }
 };
 
@@ -40,28 +71,52 @@ const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await userModel.findOne({ email });
+    // Basic validation
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and password are required",
+      });
+    }
+
+    const user = await userModel.findOne({ email }).select("+password");
 
     if (!user) {
-      return res.json({ success: false, message: "User doesn't exists" });
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
 
-    if (isMatch) {
-      const token = createToken(user._id);
-      const refreshToken = createRefreshToken(user._id);
-      res.json({ 
-        success: true, 
-        token,
-        refreshToken 
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid credentials",
       });
-    } else {
-      res.json({ success: false, message: "Invalid credentials" });
     }
+
+    // Generate tokens
+    const token = createToken(user._id);
+    const refreshToken = createRefreshToken(user._id);
+
+    res.json({
+      success: true,
+      token,
+      refreshToken,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+      },
+    });
   } catch (error) {
-    console.log(error);
-    res.json({ success: false, message: error.message });
+    console.error("Login error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Login failed",
+    });
   }
 };
 
@@ -70,30 +125,44 @@ const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
-    // checking user already exists or not
-    const exists = await userModel.findOne({ email });
-    if (exists) {
-      return res.json({ success: false, message: "User already exists" });
+    // Input validation
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required",
+      });
     }
 
-    // validating email format & strong password
+    // Validate email format
     if (!validator.isEmail(email)) {
-      return res.json({
+      return res.status(400).json({
         success: false,
         message: "Please enter a valid email",
       });
     }
+
+    // Password strength check
     if (password.length < 8) {
-      return res.json({
+      return res.status(400).json({
         success: false,
-        message: "Please enter a strong password",
+        message: "Password must be at least 8 characters",
       });
     }
 
-    // hashing user password
+    // Check if user exists
+    const exists = await userModel.findOne({ email });
+    if (exists) {
+      return res.status(409).json({
+        success: false,
+        message: "User already exists",
+      });
+    }
+
+    // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
+    // Create user
     const newUser = new userModel({
       name,
       email,
@@ -102,12 +171,26 @@ const registerUser = async (req, res) => {
 
     const user = await newUser.save();
 
+    // Generate tokens
     const token = createToken(user._id);
     const refreshToken = createRefreshToken(user._id);
-    res.json({ success: true, token, refreshToken });
+
+    res.status(201).json({
+      success: true,
+      token,
+      refreshToken,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+      },
+    });
   } catch (error) {
-    console.log(error);
-    res.json({ success: false, message: error.message });
+    console.error("Registration error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Registration failed",
+    });
   }
 };
 
@@ -116,33 +199,57 @@ const adminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    if (
-      email === process.env.ADMIN_EMAIL &&
-      password === process.env.ADMIN_PASSWORD
-    ) {
-      const token = createToken(process.env.ADMIN_ID);
-      res.json({ success: true, token });
-    } else {
-      res.json({ success: false, message: "Invalid credentials" });
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and password are required",
+      });
     }
+
+    if (
+      email !== process.env.ADMIN_EMAIL ||
+      password !== process.env.ADMIN_PASSWORD
+    ) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid admin credentials",
+      });
+    }
+
+    const token = createToken(process.env.ADMIN_ID);
+    res.json({
+      success: true,
+      token,
+      isAdmin: true,
+    });
   } catch (error) {
-    console.log(error);
-    res.json({ success: false, message: error.message });
+    console.error("Admin login error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Admin login failed",
+    });
   }
 };
 
 // Apply Coupon on New User's First Order
 const applyCoupon = async (req, res) => {
-  const userId = req.user.id;
-  const { couponCode } = req.body;
-
   try {
+    const userId = req.user.id;
+    const { couponCode } = req.body;
+
+    if (!couponCode) {
+      return res.status(400).json({
+        success: false,
+        message: "Coupon code is required",
+      });
+    }
+
     const user = await userModel.findById(userId);
 
     if (user?.has_placed_first_order) {
-      return res.json({
+      return res.status(403).json({
         success: false,
-        message: "Coupon is only applicable on first orders.",
+        message: "Coupon is only applicable on first orders",
       });
     }
 
@@ -150,7 +257,7 @@ const applyCoupon = async (req, res) => {
       return res.json({
         success: true,
         message: "Coupon applied",
-        // discount: 10,
+        discount: process.env.FIRST_ORDER_DISCOUNT || 10,
       });
     }
 
@@ -160,45 +267,73 @@ const applyCoupon = async (req, res) => {
     });
 
     if (!couponOwner) {
-      return res.json({
+      return res.status(404).json({
         success: false,
-        message: "Invalid or expired coupon.",
+        message: "Invalid or expired coupon",
       });
     }
 
-    return res.json({ success: true, message: "Coupon applied" });
-  } catch (error) {
-    console.log(error);
-    return res.json({ success: false, message: error.message });
-  }
-};
-
-const getUserInfo = async (req, res) => {
-  const userId = req.user.id;
-  // console.log(userId);
-
-  try {
-    const resp = await userModel.findById(userId);
-
-    // console.log(resp);
-    if (!resp) {
-      return res.json({
-        success: false,
-        message: "User not fount",
-      });
-    }
-    res.json({
+    return res.json({
       success: true,
-      name: resp.name,
-      email: resp.email,
-      coupon: resp.coupon,
-      isCouponActive: resp.isCouponActive,
-      paymentScreenshot: resp.paymentScreenshot,
+      message: "Coupon applied",
+      discount: couponOwner.couponDiscount || 10,
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: error.message });
+    console.error("Coupon application error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to apply coupon",
+    });
   }
 };
 
-export { loginUser, registerUser, adminLogin, applyCoupon, getUserInfo,refreshToken };
+// controllers/userController.js
+const getUserInfo = async (req, res) => {
+  try {
+    const user = await userModel
+      .findById(req.user.id)
+      .select("name email coupon isCouponActive cartData")
+      .lean();
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Calculate cart count
+    const cartCount = user.cartData
+      ? Object.values(user.cartData).reduce(
+          (total, sizes) =>
+            total + Object.values(sizes).reduce((sum, qty) => sum + qty, 0),
+          0
+        )
+      : 0;
+
+    res.json({
+      success: true,
+      name: user.name,
+      email: user.email,
+      coupon: user.coupon,
+      cartCount,
+      isCouponActive: user.isCouponActive,
+    });
+  } catch (error) {
+    console.error("User info error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export {
+  loginUser,
+  registerUser,
+  adminLogin,
+  applyCoupon,
+  getUserInfo,
+  createRefreshToken,
+  refreshToken,
+};

@@ -89,11 +89,11 @@ const ProductItem = ({
 };
 
 export const CategoryItem = ({ name, image }) => {
-  const { setSearch, setShowSearch, navigate } = useContext(ShopContext);
+  const { setSearchQuery, toggleSearch, navigate } = useContext(ShopContext);
 
   const toMove = (val) => {
-    setShowSearch(true);
-    setSearch(val);
+    toggleSearch(true);
+    setSearchQuery(val);
     navigate("/collection");
   };
 

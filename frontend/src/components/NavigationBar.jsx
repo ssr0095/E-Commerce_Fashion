@@ -3,7 +3,7 @@ import { useContext } from "react";
 import { ShopContext } from "../context/ShopContext";
 
 const NavigationBar = () => {
-  const { setSearch, setShowSearch, navigate } = useContext(ShopContext);
+  const { setSearchQuery, toggleSearch, navigate } = useContext(ShopContext);
 
   const NavItems = [
     "Men",
@@ -18,8 +18,8 @@ const NavigationBar = () => {
   ];
 
   const toMove = (val) => {
-    setShowSearch(true);
-    setSearch(val);
+    toggleSearch(true);
+    setSearchQuery(val);
     navigate("/collection");
   };
   return (

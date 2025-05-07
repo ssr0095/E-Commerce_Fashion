@@ -106,7 +106,7 @@ const List = ({ token }) => {
             key={index}
           >
             <img
-              className="size-12"
+              className="w-12 aspect-[3/4]"
               width={48}
               height={48}
               src={item.image[0]}

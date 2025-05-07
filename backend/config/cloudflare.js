@@ -26,7 +26,7 @@ export const uploadToR2 = async (buffer, fileName, mimetype) => {
       ContentType: mimetype,
     })
   );
-  
+
   // Public URL format: https://<bucket>.<account-id>.r2.dev/filename.jpg
   return `https://${process.env.R2_BUCKET_NAME}.${process.env.R2_ACCOUNT_ID}.r2.dev/${fileName}`;
 };

@@ -18,7 +18,6 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuShortcut,
 } from "@/components/ui/dropdown-menu";
 
 const navItems = [
@@ -38,47 +37,22 @@ const navItems = [
 
 const Navbar = () => {
   const [visible, setVisible] = useState(false);
-  const [user, setUser] = useState(false);
-
   const {
     setShowSearch,
-    getCartCount,
+    cartCount,
     navigate,
     token,
-    setToken,
-    setCartItems,
-    userInfo,
+    logout,
+    user,
+    whatsappNumber,
   } = useContext(ShopContext);
-
-  const logout = () => {
-    navigate("/login");
-    localStorage.removeItem("token");
-    setToken("");
-    setCartItems({});
-  };
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      const fetchedUser = await userInfo();
-      setUser(fetchedUser?.data);
-    };
-
-    fetchUser();
-  }, [userInfo]);
 
   const handleCloseSidebar = () => setVisible(false);
 
   return (
     <>
-      {/* BANNER */}
-      {/* <Banner /> */}
-      <div className="w-full flex items-center justify-center text-white bg-black py-3 px-4 ">
-        {/* <p>
-          Special offer |{" "}
-          <a href="#" className="font-bold underline">
-            Sale
-          </a>
-        </p> */}
+      {/* Promo Banner */}
+      <div className="w-full flex items-center justify-center text-white bg-black py-3 px-4">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-white">
           <p className="max-sm:text-xs text-sm/6">
             <span className="max-sm:hidden">
@@ -106,79 +80,67 @@ const Navbar = () => {
         </div>
       </div>
 
+      {/* Main Navigation */}
       <header className="sticky top-0 left-0 flex w-full items-center justify-center px-5 py-3 sm:px-10 backdrop-blur-xl z-40">
         <nav className="screen-max-width flex w-full">
-          <Link to="/">
+          <Link to="/" aria-label="Home">
             <img
               src={assets.logo}
               className="w-24"
-              alt="logo"
+              alt="Cousins Fashion"
               width={96}
               height={18}
+              loading="lazy"
             />
           </Link>
-          {/* NAVIGATION */}
+
+          {/* Desktop Navigation */}
           <div className="flex w-full flex-1 items-center justify-center max-md:hidden">
-            <NavLink
-              to="/"
-              className="cursor-pointer px-5 text-sm text-gray transition-all hover:scale-105"
-            >
-              HOME
-              <hr className="w-2/4 border-none h-[1.5px] bg-gray-700 hidden" />
-            </NavLink>
-            <NavLink
-              to="/collection"
-              className="cursor-pointer px-5 text-sm text-gray transition-all hover:scale-105"
-            >
-              COLLECTION
-              <hr className="w-2/4 border-none h-[1.5px] bg-gray-700 hidden" />
-            </NavLink>
-            <NavLink
-              to="/customize"
-              className="cursor-pointer px-5 text-sm text-gray transition-all hover:scale-105"
-            >
-              CUSTOMIZE
-              <hr className="w-2/4 border-none h-[1.5px] bg-gray-700 hidden" />
-            </NavLink>
-            <NavLink
-              to="/about"
-              className="cursor-pointer px-5 text-sm text-gray transition-all hover:scale-105"
-            >
-              ABOUT
-              <hr className="w-2/4 border-none h-[1.5px] bg-gray-700 hidden" />
-            </NavLink>
+            {navItems.map((item) => (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                className={({ isActive }) =>
+                  `cursor-pointer px-5 text-sm transition-all hover:scale-105 ${
+                    isActive ? "text-black font-medium" : "text-gray-600"
+                  }`
+                }
+              >
+                {item.name}
+              </NavLink>
+            ))}
           </div>
 
-          {/* icon nav */}
+          {/* Mobile Icons */}
           <div className="flex items-center gap-7 max-md:flex-1 max-md:justify-end">
-            <img
+            <button
               onClick={() => {
                 setShowSearch(true);
                 navigate("/collection");
               }}
-              src={assets.search_icon}
-              className="w-5 cursor-pointer"
-              alt="search"
-            />
+              aria-label="Search"
+            >
+              <img
+                src={assets.search_icon}
+                className="w-5 cursor-pointer"
+                alt="Search"
+                loading="lazy"
+              />
+            </button>
+
+            {/* Profile Dropdown */}
             <div className="group relative shrink-0">
-              {!token && (
-                <img
-                  onClick={() => navigate("/login")}
-                  className="w-[17px] cursor-pointer"
-                  src={assets.profile_icon}
-                  alt="profile"
-                />
-              )}
-              {/* Dropdown Menu */}
-              {token && (
+              {token ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <img
-                      onClick={() => (token ? null : navigate("/login"))}
-                      className="w-[17px] cursor-pointer"
-                      src={assets.profile_icon}
-                      alt="profile"
-                    />
+                    <button aria-label="Account menu">
+                      <img
+                        className="w-[17px] cursor-pointer"
+                        src={assets.profile_icon}
+                        alt="Profile"
+                        // loading="lazy"
+                      />
+                    </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56">
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
@@ -187,7 +149,7 @@ const Navbar = () => {
                       <DropdownMenuItem disabled>
                         <div className="grid flex-1 text-left text-sm leading-tight">
                           <span className="truncate font-semibold">
-                            @{user?.name}
+                            {user?.name}
                           </span>
                           <span className="text-muted-foreground truncate text-xs">
                             {user?.email}
@@ -195,13 +157,14 @@ const Navbar = () => {
                         </div>
                       </DropdownMenuItem>
                       <DropdownMenuItem>
-                        My coupon: {!user ? "--" : user.coupon}
-                        <DropdownMenuShortcut
-                          className="px-2 py-1 rounded-md text-xs text-gray-600 hover:bg-gray-200 active:bg-gray-300 cursor-pointer"
+                        My coupon: {user?.coupon || "--"}
+                        <button
+                          className="ml-2 p-1 rounded-md text-xs text-gray-600 hover:bg-gray-200"
                           onClick={async () =>
-                            user &&
-                            (await navigator.clipboard.writeText(user?.coupon))
+                            user?.coupon &&
+                            navigator.clipboard.writeText(user.coupon)
                           }
+                          aria-label="Copy coupon code"
                         >
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -213,7 +176,6 @@ const Navbar = () => {
                             strokeWidth="2"
                             strokeLinecap="round"
                             strokeLinejoin="round"
-                            className="lucide lucide-copy"
                           >
                             <rect
                               width="14"
@@ -225,80 +187,112 @@ const Navbar = () => {
                             />
                             <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
                           </svg>
-                        </DropdownMenuShortcut>
+                        </button>
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => navigate("/orders")}>
                         My orders
-                        {/* <DropdownMenuShortcut>⌘B</DropdownMenuShortcut> */}
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={logout}>
                         Log out
-                        {/* <DropdownMenuShortcut>⌘S</DropdownMenuShortcut> */}
                       </DropdownMenuItem>
                     </DropdownMenuGroup>
                   </DropdownMenuContent>
                 </DropdownMenu>
+              ) : (
+                <button onClick={() => navigate("/login")} aria-label="Login">
+                  <img
+                    className="w-[17px] cursor-pointer"
+                    src={assets.profile_icon}
+                    alt="Login"
+                    loading="lazy"
+                  />
+                </button>
               )}
             </div>
-            <Link to="/cart" className="relative">
-              <img src={assets.cart_icon} className="w-5 min-w-5" alt="cart" />
-              <p className="absolute right-[-5px] bottom-[-5px] w-4 text-center leading-4 bg-black text-white aspect-square rounded-full text-[8px]">
-                {getCartCount()}
-              </p>
+
+            {/* Cart */}
+            <Link to="/cart" className="relative" aria-label="Cart">
+              <img
+                src={assets.cart_icon}
+                className="w-5 min-w-5"
+                alt="Cart"
+                loading="lazy"
+              />
+              {cartCount > 0 && (
+                <span className="absolute right-[-5px] bottom-[-5px] w-4 text-center leading-4 bg-black text-white aspect-square rounded-full text-[8px]">
+                  {cartCount}
+                </span>
+              )}
             </Link>
+
+            {/* WhatsApp */}
             <Link
-              to="https://wa.me/8248586654?text=Hey!%20I%20saw%20your%20collection%20and%20loved%20it.%20Can%20you%20help%20me%20with%20sizes%20and%20pricing?"
-              target="_black"
+              to={`https://wa.me/${whatsappNumber}?text=Hey!%20I%20saw%20your%20collection%20and%20loved%20it.`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="shrink-0 max-md:hidden"
+              aria-label="Contact on WhatsApp"
             >
               <img
                 src={assets.whatsapp_icon_02}
                 className="w-7"
-                alt="whatsapp"
+                alt="WhatsApp"
+                loading="lazy"
               />
             </Link>
-            <AlignRight
+
+            {/* Mobile Menu Button */}
+            <button
               onClick={() => setVisible(true)}
-              className="w-6 cursor-pointer md:hidden"
-            />
+              className="md:hidden"
+              aria-label="Open menu"
+            >
+              <AlignRight className="w-6 cursor-pointer" />
+            </button>
           </div>
         </nav>
       </header>
 
-      {/* Sidebar menu for small screens */}
+      {/* Mobile Sidebar */}
       <div
-        className={`fixed top-0 right-0 h-full w-full bg-white z-50 transition-transform duration-300 ease-in-out transform ${
+        className={`fixed top-0 right-0 h-full w-full bg-white z-50 transition-transform duration-300 ease-in-out ${
           visible ? "translate-x-0" : "translate-x-full"
         }`}
+        aria-hidden={!visible}
       >
         <div className="p-4 flex flex-col gap-3 text-gray-800">
-          <div
+          <button
             className="flex items-center gap-3 cursor-pointer"
             onClick={handleCloseSidebar}
+            aria-label="Close menu"
           >
             <ArrowLeft className="w-5" />
             <span>Back</span>
-          </div>
+          </button>
           {navItems.map((item) => (
             <NavLink
               key={item.name}
               to={item.path}
               onClick={handleCloseSidebar}
-              className="flex items-center justify-start gap-4 py-2 pl-4 border-b"
+              className={({ isActive }) =>
+                `flex items-center justify-start gap-4 py-2 pl-4 border-b ${
+                  isActive ? "text-black font-medium" : "text-gray-600"
+                }`
+              }
             >
               {item.icon}
               {item.name}
             </NavLink>
           ))}
           <Link
-            to="https://wa.me/8248586654?text=Hey!%20I%20saw%20your%20collection%20and%20loved%20it."
+            to={`https://wa.me/${whatsappNumber}?text=Hey!%20I%20saw%20your%20collection%20and%20loved%20it.`}
             target="_blank"
             rel="noopener noreferrer"
             onClick={handleCloseSidebar}
             className="flex items-center justify-start gap-4 py-2 pl-4 border-b"
           >
-            <img src={assets.whatsapp_icon_02} className="w-6" alt="whatsapp" />
+            <img src={assets.whatsapp_icon_02} className="w-6" alt="WhatsApp" />
             WHATSAPP
           </Link>
         </div>
