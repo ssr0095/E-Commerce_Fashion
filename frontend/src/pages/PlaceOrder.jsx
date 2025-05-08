@@ -101,7 +101,7 @@ const PlaceOrder = () => {
       let orderData = {
         address: formData,
         items: orderItems,
-        amount: getCartAmount() + delivery_fee - discount,
+        amount: getCartAmount() + delivery_fee - Math.round((getCartAmount() * discount) / 100),
       };
 
       switch (method) {
@@ -174,7 +174,7 @@ const PlaceOrder = () => {
           break;
       }
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       toast.error(error.message);
     }
   };

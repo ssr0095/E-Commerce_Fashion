@@ -5,6 +5,8 @@ import {Trash2} from "lucide-react"
 import CartTotal from "../components/CartTotal";
 import { toast } from "react-toastify";
 import SmallNavBar from "../components/SmallNavBar";
+import { Input } from "../components/ui/input";
+import { Button } from "../components/ui/button";
 
 const Cart = () => {
   const {
@@ -35,7 +37,9 @@ const Cart = () => {
 
     const discountValue = await verifyDiscountCode(couponCode);
     if (discountValue > 0) {
-      setCouponCode(""); // Clear input on success
+      setCouponCode("");
+      setDiscount(0);
+    
     }
   };
 
@@ -43,6 +47,16 @@ const Cart = () => {
     setDiscount(0);
     toast.info("Discount removed");
   };
+
+  const onSubmitHandler = () => {
+    if (getCartAmount() < 1) {
+      toast.error("No items added");
+    } else if (!token) {
+      navigate("/login");
+    } else {
+      navigate("/place-order");
+    }
+  }
 
   useEffect(() => {
     const allProducts = [...products, ...customizableProducts];
@@ -105,7 +119,7 @@ const Cart = () => {
                     </div>
                   </div>
                 </div>
-                <input
+                <Input
                   onChange={(e) =>
                     e.target.value === "" || e.target.value === "0"
                       ? null
@@ -132,34 +146,35 @@ const Cart = () => {
 
         <div className="flex justify-between gap-10 my-20 flex-col lg:flex-row">
           <form onSubmit={applyCoupon} className="flex gap-2">
-            <input
+            <Input
               type="text"
               value={couponCode}
               onChange={(e) => setCouponCode(e.target.value)}
               placeholder="Enter coupon code"
-              className="flex-1 px-4 py-2 border rounded-md"
+              className="flex-1 max-w-sm border border-gray-300 rounded-none"
               disabled={applyingDiscount || discount > 0}
             />
             {discount > 0 ? (
-              <button
+              <Button
                 type="button"
                 onClick={removeDiscount}
-                className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+                className="bg-red-500 text-white rounded-none hover:bg-red-600"
               >
                 Remove
-              </button>
+              </Button>
             ) : (
-              <button
+              <Button
                 type="submit"
+                variant={"default"}
                 disabled={applyingDiscount || !couponCode.trim()}
-                className={`px-4 py-2 rounded-md ${
+                className={`rounded-none ${
                   applyingDiscount || !couponCode.trim()
-                    ? "bg-gray-300 cursor-not-allowed"
+                    ? "cursor-not-allowed"
                     : "bg-green-500 text-white hover:bg-green-600"
                 }`}
               >
                 {applyingDiscount ? "Applying..." : "Apply"}
-              </button>
+              </Button>
             )}
           </form>
           {discount > 0 && (
@@ -171,20 +186,12 @@ const Cart = () => {
       <div className="w-full">
       <CartTotal />
       <div className=" w-full text-end">
-        <button
-          onClick={() => {
-            if (getCartAmount() < 1) {
-              toast.error("No items added");
-            } else if (!token) {
-              navigate("/login");
-            } else {
-              navigate("/place-order");
-            }
-          }}
-          className="bg-gray-950 text-white shadow-sm outline-none duration-75 hover:bg-gray-800  active:bg-gray-900 my-8 px-8 w-full sm:w-fit py-3"
+        <Button
+          onClick={onSubmitHandler}
+          className="rounded-none my-8 px-8 w-full sm:w-fit py-3"
         >
           PROCEED TO CHECKOUT
-        </button>
+        </Button>
       </div>
         </div>
     </div>

@@ -1,13 +1,17 @@
 import logo from "./logos/logo.png";
 import cart_icon from "./cart_icon.png";
+import about_img from "./about_img.jpg";
 import profile_icon from "./profile_icon.png";
 import search_icon from "./search_icon.png";
 import star_dull_icon from "./star_dull_icon.png";
 import star_icon from "./star_icon.png";
+import cross_icon from "./cross_icon.png";
+import googlepay_logo from "./googlepay_logo.svg";
 import razorpay_logo from "./razorpay_logo.png";
 import stripe_logo from "./stripe_logo.png";
 import upload_area from "./upload_area.png";
 import process_icon from "./process_icon.png";
+import ok_icon from "./ok_icon.png";
 import right_icon from "./right_icon.png";
 import round_icon from "./round_icon.svg";
 import whatsapp_icon_01 from "./whatsapp_icon_01.png";
@@ -20,10 +24,14 @@ import bg_03 from "./anime/bg_03.jpg";
 export const assets = {
   logo,
   cart_icon,
+  about_img,
   profile_icon,
   search_icon,
   star_dull_icon,
   star_icon,
+  ok_icon,
+  cross_icon,
+  googlepay_logo,
   razorpay_logo,
   stripe_logo,
   process_icon,

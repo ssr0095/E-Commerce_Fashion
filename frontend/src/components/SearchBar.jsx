@@ -74,6 +74,7 @@ const SearchBar = () => {
         className="inline p-1 cursor-pointer"
         aria-label="Close search"
       >
+        {/* <X className="w-6 text-gray-500" /> */}
         <img 
           className="w-3" 
           src={assets.cross_icon} 

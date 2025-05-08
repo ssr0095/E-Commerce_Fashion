@@ -413,24 +413,6 @@ const ShopContextProvider = ({ children }) => {
     [backendUrl, updateCart]
   );
 
-  const isDiscount = async (couponCode) => {
-    try {
-      const res = await axios.post(
-        `${backendUrl}/api/user/verifyCode`,
-        { couponCode },
-        { headers: { token } }
-      );
-      if (res.data.success) {
-        const dis = import.meta.env.VITE_DISCOUNT;
-        setDiscount(dis);
-        return dis;
-      }
-      return res.data.message;
-    } catch (error) {
-      toast.error(error?.response?.data?.message || "Invalid discount code");
-    }
-  };
-
   // Helper functions
   const mergeProducts = (existing, newItems) => {
     const existingIds = new Set(existing.map((p) => p._id));
