@@ -16,6 +16,10 @@ const productSchema = new mongoose.Schema({
   date: { type: Number, required: true },
 });
 
+// In your product model schema
+productSchema.index({ date: -1 }); // For faster sorting
+productSchema.index({ customizable: 1 }); // For custom product queries
+
 const productModel =
   mongoose.models.product || mongoose.model("product", productSchema);
 

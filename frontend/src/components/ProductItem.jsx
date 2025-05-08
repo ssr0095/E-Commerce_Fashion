@@ -105,7 +105,9 @@ export const CategoryItem = ({ name, image }) => {
     >
       <div className="overflow-hidden flex items-center">
         <img
-          className="w-full hover:scale-105 transition ease-in-out duration-500"
+          className="w-full aspect-[3/4] hover:scale-105 transition ease-in-out duration-500"
+          width={200}
+          height={300}
           src={image}
           alt={name}
         />

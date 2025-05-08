@@ -17,7 +17,7 @@ const PlaceOrder = () => {
     backendUrl,
     token,
     cartItems,
-    setCartItems,
+    clearCart,
     getCartAmount,
     delivery_fee,
     products,
@@ -118,7 +118,7 @@ const PlaceOrder = () => {
             { headers: { token } }
           );
           if (responseGooglePay.data.success) {
-            setCartItems({});
+            clearCart();
             navigate(`/payment/${responseGooglePay.data.orderId}`);
           } else {
             toast.error(responseGooglePay.data.message);

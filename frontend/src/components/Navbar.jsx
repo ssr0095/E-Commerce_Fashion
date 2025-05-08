@@ -38,7 +38,7 @@ const navItems = [
 const Navbar = () => {
   const [visible, setVisible] = useState(false);
   const {
-    setShowSearch,
+    toggleSearch,
     cartCount,
     navigate,
     token,
@@ -111,11 +111,11 @@ const Navbar = () => {
             ))}
           </div>
 
-          {/* Mobile Icons */}
-          <div className="flex items-center gap-7 max-md:flex-1 max-md:justify-end">
+          {/* Nav Icons */}
+          <div className="flex items-center gap-6 sm:gap-7 max-md:flex-1 max-md:justify-end">
             <button
               onClick={() => {
-                setShowSearch(true);
+                toggleSearch(true);
                 navigate("/collection");
               }}
               aria-label="Search"
@@ -129,7 +129,7 @@ const Navbar = () => {
             </button>
 
             {/* Profile Dropdown */}
-            <div className="group relative shrink-0">
+            <div className="flex items-center group relative shrink-0">
               {token ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -290,7 +290,7 @@ const Navbar = () => {
             target="_blank"
             rel="noopener noreferrer"
             onClick={handleCloseSidebar}
-            className="flex items-center justify-start gap-4 py-2 pl-4 border-b"
+            className="flex items-center justify-start gap-4 py-2 pl-4 border-b  text-gray-600"
           >
             <img src={assets.whatsapp_icon_02} className="w-6" alt="WhatsApp" />
             WHATSAPP

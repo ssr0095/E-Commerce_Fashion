@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { ShopContext } from "../context/ShopContext";
 import Title from "../components/Title";
-import { assets } from "../assets/assets";
+import {Trash2} from "lucide-react"
 import CartTotal from "../components/CartTotal";
 import { toast } from "react-toastify";
 import SmallNavBar from "../components/SmallNavBar";
@@ -14,37 +14,34 @@ const Cart = () => {
     cartItems,
     updateQuantity,
     navigate,
-    isDiscount,
+    verifyDiscountCode,
     discount,
     setDiscount,
     getCartAmount,
     token,
+    applyingDiscount,
   } = useContext(ShopContext);
+
   const allProducts = [...products, ...customizableProducts];
   const [cartData, setCartData] = useState([]);
   const [couponCode, setCouponCode] = useState("");
 
-  const onChangeHandler = (event) => {
-    const value = event.target.value;
-    setCouponCode(value);
+  const applyCoupon = async (e) => {
+    e.preventDefault();
+    if (!couponCode.trim()) {
+      toast.error("Please enter a coupon code");
+      return;
+    }
+
+    const discountValue = await verifyDiscountCode(couponCode);
+    if (discountValue > 0) {
+      setCouponCode(""); // Clear input on success
+    }
   };
 
-  const isCouponValid = async (e) => {
-    e.preventDefault();
-
-    try {
-      const res = await isDiscount(couponCode);
-
-      if (res > 0) {
-        toast.success("Promo code applied");
-        setDiscount(res);
-      } else {
-        toast.error("Invalid Promo code");
-      }
-    } catch (error) {
-      console.log(error);
-      toast.error(error.message);
-    }
+  const removeDiscount = () => {
+    setDiscount(0);
+    toast.info("Discount removed");
   };
 
   useEffect(() => {
@@ -123,67 +120,75 @@ const Cart = () => {
                   min={1}
                   defaultValue={item?.quantity}
                 />
-                <img
-                  onClick={() => updateQuantity(item?._id, item?.size, 0)}
+                <Trash2 
+                onClick={() => updateQuantity(item?._id, item?.size, 0)}
                   className="w-4 mr-4 sm:w-5 cursor-pointer"
-                  src={assets.bin_icon}
-                  alt="remove"
                 />
               </div>
             );
           })}
         </div>
+        </div>
 
         <div className="flex justify-between gap-10 my-20 flex-col lg:flex-row">
-          <form
-            className="w-full sm:w-[450px] space-y-4"
-            onSubmit={isCouponValid}
-          >
-            <h3 className="text-xl font-semibold text-gray-900">
-              Enter Promo Code
-            </h3>
-            <div className="flex w-full items-center gap-3">
-              <input
-                type="text"
-                placeholder="Enter"
-                className="input"
-                onChange={onChangeHandler}
-                value={couponCode}
-              />
+          <form onSubmit={applyCoupon} className="flex gap-2">
+            <input
+              type="text"
+              value={couponCode}
+              onChange={(e) => setCouponCode(e.target.value)}
+              placeholder="Enter coupon code"
+              className="flex-1 px-4 py-2 border rounded-md"
+              disabled={applyingDiscount || discount > 0}
+            />
+            {discount > 0 ? (
+              <button
+                type="button"
+                onClick={removeDiscount}
+                className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+              >
+                Remove
+              </button>
+            ) : (
               <button
                 type="submit"
-                className={`w-2/6 bg-gray-950 p-2.5 text-white shadow-sm outline-none duration-75 hover:bg-gray-800  active:bg-gray-900 ${
-                  discount > 0 && " cursor-not-allowed"
+                disabled={applyingDiscount || !couponCode.trim()}
+                className={`px-4 py-2 rounded-md ${
+                  applyingDiscount || !couponCode.trim()
+                    ? "bg-gray-300 cursor-not-allowed"
+                    : "bg-green-500 text-white hover:bg-green-600"
                 }`}
-                disabled={discount > 0 ? true : false}
               >
-                Apply
+                {applyingDiscount ? "Applying..." : "Apply"}
               </button>
-            </div>
+            )}
           </form>
-          <div className="w-full sm:w-[450px]">
-            <CartTotal />
-            <div className=" w-full text-end">
-              <button
-                onClick={() => {
-                  if (getCartAmount() < 1) {
-                    toast.error("No items added");
-                  } else if (!token) {
-                    navigate("/login");
-                  } else {
-                    navigate("/place-order");
-                  }
-                }}
-                className="bg-gray-950 text-white shadow-sm outline-none duration-75 hover:bg-gray-800  active:bg-gray-900 my-8 px-8 w-full sm:w-fit py-3"
-              >
-                PROCEED TO CHECKOUT
-              </button>
-            </div>
-          </div>
-        </div>
+          {discount > 0 && (
+          <p className="mt-2 text-green-600">
+            {discount}% discount applied!
+          </p>
+        )}
       </div>
+      <div className="w-full">
+      <CartTotal />
+      <div className=" w-full text-end">
+        <button
+          onClick={() => {
+            if (getCartAmount() < 1) {
+              toast.error("No items added");
+            } else if (!token) {
+              navigate("/login");
+            } else {
+              navigate("/place-order");
+            }
+          }}
+          className="bg-gray-950 text-white shadow-sm outline-none duration-75 hover:bg-gray-800  active:bg-gray-900 my-8 px-8 w-full sm:w-fit py-3"
+        >
+          PROCEED TO CHECKOUT
+        </button>
+      </div>
+        </div>
     </div>
-  );
-};
+  )
+}
 
-export default Cart;
+export default Cart

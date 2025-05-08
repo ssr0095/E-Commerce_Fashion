@@ -15,186 +15,190 @@ import { Button } from "../components/ui/button";
 import imageCompression from "browser-image-compression";
 
 const Payment = () => {
-  const { token, navigate, backendUrl, currency } = useContext(ShopContext);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const [paymentImage, setPaymentImage] = useState(false);
-  const [isPaymentImageUploaded, setIsPaymentImageUploaded] = useState(false);
-  const [order, setOrder] = useState(false);
+  const { token, backendUrl, currency, navigate } = useContext(ShopContext);
   const { orderId } = useParams();
+  
+  const [isLoading, setIsLoading] = useState(false);
+  const [order, setOrder] = useState(null);
   const [quantity, setQuantity] = useState(0);
-
   const [isCustom, setIsCustom] = useState(false);
-  const [designImage, setDesignImage] = useState(false);
+  
+  // Payment image state
+  const [paymentImage, setPaymentImage] = useState(null);
+  const [isPaymentImageUploaded, setIsPaymentImageUploaded] = useState(false);
+  
+  // Design image state
+  const [designImage, setDesignImage] = useState(null);
   const [designDetail, setDesignDetail] = useState("");
-  const [isDesignImageUploaded, setDesignIsImageUploaded] = useState(false);
+  const [isDesignImageUploaded, setIsDesignImageUploaded] = useState(false);
+  
+  // Constants
   const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/avif"];
   const maxSize = 3 * 1024 * 1024; // 3MB
 
   const loadOrderData = async () => {
-    try {
-      if (!token) {
-        return null;
-      }
-      setIsLoading(true);
+    if (!token) {
+      toast.error("Please login to view order");
+      navigate("/login");
+      return;
+    }
 
+    try {
+      setIsLoading(true);
       const response = await axios.post(
-        backendUrl + "/api/order/getuserorder",
+        `${backendUrl}/api/order/getuserorder`,
         { orderId },
         { headers: { token } }
       );
-      setIsLoading(false);
 
       if (response.data.success) {
         const orderData = response.data.order;
         setOrder(orderData);
 
-        // Set quantity
-        orderData.items.forEach((item) => {
-          setQuantity((prev) => prev + item.quantity);
-        });
+        // Calculate total quantity
+        const totalQuantity = orderData.items.reduce(
+          (sum, item) => sum + item.quantity,
+          0
+        );
+        setQuantity(totalQuantity);
 
-        // ✅ Check for customizable items
+        // Check for customizable items
         const hasCustomItem = orderData.items.some(
           (item) => item.customizable === true
         );
         setIsCustom(hasCustomItem);
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.response?.data?.message || "Failed to load order");
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const validateFile = (file, input) => {
+  const validateFile = (file) => {
     if (!allowedTypes.includes(file.type)) {
       toast.error("Only JPG, PNG, AVIF, or WEBP images are allowed.");
-      input.value = "";
       return false;
     }
     if (file.size > maxSize) {
       toast.error("File size must be less than 3MB.");
-      input.value = "";
       return false;
     }
     return true;
   };
 
   const compressImage = async (file) => {
-    const options = { 
-      maxSizeMB: 1,          // Compress to ≤1MB
-      maxWidthOrHeight: 1920 // Resize if needed
-    };
-    return await imageCompression(file, options);
-  };
-
-  const handleFileChange = (e) => {
-    const fileInput = e.target;
-    const file = fileInput.files?.[0];
-    if (!file) return;
-
-    if (!validateFile(file, fileInput)) return;
-
-    setPaymentImage(file);
-  };
-
-  const handleDesinFileChange = (e) => {
-    const fileInput = e.target;
-    const file = fileInput.files?.[0];
-    if (!file) return;
-
-    if (!validateFile(file, fileInput)) return;
-
-    setDesignImage(file);
-  };
-
-  const onSubmitDesignImageHandler = async () => {
-    if (!designImage) return toast.error("Design image not selected");
-    if (!designDetail.trim()) return toast.error("Design detail required");
-
-    setIsLoading(true);
     try {
-      const designFormData = new FormData();
-      designFormData.append("orderId", orderId);
-      designFormData.append("designImage", await compressImage(designImage));
-      designFormData.append("designDetail", designDetail);
+      const options = {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true
+      };
+      return await imageCompression(file, options);
+    } catch (error) {
+      console.error("Image compression error:", error);
+      return file; // Fallback to original if compression fails
+    }
+  };
+
+  const handleFileChange = async (e, setImage) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!validateFile(file)) {
+      e.target.value = ""; // Clear input
+      return;
+    }
+
+    setImage(file);
+  };
+
+  const uploadDesignImage = async () => {
+    if (!designImage) {
+      toast.error("Please select a design image");
+      return false;
+    }
+    if (!designDetail.trim()) {
+      toast.error("Please provide design details");
+      return false;
+    }
+
+    try {
+      setIsLoading(true);
+      const compressedImage = await compressImage(designImage);
+      
+      const formData = new FormData();
+      formData.append("orderId", orderId);
+      formData.append("designImage", compressedImage);
+      formData.append("designDetail", designDetail);
 
       const response = await axios.post(
-        backendUrl + "/api/order/addDesignImage",
-        designFormData,
+        `${backendUrl}/api/order/addDesignImage`,
+        formData,
         { headers: { token } }
       );
 
       if (response.data.success) {
-        setDesignIsImageUploaded(true);
-        toast.success("Design image uploaded");
+        setIsDesignImageUploaded(true);
+        toast.success("Design uploaded successfully");
+        return true;
       } else {
         toast.error(response.data.message);
+        return false;
       }
-    } catch (err) {
-      toast.error(err.message || "Upload failed");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to upload design");
+      return false;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const onSubmitPaymentImageHandler = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    const allowedTypes = [
-      "image/jpeg",
-      "image/png",
-      "image/webp",
-      "image/avif",
-    ];
-
+  const uploadPaymentImage = async () => {
     if (!paymentImage) {
-      setIsLoading(false);
-      return toast.error("Payment screenshot not added");
-    }
-    if (!allowedTypes.includes(file.type)) {
-      alert("Only JPG, PNG, or WEBP images are allowed.");
+      toast.error("Please select a payment screenshot");
       return;
     }
-    if (isCustom) {
-      if (!isDesignImageUploaded) {
-        setIsLoading(false);
-        return toast.error("Design image not selected");
-      }
-      if (!designDetail.trim()) {
-        setIsLoading(false);
-        return toast.error("Design detail required");
-      }
+
+    if (isCustom && !isDesignImageUploaded) {
+      toast.error("Please upload design first");
+      return;
     }
 
     try {
-      const paymentFormData = new FormData();
-      paymentFormData.append("orderId", orderId);
-      paymentFormData.append("paymentImage", paymentImage);
+      setIsLoading(true);
+      const compressedImage = await compressImage(paymentImage);
+      
+      const formData = new FormData();
+      formData.append("orderId", orderId);
+      formData.append("paymentImage", compressedImage);
 
-      const paymentResponse = await axios.post(
-        backendUrl + "/api/order/addPaymentScreenshot",
-        paymentFormData,
+      const response = await axios.post(
+        `${backendUrl}/api/order/addPaymentScreenshot`,
+        formData,
         { headers: { token } }
       );
 
-      if (!paymentResponse.data.success) {
-        setIsLoading(false);
-        return toast.error(paymentResponse.data.message);
+      if (response.data.success) {
+        setIsPaymentImageUploaded(true);
+        toast.success("Payment uploaded successfully");
+      } else {
+        toast.error(response.data.message);
       }
-
-      setIsPaymentImageUploaded(true);
-      toast.success("Payment screenshot uploaded");
-
-      setIsLoading(false);
     } catch (error) {
+      toast.error(error.response?.data?.message || "Payment upload failed");
+    } finally {
       setIsLoading(false);
-      toast.error(error.message || "Something went wrong");
     }
   };
 
   useEffect(() => {
     loadOrderData();
-  }, [token]);
+  }, [token, orderId]);
+
+  if (!order) {
+    return <Loader />;
+  }
 
   return (
     <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
@@ -203,138 +207,164 @@ const Payment = () => {
       <SmallNavBar navs={["Orders", "Payment"]} />
 
       <div className="border-t pt-7">
+        {/* Design Section for Custom Items */}
         {isCustom && (
-          <>
+          <div className="mb-16">
             <div className="text-xl sm:text-2xl my-3">
-              <Title text1={"DESIGN"} text2={"INFORMATION"} />
+              <Title text1="DESIGN" text2="INFORMATION" />
             </div>
-            <div className="w-full max-w-lg flex items-start flex-col gap-3  mb-16">
-              {/* <div className="grid w-full max-w-sm items-center gap-1.5"> */}
-              <Label htmlFor="designImage">Upload design</Label>
+            
+            <div className="w-full max-w-lg flex flex-col gap-3">
+              <div className="space-y-2">
+                <Label htmlFor="designImage">Upload design</Label>
+                <Input
+                  type="file"
+                  accept={allowedTypes.join(",")}
+                  onChange={(e) => handleFileChange(e, setDesignImage)}
+                  id="designImage"
+                  disabled={isDesignImageUploaded}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="designDetail">Detail</Label>
+                <Textarea
+                  value={designDetail}
+                  onChange={(e) => setDesignDetail(e.target.value)}
+                  id="designDetail"
+                  placeholder="Describe your design requirements"
+                  disabled={isDesignImageUploaded}
+                />
+              </div>
+              
+              {!isDesignImageUploaded && (
+                <Button
+                  className="bg-gray-950 hover:bg-gray-800 rounded-none mt-6 w-full sm:w-1/2"
+                  onClick={uploadDesignImage}
+                  disabled={!designImage || !designDetail.trim()}
+                >
+                  Upload Design
+                </Button>
+              )}
+              
+              {isDesignImageUploaded && (
+                <div className="text-green-600 mt-2">
+                  Design uploaded successfully!
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Payment Section */}
+        <div className="flex flex-col md:flex-row justify-center items-start gap-8 md:gap-20 mb-16">
+          {/* Payment Upload */}
+          <div className="w-full md:w-[450px] space-y-6">
+            <div className="text-xl sm:text-2xl text-center mb-3">
+              <Title text1="UPLOAD" text2="PAYMENT SCREENSHOT" />
+            </div>
+
+            <div className="flex flex-col items-center space-y-4">
+              <Label htmlFor="paymentImage" className="cursor-pointer">
+                <div className="w-48 h-48 rounded-lg border-2 border-dashed border-gray-500 bg-gray-200 hover:bg-gray-300 flex flex-col items-center justify-center overflow-hidden">
+                  {paymentImage ? (
+                    <img 
+                      src={URL.createObjectURL(paymentImage)} 
+                      alt="Payment preview" 
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
+                    <>
+                      <img 
+                        src={assets.upload_area} 
+                        alt="Upload" 
+                        className="w-6 h-6"
+                      />
+                      <p className="text-gray-500 mt-2">
+                        Upload <span className="text-blue-500 underline">image</span>
+                      </p>
+                    </>
+                  )}
+                </div>
+              </Label>
+              
               <Input
                 type="file"
-                accept="image/jpeg,image/png,image/webp,image/avif"
-                onChange={handleDesinFileChange}
-                name="designImage"
-                id="designImage"
-                required
+                id="paymentImage"
+                accept={allowedTypes.join(",")}
+                onChange={(e) => handleFileChange(e, setPaymentImage)}
+                className="hidden"
+                disabled={isPaymentImageUploaded}
               />
-              <Label htmlFor="designDetail">Detail</Label>
-              <Textarea
-                onChange={(e) => setDesignDetail(e.target.value)}
-                name="designDetail"
-                value={designDetail}
-                type="text"
-                placeholder="Write details about your design"
-                required
-              />
+              
               <Button
-                className="bg-gray-950 text-white rounded-none shadow-sm outline-none duration-75 hover:bg-gray-800  active:bg-gray-900 my-6 px-8 w-full sm:w-[50%] py-2"
-                onClick={onSubmitDesignImageHandler}
+                className="bg-gray-950 hover:bg-gray-800 rounded-none mt-4 w-48"
+                onClick={uploadPaymentImage}
+                disabled={
+                  !paymentImage || 
+                  (isCustom && !isDesignImageUploaded) ||
+                  isPaymentImageUploaded
+                }
               >
-                Upload
+                {isPaymentImageUploaded ? "Uploaded" : "Upload Payment"}
               </Button>
             </div>
-          </>
-        )}
-        <div className="flex justify-center items-start gap-20 mb-16 flex-col-reverse md:flex-row">
-          {/* IMAGE UPLOAD */}
-          <div className="w-full md:w-[450px] flex flex-col items-center justify-start space-y-6">
-            {/* <form className="flex flex-col items-center space-y-4"> */}
-            <div className="text-xl text-center sm:text-2xl mb-3">
-              <Title text1={"UPLOAD"} text2={"PAYMENT SCREENSHOT"} />
-            </div>
-
-            <Label htmlFor="paymentImage">
-              <div className="w-48 overflow-hidden bg-contain h-48 rounded-lg border-2 bg-gray-200 gap-2 border-gray-500 border-dashed flex items-center justify-center flex-col hover:bg-gray-300">
-                <img
-                  className={
-                    !paymentImage ? "w-6 h-6" : "w-full h-fit bg-contain"
-                  }
-                  src={
-                    !paymentImage
-                      ? assets.upload_area
-                      : URL.createObjectURL(paymentImage)
-                  }
-                  alt="upload"
-                  width={24}
-                  height={24}
-                />
-                {!paymentImage && (
-                  <p className="text-gray-500">
-                    Upload{" "}
-                    <span className="text-blue-500 underline"> image</span>
-                  </p>
-                )}
-              </div>
-              <input
-                type="file"
-                accept="image/jpeg,image/png,image/webp,image/avif"
-                onChange={handleFileChange}
-                name="paymentImage"
-                id="paymentImage"
-                hidden
-              />
-            </Label>
-            <Button
-              className="bg-gray-950 text-white rounded-none shadow-sm outline-none duration-75 hover:bg-gray-800  active:bg-gray-900 my-14 px-8 w-48  py-2"
-              onClick={onSubmitPaymentImageHandler}
-              disabled={isCustom && !isDesignImageUploaded}
-            >
-              Upload
-            </Button>
-            {/* </form> */}
           </div>
 
-          {/* -----------RIGHT SIDE------------- */}
-          <div className="w-full md:w-[450px] flex flex-col items-center space-y-4">
-            <div className="text-xl sm:text-2xl mb-2">
-              <Title text1={"COMPLETE"} text2={"PAYMENT"} />
+          {/* Payment Details */}
+          <div className="w-full flex items-center flex-col md:w-[450px] space-y-6">
+            <div className="text-xl sm:text-2xl mb-3">
+              <Title text1="COMPLETE" text2="PAYMENT" />
             </div>
+            
             <div className="flex items-center gap-2">
-              <img src={assets.ok_icon} alt="ok" width={24} height={24} />
+              <img src={assets.ok_icon} alt="OK" width={24} height={24} />
               <h1 className="text-3xl font-bold">
-                {currency + "" + order?.amount}
+                {currency} {order?.amount?.toFixed(2)}
               </h1>
             </div>
+            
             <QRCode
               upiId={import.meta.env.VITE_UPI}
-              amount={`${order?.amount}`}
+              amount={order?.amount?.toString()}
               name={import.meta.env.VITE_BANKNAME}
             />
           </div>
         </div>
 
-        {/* -------------CART TOTAL---------------- */}
-        <div className="w-full my-8 flex items-center justify-end">
+        {/* Order Summary */}
+        <div className="w-full my-8 flex justify-end">
           <div className="min-w-72">
             <div className="text-2xl">
-              <Title text1={"CART"} text2={"TOTALS"} />
+              <Title text1="CART" text2="TOTALS" />
             </div>
-
+            
             <div className="flex flex-col gap-2 mt-2 text-sm">
               <div className="flex justify-between">
                 <p>Quantity</p>
                 <p>
-                  {quantity} {quantity > 1 ? "items" : "item"}
+                  {quantity} {quantity === 1 ? "item" : "items"}
                 </p>
               </div>
-              <hr />
-              <div className="flex justify-between">
-                <b>Total</b>
-                <b>
-                  {currency} {order?.amount}
-                  .00
-                </b>
+              
+              <hr className="my-1" />
+              
+              <div className="flex justify-between font-semibold">
+                <span>Total</span>
+                <span>
+                  {currency} {order?.amount?.toFixed(2)}
+                </span>
               </div>
             </div>
           </div>
         </div>
-        <div className=" w-full text-end">
+
+        {/* Submit Button */}
+        <div className="w-full text-end">
           <Button
             onClick={() => navigate("/orders")}
-            className={`bg-gray-950 text-white rounded-none shadow-sm outline-none duration-75 hover:bg-gray-800  active:bg-gray-900 px-8 w-full sm:w-[50%] lg:w-[25%] py-3 ${
-              !isPaymentImageUploaded && "cursor-not-allowed"
+            className={`bg-gray-950 hover:bg-gray-800 rounded-none w-full sm:w-1/2 lg:w-1/4 ${
+              !isPaymentImageUploaded ? "opacity-50 cursor-not-allowed" : ""
             }`}
             disabled={!isPaymentImageUploaded}
           >

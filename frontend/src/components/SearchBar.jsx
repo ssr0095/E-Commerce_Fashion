@@ -4,9 +4,14 @@ import { assets } from "../assets/assets";
 import { useLocation } from "react-router-dom";
 
 const SearchBar = () => {
-  const { search, setSearch, showSearch, setShowSearch, toggleSearch } =
-    useContext(ShopContext);
-
+  const { 
+    search, 
+    setSearchQuery, 
+    showSearch, 
+    toggleSearch,
+    loading
+  } = useContext(ShopContext);
+  
   const [isVisible, setIsVisible] = useState(false);
   const location = useLocation();
   const inputRef = React.useRef(null);
@@ -24,45 +29,43 @@ const SearchBar = () => {
   }, [showSearch, isVisible]);
 
   const handleClearSearch = useCallback(() => {
-    setSearch("");
-    setShowSearch(false);
-  }, [setSearch, setShowSearch]);
+    setSearchQuery("");
+    toggleSearch();
+  }, [setSearchQuery, toggleSearch]);
 
-  const handleKeyDown = useCallback(
-    (e) => {
-      if (e.key === "Escape") {
-        handleClearSearch();
-      }
-    },
-    [handleClearSearch]
-  );
+  const handleKeyDown = useCallback((e) => {
+    if (e.key === 'Escape') {
+      handleClearSearch();
+    }
+  }, [handleClearSearch]);
 
   if (!showSearch || !isVisible) return null;
 
   return (
-    <div
+    <div 
       className="border-t border-b bg-gray-50 text-center"
       aria-live="polite"
       aria-atomic="true"
     >
-      <div
+      <div 
         className="inline-flex items-center justify-center border border-gray-400 px-5 py-2 my-5 mx-3 rounded-full w-3/4 sm:w-1/2"
         role="search"
       >
         <input
           ref={inputRef}
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => setSearchQuery(e.target.value)}
           onKeyDown={handleKeyDown}
           className="flex-1 outline-none bg-inherit text-sm"
           type="text"
-          placeholder="Search products..."
+          placeholder={loading ? "Loading products..." : "Search products..."}
           aria-label="Search products"
+          disabled={loading}
         />
-        <img
-          className="w-4"
-          src={assets.search_icon}
-          alt=""
+        <img 
+          className="w-4" 
+          src={assets.search_icon} 
+          alt="" 
           aria-hidden="true"
         />
       </div>
@@ -71,10 +74,10 @@ const SearchBar = () => {
         className="inline p-1 cursor-pointer"
         aria-label="Close search"
       >
-        <img
-          className="w-3"
-          src={assets.cross_icon}
-          alt=""
+        <img 
+          className="w-3" 
+          src={assets.cross_icon} 
+          alt="" 
           aria-hidden="true"
         />
       </button>

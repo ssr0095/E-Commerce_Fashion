@@ -35,8 +35,12 @@ const cacheManager = {
 export const ShopContext = createContext();
 
 const ShopContextProvider = ({ children }) => {
-  const navigate = useNavigate();
+  const currency = import.meta.env.VITE_CURRENCY;
+  const delivery_fee = Number(import.meta.env.VITE_DELIVERY_FEE);
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  const whatsappNumber = import.meta.env.VITE_WHATSAPP;
+  const discountPercentage = Number(import.meta.env.VITE_DISCOUNT || 0);
+  const navigate = useNavigate();
   const productCache = useRef({});
 
   const [state, setState] = useState(() => ({
@@ -55,6 +59,7 @@ const ShopContextProvider = ({ children }) => {
     page: 1,
     hasMore: true,
     loading: false,
+    applyingDiscount: false,
   }));
 
   // Token management
@@ -239,50 +244,88 @@ const ShopContextProvider = ({ children }) => {
     updateCart({});
   }, [updateCart]);
 
+  const setDiscount = useCallback((value) => {
+    setState(prev => ({ ...prev, discount: value }));
+  }, []);
+
+  const setApplyingDiscount = useCallback((value) => {
+    setState(prev => ({ ...prev, applyingDiscount: value }));
+  }, []);
+
+  // Add the discount verification function
+  const verifyDiscountCode = useCallback(async (couponCode) => {
+    if (!state.token) {
+      toast.error("Please login to apply discount");
+      return 0;
+    }
+
+    setApplyingDiscount(true);
+    try {
+      const { data } = await axios.post(
+        `${backendUrl}/api/user/verifyCode`,
+        { couponCode },
+        { headers: { token: state.token } }
+      );
+      
+      if (data.success) {
+        setDiscount(discountPercentage);
+        return discountPercentage;
+      }
+      toast.error(data.message || "Invalid discount code");
+      return 0;
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Failed to apply discount");
+      return 0;
+    } finally {
+      setApplyingDiscount(false);
+    }
+  }, [state.token, backendUrl, discountPercentage, setDiscount, setApplyingDiscount]);
+
   // Product fetching
-  const getProductsData = useCallback(
-    async (page, forceRefresh = false) => {
-      const cacheKey = `products_page_${page}`;
+  const getProductsData = useCallback(async (page = 1, forceRefresh = false) => {
+    const cacheKey = `products_page_${page}`;
 
-      if (!forceRefresh) {
-        const cached = cacheManager.get(cacheKey);
-        if (cached) {
-          setState((prev) => ({
-            ...prev,
-            products: mergeProducts(prev.products, cached),
-          }));
-          return;
-        }
+    // Only use cache if not forcing refresh
+    if (!forceRefresh) {
+      const cached = cacheManager.get(cacheKey);
+      if (cached) {
+        setState(prev => ({
+          ...prev,
+          products: mergeProducts(prev.products, cached),
+          loading: false
+        }));
+        return;
       }
+    }
 
-      setState((prev) => ({ ...prev, loading: true }));
+    setState(prev => ({ ...prev, loading: true }));
 
-      try {
-        const { data } = await axios.get(`${backendUrl}/api/product/list`, {
-          params: { page, limit: 8 },
-        });
-
-        if (data.success) {
-          const newProducts = data.products.filter((p) => !p.customizable);
-          cacheManager.set(cacheKey, newProducts);
-          productCache.current[cacheKey] = newProducts;
-
-          setState((prev) => ({
-            ...prev,
-            products: mergeProducts(prev.products, newProducts),
-            hasMore: data.hasMore,
-            loading: false,
-          }));
+    try {
+      const { data } = await axios.get(`${backendUrl}/api/product/list`, {
+        params: { 
+          page,
+          limit: 8 // Match your default limit
         }
-      } catch (error) {
-        toast.error(
-          error.response?.data?.message || "Failed to fetch products"
-        );
-        setState((prev) => ({ ...prev, loading: false }));
+      });
+
+      if (data.success) {
+        const newProducts = data.products.filter(p => !p.customizable);
+        cacheManager.set(cacheKey, newProducts);
+        productCache.current[cacheKey] = newProducts;
+
+        setState(prev => ({
+          ...prev,
+          products: page === 1 ? newProducts : mergeProducts(prev.products, newProducts),
+          hasMore: data.hasMore,
+          loading: false,
+          page
+        }));
       }
-    },
-    [backendUrl]
-  );
+    } catch (error) {
+      setState(prev => ({ ...prev, loading: false }));
+      toast.error(error.response?.data?.message || "Failed to fetch products");
+    }
+  }, [backendUrl]);
 
   const getCustomizableProductsData = useCallback(async () => {
     const cached = cacheManager.get("customizableProducts");
@@ -305,6 +348,13 @@ const ShopContextProvider = ({ children }) => {
       toast.error("Failed to fetch customizable products");
     }
   }, [backendUrl]);
+
+  const toggleSearch = useCallback((forceState) => {
+    setState(prev => ({
+      ...prev,
+      showSearch: typeof forceState === 'boolean' ? forceState : !prev.showSearch
+    }));
+  }, []);
 
   // User authentication
   const login = useCallback(
@@ -363,6 +413,24 @@ const ShopContextProvider = ({ children }) => {
     [backendUrl, updateCart]
   );
 
+  const isDiscount = async (couponCode) => {
+    try {
+      const res = await axios.post(
+        `${backendUrl}/api/user/verifyCode`,
+        { couponCode },
+        { headers: { token } }
+      );
+      if (res.data.success) {
+        const dis = import.meta.env.VITE_DISCOUNT;
+        setDiscount(dis);
+        return dis;
+      }
+      return res.data.message;
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Invalid discount code");
+    }
+  };
+
   // Helper functions
   const mergeProducts = (existing, newItems) => {
     const existingIds = new Set(existing.map((p) => p._id));
@@ -411,11 +479,15 @@ const ShopContextProvider = ({ children }) => {
         logout,
         setSearchQuery: (query) =>
           setState((prev) => ({ ...prev, search: query })),
-        toggleSearch: () =>
-          setState((prev) => ({ ...prev, showSearch: !prev.showSearch })),
+        toggleSearch,
         getCartAmount,
         updateCart,
         navigate,
+        delivery_fee,
+        currency,
+        whatsappNumber,
+        setDiscount,
+    verifyDiscountCode,
       }}
     >
       {children}

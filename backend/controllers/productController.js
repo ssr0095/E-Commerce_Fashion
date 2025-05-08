@@ -151,26 +151,50 @@ const listProducts = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const custom = req.query.custom == "true";
-    const admin = req.query.admin == "true";
+    const custom = req.query.custom === "true";
+    const admin = req.query.admin === "true";
     const skip = (page - 1) * limit;
-    // console.log(req.query.custom);
+
+    // For admin view - return all products without pagination
     if (admin) {
-      const products = await productModel.find({});
+      const products = await productModel.find({}).sort({ date: -1 }); // Sort by newest first
       return res.json({ success: true, products });
     }
+
+    // For custom products view
     if (custom) {
-      const products = await productModel.find({ customizable: true });
+      const products = await productModel
+        .find({ customizable: true })
+        .sort({ date: -1 });
       return res.json({ success: true, products });
-    } else {
-      const products = await productModel.find({}).skip(skip).limit(limit);
-      const totalProducts = await productModel.countDocuments();
-      const hasMore = skip + products.length < totalProducts;
-      return res.json({ success: true, products, hasMore });
     }
+
+    // For regular paginated view
+    const products = await productModel
+      .find({})
+      .sort({ date: -1 }) // Sort by newest first
+      .skip(skip)
+      .limit(limit);
+      
+    const totalProducts = await productModel.countDocuments();
+    const hasMore = skip + products.length < totalProducts;
+    
+    return res.json({ 
+      success: true, 
+      products, 
+      hasMore,
+      totalProducts,
+      currentPage: page,
+      totalPages: Math.ceil(totalProducts / limit)
+    });
+
   } catch (error) {
-    console.log(error);
-    return res.json({ success: false, message: error.message });
+    console.error("Product listing error:", error);
+    return res.status(500).json({ 
+      success: false, 
+      message: "Failed to fetch products",
+      error: error.message 
+    });
   }
 };
 
