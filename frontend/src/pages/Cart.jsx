@@ -151,7 +151,7 @@ const Cart = () => {
               value={couponCode}
               onChange={(e) => setCouponCode(e.target.value)}
               placeholder="Enter coupon code"
-              className="flex-1 max-w-sm border border-gray-300 rounded-none"
+              className="flex-1 max-w-sm border border-gray-300 py-1.5 px-3.5 rounded-none"
               disabled={applyingDiscount || discount > 0}
             />
             {discount > 0 ? (

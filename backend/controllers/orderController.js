@@ -4,6 +4,7 @@ import Stripe from "stripe";
 import razorpay from "razorpay";
 import { uploadToR2 } from "../config/cloudflare.js";
 import { v4 as uuidv4 } from "uuid";
+import validateFile from "../utils/fileValidation.js";
 
 // global variables
 const currency = process.env.CURRENCY;
@@ -296,6 +297,8 @@ const addPaymentScreenshot = async (req, res) => {
         message: "Payment screenshot not uploaded" 
       });
     }
+
+    validateFile(req.file);
 
     // Upload to R2
     const fileName = `payments/${uuidv4()}-${req.file.originalname}`;

@@ -93,7 +93,13 @@ const ShopContextProvider = ({ children }) => {
       const response = await axios.post(
         `${backendUrl}/api/user/userInfo`,
         {},
-        { headers: { token: state.token } }
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            "Authorization": `Bearer ${state.token}`
+          },
+          withCredentials: true // For cookies if using
+        }
       );
 
       if (response.data?.success) {
@@ -165,28 +171,32 @@ const ShopContextProvider = ({ children }) => {
           0
         );
 
-        cacheManager.set("cart", newCart, 1800000); // 30 mins cache
+    cacheManager.set('cart', newCart, 1800000);
 
-        // Sync with server if authenticated
-        if (state.token) {
-          axios
-            .post(
-              `${backendUrl}/api/cart/sync`,
-              { cartData: newCart },
-              { headers: { token: state.token } }
-            )
-            .catch(console.error);
+    if (state.token) {
+      axios.post(
+        `${backendUrl}/api/cart/update`,
+        { cartData: newCart },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${state.token}`
+          },
+          withCredentials: true
         }
-
-        return {
-          ...prev,
-          cartItems: newCart,
-          cartCount: newCartCount,
-        };
+      )
+      .catch(error => {
+        if (error.response?.status === 401) {
+          // Handle token expiration
+          console.log('Token expired, redirect to login');
+        }
+        console.error('Cart update failed:', error.message);
       });
-    },
-    [state.token, backendUrl]
-  );
+    }
+
+    return { ...prev, cartItems: newCart, cartCount: newCartCount };
+  });
+}, [state.token, backendUrl]);
 
   const addToCart = useCallback(
     (itemId, size) => {
@@ -264,8 +274,13 @@ const ShopContextProvider = ({ children }) => {
       const { data } = await axios.post(
         `${backendUrl}/api/user/verifyCode`,
         { couponCode },
-        { headers: { token: state.token } }
-      );
+        {
+          headers: {
+            "Authorization": `Bearer ${state.token}`
+          },
+          withCredentials: true // For cookies if using
+        }
+      )
       
       if (data.success) {
         setDiscount(discountPercentage);
@@ -400,8 +415,14 @@ const ShopContextProvider = ({ children }) => {
         const { data } = await axios.post(
           `${backendUrl}/api/cart/get`,
           {},
-          { headers: { token: userToken } }
-        );
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              "Authorization": `Bearer ${state.token}`
+            },
+            withCredentials: true // For cookies if using
+          }
+        )
 
         if (data.success) {
           updateCart(data.cartData);
@@ -469,7 +490,7 @@ const ShopContextProvider = ({ children }) => {
         currency,
         whatsappNumber,
         setDiscount,
-    verifyDiscountCode,
+        verifyDiscountCode,
       }}
     >
       {children}

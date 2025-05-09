@@ -30,8 +30,9 @@ const Hero = () => {
                 src={img}
                 className="w-full"
                 alt="Hero"
-                // width={96}
+                width={1080}
                 // height={18}
+                loading="lazy"
               />
             </CarouselItem>
           ))}

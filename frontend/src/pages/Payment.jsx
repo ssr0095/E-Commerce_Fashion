@@ -132,11 +132,17 @@ const Payment = () => {
       formData.append("designImage", compressedImage);
       formData.append("designDetail", designDetail);
 
-      const response = await axios.post(
-        `${backendUrl}/api/order/addDesignImage`,
-        formData,
-        { headers: { token } }
-      );
+    const response = await axios.post(
+      `${backendUrl}/api/order/addDesignImage`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data", // Crucial for file uploads
+          "Authorization": `Bearer ${token}`
+        },
+        withCredentials: true // For cookies if using
+      }
+    );
 
       if (response.data.success) {
         setIsDesignImageUploaded(true);
@@ -176,7 +182,13 @@ const Payment = () => {
       const response = await axios.post(
         `${backendUrl}/api/order/addPaymentScreenshot`,
         formData,
-        { headers: { token } }
+        {
+          headers: {
+            "Content-Type": "multipart/form-data", // Crucial for file uploads
+            "Authorization": `Bearer ${token}`
+          },
+          withCredentials: true // For cookies if using
+        }
       );
 
       if (response.data.success) {

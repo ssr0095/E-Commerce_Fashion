@@ -18,15 +18,17 @@ const s3Client = new S3Client({
  * @returns {Promise<string>} Public URL
  */
 export const uploadToR2 = async (buffer, fileName, mimetype) => {
+  const safeFileName = fileName.replace(/[^a-zA-Z0-9.-]/g, "_");
   await s3Client.send(
     new PutObjectCommand({
       Bucket: process.env.R2_BUCKET_NAME,
-      Key: fileName,
+      Key: safeFileName,
       Body: buffer,
       ContentType: mimetype,
+      ACL: "public-read", // Explicitly set public access
     })
   );
 
-  // Public URL format: https://<bucket>.<account-id>.r2.dev/filename.jpg
-  return `https://${process.env.R2_BUCKET_NAME}.${process.env.R2_ACCOUNT_ID}.r2.dev/${fileName}`;
+  // Use custom domain instead of R2 public URL
+  return `https://cdn.cousinsfashion.in/${fileName}`;
 };

@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 // import { redirect } from "react-router-dom";
 import SmallNavBar from "../components/SmallNavBar";
 import { Input } from "../components/ui/input";
+import { Button } from "../components/ui/button";
 
 const PlaceOrder = () => {
   const [method, setMethod] = useState("googlepay");
@@ -336,12 +337,12 @@ const PlaceOrder = () => {
             </div>
 
             <div className="w-full text-end mt-8">
-              <button
+              <Button
                 type="submit"
-                className="bg-gray-950 text-white shadow-sm outline-none duration-75 hover:bg-gray-800  active:bg-gray-900 my-8 px-8 w-full sm:w-fit py-3"
+                className="rounded-none my-8 px-8 w-full sm:w-fit py-3"
               >
                 PLACE ORDER
-              </button>
+              </Button>
             </div>
           </div>
         </div>

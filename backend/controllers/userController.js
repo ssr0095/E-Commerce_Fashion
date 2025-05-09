@@ -29,40 +29,32 @@ const createRefreshToken = (id) => {
   }
 };
 
+// In refreshToken controller:
 const refreshToken = async (req, res) => {
+  const { refreshToken } = req.body;
+
+  if (!refreshToken) {
+    return res.status(400).json({ message: 'Refresh token required' });
+  }
+
   try {
-    const { refreshToken } = req.body;
-
-    if (!refreshToken) {
-      return res.status(400).json({
-        success: false,
-        message: "Refresh token required",
-      });
-    }
-
     const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-    const newToken = createToken(decoded.id);
-    const newRefreshToken = createRefreshToken(decoded.id);
+    
+    // Verify user still exists
+    const user = await userModel.findById(decoded.id);
+    if (!user) return res.sendStatus(403);
 
-    res.json({
-      success: true,
-      token: newToken,
-      refreshToken: newRefreshToken,
+    // Issue new tokens
+    const newAccessToken = createToken(user._id);
+    const newRefreshToken = createRefreshToken(user._id);
+
+    return res.json({ 
+      token: newAccessToken,
+      refreshToken: newRefreshToken 
     });
-  } catch (error) {
-    console.error("Refresh token error:", error);
-
-    if (error.name === "TokenExpiredError") {
-      return res.status(401).json({
-        success: false,
-        message: "Refresh token expired. Please login again.",
-      });
-    }
-
-    res.status(401).json({
-      success: false,
-      message: "Invalid refresh token",
-    });
+  } catch (err) {
+    console.error('Refresh error:', err);
+    return res.status(403).json({ message: 'Invalid refresh token' });
   }
 };
 
