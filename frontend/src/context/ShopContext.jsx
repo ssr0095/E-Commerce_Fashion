@@ -39,7 +39,7 @@ const ShopContextProvider = ({ children }) => {
   const delivery_fee = Number(import.meta.env.VITE_DELIVERY_FEE);
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const whatsappNumber = import.meta.env.VITE_WHATSAPP;
-  const discountPercentage = Number(import.meta.env.VITE_DISCOUNT || 0);
+  // const discountPercentage = Number(import.meta.env.FIRST_ORDER_DISCOUNT || 0);
   const navigate = useNavigate();
   const productCache = useRef({});
 
@@ -60,6 +60,10 @@ const ShopContextProvider = ({ children }) => {
     hasMore: true,
     loading: false,
     applyingDiscount: false,
+    orders: cacheManager.get("orders") || [],
+    loadingOrders: cacheManager.get("orders")?.length === 0, // Only load if no cached orders
+    currentOrderPage: 1,
+    hasMoreOrders: true,
   }));
 
   // Token management
@@ -94,11 +98,7 @@ const ShopContextProvider = ({ children }) => {
         `${backendUrl}/api/user/userInfo`,
         {},
         {
-          headers: {
-            'Content-Type': 'application/json',
-            "Authorization": `Bearer ${state.token}`
-          },
-          withCredentials: true // For cookies if using
+          headers: { Authorization: `Bearer ${state.token}` },
         }
       );
 
@@ -140,7 +140,7 @@ const ShopContextProvider = ({ children }) => {
             );
 
             persistTokens(data.token, data.refreshToken);
-            originalRequest.headers.token = data.token;
+            originalRequest.headers.authorization = `Bearer ${data.token}`;
             return axios(originalRequest);
           } catch (refreshError) {
             clearAuth();
@@ -171,32 +171,32 @@ const ShopContextProvider = ({ children }) => {
           0
         );
 
-    cacheManager.set('cart', newCart, 1800000);
+        cacheManager.set("cart", newCart, 1800000);
 
-    if (state.token) {
-      axios.post(
-        `${backendUrl}/api/cart/update`,
-        { cartData: newCart },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${state.token}`
-          },
-          withCredentials: true
+        if (state.token) {
+          axios
+            .post(
+              `${backendUrl}/api/cart/update`,
+              { cartData: newCart },
+              {
+                headers: { Authorization: `Bearer ${state.token}` },
+              }
+            )
+            .catch((error) => {
+              if (error.response?.status === 401) {
+                // Handle token expiration
+                // console.log("Token expired, redirect to login");
+                toast.error("Token expired, redirect to login");
+              }
+              toast.error("Cart update failed");
+            });
         }
-      )
-      .catch(error => {
-        if (error.response?.status === 401) {
-          // Handle token expiration
-          console.log('Token expired, redirect to login');
-        }
-        console.error('Cart update failed:', error.message);
+
+        return { ...prev, cartItems: newCart, cartCount: newCartCount };
       });
-    }
-
-    return { ...prev, cartItems: newCart, cartCount: newCartCount };
-  });
-}, [state.token, backendUrl]);
+    },
+    [state.token, backendUrl]
+  );
 
   const addToCart = useCallback(
     (itemId, size) => {
@@ -255,92 +255,105 @@ const ShopContextProvider = ({ children }) => {
   }, [updateCart]);
 
   const setDiscount = useCallback((value) => {
-    setState(prev => ({ ...prev, discount: value }));
+    setState((prev) => ({ ...prev, discount: value }));
   }, []);
 
   const setApplyingDiscount = useCallback((value) => {
-    setState(prev => ({ ...prev, applyingDiscount: value }));
+    setState((prev) => ({ ...prev, applyingDiscount: value }));
   }, []);
 
   // Add the discount verification function
-  const verifyDiscountCode = useCallback(async (couponCode) => {
-    if (!state.token) {
-      toast.error("Please login to apply discount");
-      return 0;
-    }
-
-    setApplyingDiscount(true);
-    try {
-      const { data } = await axios.post(
-        `${backendUrl}/api/user/verifyCode`,
-        { couponCode },
-        {
-          headers: {
-            "Authorization": `Bearer ${state.token}`
-          },
-          withCredentials: true // For cookies if using
-        }
-      )
-      
-      if (data.success) {
-        setDiscount(discountPercentage);
-        return discountPercentage;
+  const verifyDiscountCode = useCallback(
+    async (couponCode) => {
+      if (!state.token) {
+        toast.error("Please login to apply discount");
+        return 0;
       }
-      toast.error(data.message || "Invalid discount code");
-      return 0;
-    } catch (error) {
-      toast.error(error?.response?.data?.message || "Failed to apply discount");
-      return 0;
-    } finally {
-      setApplyingDiscount(false);
-    }
-  }, [state.token, backendUrl, discountPercentage, setDiscount, setApplyingDiscount]);
+
+      setApplyingDiscount(true);
+      try {
+        const { data } = await axios.post(
+          `${backendUrl}/api/order/verifyCode`,
+          { couponCode },
+          {
+            headers: {
+              Authorization: `Bearer ${state.token}`,
+            },
+          }
+        );
+
+        if (data.success && data.discount) {
+          setDiscount(data.discount);
+          return data.discount;
+        }
+
+        toast.error(data.message || "Invalid discount code");
+        return 0;
+      } catch (error) {
+        const errorMessage =
+          error?.response?.data?.message || "Failed to apply discount";
+        toast.error(errorMessage);
+        return 0;
+      } finally {
+        setApplyingDiscount(false);
+      }
+    },
+    [state.token, backendUrl, setDiscount, setApplyingDiscount]
+  );
 
   // Product fetching
-  const getProductsData = useCallback(async (page = 1, forceRefresh = false) => {
-    const cacheKey = `products_page_${page}`;
+  const getProductsData = useCallback(
+    async (page = 1, forceRefresh = false) => {
+      const cacheKey = `products_page_${page}`;
 
-    // Only use cache if not forcing refresh
-    if (!forceRefresh) {
-      const cached = cacheManager.get(cacheKey);
-      if (cached) {
-        setState(prev => ({
-          ...prev,
-          products: mergeProducts(prev.products, cached),
-          loading: false
-        }));
-        return;
-      }
-    }
-
-    setState(prev => ({ ...prev, loading: true }));
-
-    try {
-      const { data } = await axios.get(`${backendUrl}/api/product/list`, {
-        params: { 
-          page,
-          limit: 8 // Match your default limit
+      // Only use cache if not forcing refresh
+      if (!forceRefresh) {
+        const cached = cacheManager.get(cacheKey);
+        if (cached) {
+          setState((prev) => ({
+            ...prev,
+            products: mergeProducts(prev.products, cached),
+            loading: false,
+          }));
+          return;
         }
-      });
-
-      if (data.success) {
-        const newProducts = data.products.filter(p => !p.customizable);
-        cacheManager.set(cacheKey, newProducts);
-        productCache.current[cacheKey] = newProducts;
-
-        setState(prev => ({
-          ...prev,
-          products: page === 1 ? newProducts : mergeProducts(prev.products, newProducts),
-          hasMore: data.hasMore,
-          loading: false,
-          page
-        }));
       }
-    } catch (error) {
-      setState(prev => ({ ...prev, loading: false }));
-      toast.error(error.response?.data?.message || "Failed to fetch products");
-    }
-  }, [backendUrl]);
+
+      setState((prev) => ({ ...prev, loading: true }));
+
+      try {
+        const { data } = await axios.get(`${backendUrl}/api/product/list`, {
+          params: {
+            page,
+            limit: 8, // Match your default limit
+          },
+        });
+
+        if (data.success) {
+          const newProducts = data.products.filter((p) => !p.customizable);
+          cacheManager.set(cacheKey, newProducts);
+          productCache.current[cacheKey] = newProducts;
+
+          setState((prev) => ({
+            ...prev,
+            products:
+              page === 1
+                ? newProducts
+                : mergeProducts(prev.products, newProducts),
+            hasMore: data.hasMore,
+            loading: false,
+            page,
+          }));
+        }
+      } catch (error) {
+        setState((prev) => ({ ...prev, loading: false }));
+        toast.error(
+          error.response?.data?.message || "Failed to fetch products"
+        );
+      }
+    },
+    [backendUrl]
+  );
 
   const getCustomizableProductsData = useCallback(async () => {
     const cached = cacheManager.get("customizableProducts");
@@ -365,9 +378,10 @@ const ShopContextProvider = ({ children }) => {
   }, [backendUrl]);
 
   const toggleSearch = useCallback((forceState) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
-      showSearch: typeof forceState === 'boolean' ? forceState : !prev.showSearch
+      showSearch:
+        typeof forceState === "boolean" ? forceState : !prev.showSearch,
     }));
   }, []);
 
@@ -376,7 +390,7 @@ const ShopContextProvider = ({ children }) => {
     async (email, password) => {
       try {
         const { data } = await axios.post(
-          `${backendUrl}/api/user/login`,
+          `${backendUrl}/api/auth/login`,
           {
             email,
             password,
@@ -416,19 +430,15 @@ const ShopContextProvider = ({ children }) => {
           `${backendUrl}/api/cart/get`,
           {},
           {
-            headers: {
-              'Content-Type': 'application/json',
-              "Authorization": `Bearer ${state.token}`
-            },
-            withCredentials: true // For cookies if using
+            headers: { Authorization: `Bearer ${userToken}` },
           }
-        )
+        );
 
         if (data.success) {
           updateCart(data.cartData);
         }
       } catch (error) {
-        console.error("Failed to fetch user cart:", error);
+        toast.error("Failed to fetch user cart");
       }
     },
     [backendUrl, updateCart]
@@ -436,9 +446,13 @@ const ShopContextProvider = ({ children }) => {
 
   // Helper functions
   const mergeProducts = (existing, newItems) => {
-    const existingIds = new Set(existing.map((p) => p._id));
-    const filtered = newItems.filter((p) => !existingIds.has(p._id));
-    return [...existing, ...filtered];
+    // Ensure existing is always treated as an array
+    const safeExisting = Array.isArray(existing) ? existing : [];
+    const existingIds = new Set(safeExisting.map((p) => p._id));
+    const filtered = Array.isArray(newItems)
+      ? newItems.filter((p) => !existingIds.has(p._id))
+      : [];
+    return [...safeExisting, ...filtered];
   };
 
   const getCartAmount = useCallback(() => {
@@ -453,9 +467,88 @@ const ShopContextProvider = ({ children }) => {
     }, 0);
   }, [state.cartItems, state.products, state.customizableProducts]);
 
+  const fetchOrders = useCallback(
+    async (forceRefresh = false) => {
+      // Prevent multiple simultaneous requests
+      if (state.loadingOrders) return;
+      // Get token from state or localStorage as fallback
+      const token = state.token || cacheManager.get("token");
+      if (!token) {
+        console.error("No token available");
+        return;
+      }
+
+      const cacheKey = "userOrders";
+      const cacheExpiry = 5 * 60 * 1000; // 5 minutes cache
+
+      // Check cache if not forcing refresh
+      if (!forceRefresh) {
+        const cachedOrders = cacheManager.get(cacheKey);
+        if (cachedOrders) {
+          setState((prev) => ({ ...prev, orders: cachedOrders }));
+          return;
+        }
+      }
+
+      setState((prev) => ({ ...prev, loadingOrders: true }));
+
+      try {
+        const response = await axios.post(
+          `${backendUrl}/api/order/userorders`,
+          { page: forceRefresh ? 1 : state.currentOrderPage },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (response.data?.success) {
+          const orders = response.data.orders;
+          cacheManager.set(cacheKey, orders, cacheExpiry);
+          setState((prev) => ({
+            ...prev,
+            orders: forceRefresh ? orders : [...prev.orders, ...orders],
+            hasMoreOrders: response.data.hasMore,
+            loadingOrders: false,
+          }));
+        }
+      } catch (error) {
+        console.error(
+          "Order fetch error:",
+          error.response?.data || error.message
+        );
+        setState((prev) => ({ ...prev, loadingOrders: false }));
+
+        if (error.response?.status === 401) {
+          // Clear invalid token and redirect to login
+          cacheManager.clear("token");
+          setState((prev) => ({ ...prev, token: "" }));
+          toast.error("Session expired. Please login again");
+          navigate("/login");
+        } else {
+          toast.error(error.response?.data?.message || "Failed to load orders");
+        }
+      }
+    },
+    [backendUrl, state.currentOrderPage, navigate]
+  );
+
+  const refreshOrders = useCallback(() => {
+    return fetchOrders(true); // Force refresh
+  }, [fetchOrders]);
+
+  const getOrderById = useCallback(
+    (orderId) => {
+      return state.orders.find((order) => order._id === orderId);
+    },
+    [state.orders]
+  );
+
   // Initialize
   useEffect(() => {
-    if (!state.products.length) getProductsData(1);
+    if (!state.products?.length) getProductsData(1);
     getCustomizableProductsData();
     if (state.token) {
       fetchUserInfo();
@@ -491,6 +584,11 @@ const ShopContextProvider = ({ children }) => {
         whatsappNumber,
         setDiscount,
         verifyDiscountCode,
+        orders: state.orders,
+        loadingOrders: state.loadingOrders,
+        fetchOrders,
+        refreshOrders,
+        getOrderById,
       }}
     >
       {children}

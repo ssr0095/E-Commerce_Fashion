@@ -1,6 +1,7 @@
 import productModel from "../models/productModel.js";
 import { uploadToR2 } from "../config/cloudflare.js";
 import { v4 as uuidv4 } from "uuid";
+import { createAuditLog } from "./auditController.js";
 
 const addProduct = async (req, res) => {
   try {
@@ -17,6 +18,8 @@ const addProduct = async (req, res) => {
       customizable,
       discount,
     } = req.body;
+
+    const user = req.user;
 
     // Process images
     const images = [
@@ -51,6 +54,12 @@ const addProduct = async (req, res) => {
 
     const product = new productModel(productData);
     await product.save();
+
+    await createAuditLog({
+      action: "PRODUCT ADDED",
+      userId: user.id,
+      metadata: { ip: req.ip },
+    });
 
     return res.json({ success: true, message: "Product Added" });
   } catch (error) {
@@ -175,33 +184,41 @@ const listProducts = async (req, res) => {
       .sort({ date: -1 }) // Sort by newest first
       .skip(skip)
       .limit(limit);
-      
+
     const totalProducts = await productModel.countDocuments();
     const hasMore = skip + products.length < totalProducts;
-    
-    return res.json({ 
-      success: true, 
-      products, 
+
+    return res.json({
+      success: true,
+      products,
       hasMore,
       totalProducts,
       currentPage: page,
-      totalPages: Math.ceil(totalProducts / limit)
+      totalPages: Math.ceil(totalProducts / limit),
     });
-
   } catch (error) {
     console.error("Product listing error:", error);
-    return res.status(500).json({ 
-      success: false, 
+    return res.status(500).json({
+      success: false,
       message: "Failed to fetch products",
-      error: error.message 
+      error: error.message,
     });
   }
 };
 
 // function for removing product
 const removeProduct = async (req, res) => {
+  const user = req.user;
+
   try {
     await productModel.findByIdAndDelete(req.body.id);
+
+    await createAuditLog({
+      action: "PRODUCT REMOVED",
+      userId: user.id,
+      metadata: { ip: req.ip },
+    });
+
     res.json({ success: true, message: "Product Removed" });
   } catch (error) {
     console.log(error);

@@ -22,7 +22,9 @@ const Verify = () => {
       const response = await axios.post(
         backendUrl + "/api/order/verifyStripe",
         { success, orderId },
-        { headers: { token } }
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
 
       if (response.data.success) {

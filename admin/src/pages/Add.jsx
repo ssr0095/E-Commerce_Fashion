@@ -54,9 +54,9 @@ const Add = ({ token }) => {
   };
 
   const compressImage = async (file) => {
-    const options = { 
-      maxSizeMB: 2,          // Compress to ≤1MB
-      maxWidthOrHeight: 1920 // Resize if needed
+    const options = {
+      maxSizeMB: 2, // Compress to ≤1MB
+      maxWidthOrHeight: 1920, // Resize if needed
     };
     return await imageCompression(file, options);
   };
@@ -64,15 +64,15 @@ const Add = ({ token }) => {
   const onSubmitHandler = async (e) => {
     e.preventDefault();
 
-        if (!name.trim()) return toast.error("Name not provided");
-        if (!description.trim()) return toast.error("Description not provided");
-        if (!price.trim()) return toast.error("Price not provided");
-        if (!discount.trim()) return toast.error("Discount not provided");
-        if (!theme.trim()) return toast.error("Theme not provided");
-        if (!category.trim()) return toast.error("Category not provided");
-        if (!subCategory.trim()) return toast.error("SubCategory not provided");
-        if (!sizes) return toast.error("Sizes not provided");
-        if (!image1) return toast.error("Upload atleast 1 image");
+    if (!name.trim()) return toast.error("Name not provided");
+    if (!description.trim()) return toast.error("Description not provided");
+    if (!price.trim()) return toast.error("Price not provided");
+    if (!discount.trim()) return toast.error("Discount not provided");
+    if (!theme.trim()) return toast.error("Theme not provided");
+    if (!category.trim()) return toast.error("Category not provided");
+    if (!subCategory.trim()) return toast.error("SubCategory not provided");
+    if (!sizes) return toast.error("Sizes not provided");
+    if (!image1) return toast.error("Upload atleast 1 image");
 
     try {
       const formData = new FormData();
@@ -99,7 +99,9 @@ const Add = ({ token }) => {
       const response = await axios.post(
         backendUrl + "/api/product/add",
         formData,
-        { headers: { token } }
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
 
       setIsLoading(false);
@@ -256,7 +258,7 @@ const Add = ({ token }) => {
               <SelectValue placeholder="Select category" />
             </SelectTrigger>
             <SelectContent className="max-h-[150px]">
-            {/* <ScrollArea className="max-h-[150px]"> */}
+              {/* <ScrollArea className="max-h-[150px]"> */}
               <SelectItem value="Men">Men</SelectItem>
               <SelectItem value="Women">Women</SelectItem>
               <SelectItem value="Unisex">Unisex</SelectItem>
@@ -277,7 +279,7 @@ const Add = ({ token }) => {
               <SelectValue placeholder="Select sub category" />
             </SelectTrigger>
             <SelectContent className="max-h-[150px]">
-            {/* <ScrollArea className="max-h-[150px]"> */}
+              {/* <ScrollArea className="max-h-[150px]"> */}
               <SelectItem value="T-Shirts">T-Shirts</SelectItem>
               <SelectItem value="Hoodies">Hoodies</SelectItem>
               <SelectItem value="Shirts">Shirts</SelectItem>
@@ -304,7 +306,7 @@ const Add = ({ token }) => {
               <SelectValue placeholder="Select tag" />
             </SelectTrigger>
             <SelectContent className="max-h-[150px]">
-            {/* <ScrollArea className="max-h-[150px]"> */}
+              {/* <ScrollArea className="max-h-[150px]"> */}
               <SelectItem value="New Arrival">New Arrival</SelectItem>
               <SelectItem value="Limited Edition">Limited Edition</SelectItem>
               <SelectItem value="Trending">Trending</SelectItem>
@@ -343,133 +345,133 @@ const Add = ({ token }) => {
       {/* SIZES */}
       <div className="w-full">
         <p className="mb-2">Product Sizes</p>
-        <ScrollArea >
-        <div className="flex gap-3">
-          <div
-            onClick={() =>
-              setSizes((prev) =>
-                prev.includes("XXS")
-                  ? prev.filter((item) => item !== "XXS")
-                  : [...prev, "XXS"]
-              )
-            }
-          >
-            <p
-              className={`${
-                sizes.includes("XXS") ? "bg-green-200" : "bg-slate-200"
-              } px-3 py-1 cursor-pointer`}
+        <ScrollArea>
+          <div className="flex gap-3">
+            <div
+              onClick={() =>
+                setSizes((prev) =>
+                  prev.includes("XXS")
+                    ? prev.filter((item) => item !== "XXS")
+                    : [...prev, "XXS"]
+                )
+              }
             >
-              XXS
-            </p>
-          </div>
-          <div
-            onClick={() =>
-              setSizes((prev) =>
-                prev.includes("XS")
-                  ? prev.filter((item) => item !== "XS")
-                  : [...prev, "XS"]
-              )
-            }
-          >
-            <p
-              className={`${
-                sizes.includes("XS") ? "bg-green-200" : "bg-slate-200"
-              } px-3 py-1 cursor-pointer`}
+              <p
+                className={`${
+                  sizes.includes("XXS") ? "bg-green-200" : "bg-slate-200"
+                } px-3 py-1 cursor-pointer`}
+              >
+                XXS
+              </p>
+            </div>
+            <div
+              onClick={() =>
+                setSizes((prev) =>
+                  prev.includes("XS")
+                    ? prev.filter((item) => item !== "XS")
+                    : [...prev, "XS"]
+                )
+              }
             >
-              XS
-            </p>
-          </div>
-          <div
-            onClick={() =>
-              setSizes((prev) =>
-                prev.includes("S")
-                  ? prev.filter((item) => item !== "S")
-                  : [...prev, "S"]
-              )
-            }
-          >
-            <p
-              className={`${
-                sizes.includes("S") ? "bg-green-200" : "bg-slate-200"
-              } px-3 py-1 cursor-pointer`}
+              <p
+                className={`${
+                  sizes.includes("XS") ? "bg-green-200" : "bg-slate-200"
+                } px-3 py-1 cursor-pointer`}
+              >
+                XS
+              </p>
+            </div>
+            <div
+              onClick={() =>
+                setSizes((prev) =>
+                  prev.includes("S")
+                    ? prev.filter((item) => item !== "S")
+                    : [...prev, "S"]
+                )
+              }
             >
-              S
-            </p>
-          </div>
+              <p
+                className={`${
+                  sizes.includes("S") ? "bg-green-200" : "bg-slate-200"
+                } px-3 py-1 cursor-pointer`}
+              >
+                S
+              </p>
+            </div>
 
-          <div
-            onClick={() =>
-              setSizes((prev) =>
-                prev.includes("M")
-                  ? prev.filter((item) => item !== "M")
-                  : [...prev, "M"]
-              )
-            }
-          >
-            <p
-              className={`${
-                sizes.includes("M") ? "bg-green-200" : "bg-slate-200"
-              } px-3 py-1 cursor-pointer`}
+            <div
+              onClick={() =>
+                setSizes((prev) =>
+                  prev.includes("M")
+                    ? prev.filter((item) => item !== "M")
+                    : [...prev, "M"]
+                )
+              }
             >
-              M
-            </p>
-          </div>
+              <p
+                className={`${
+                  sizes.includes("M") ? "bg-green-200" : "bg-slate-200"
+                } px-3 py-1 cursor-pointer`}
+              >
+                M
+              </p>
+            </div>
 
-          <div
-            onClick={() =>
-              setSizes((prev) =>
-                prev.includes("L")
-                  ? prev.filter((item) => item !== "L")
-                  : [...prev, "L"]
-              )
-            }
-          >
-            <p
-              className={`${
-                sizes.includes("L") ? "bg-green-200" : "bg-slate-200"
-              } px-3 py-1 cursor-pointer`}
+            <div
+              onClick={() =>
+                setSizes((prev) =>
+                  prev.includes("L")
+                    ? prev.filter((item) => item !== "L")
+                    : [...prev, "L"]
+                )
+              }
             >
-              L
-            </p>
-          </div>
+              <p
+                className={`${
+                  sizes.includes("L") ? "bg-green-200" : "bg-slate-200"
+                } px-3 py-1 cursor-pointer`}
+              >
+                L
+              </p>
+            </div>
 
-          <div
-            onClick={() =>
-              setSizes((prev) =>
-                prev.includes("XL")
-                  ? prev.filter((item) => item !== "XL")
-                  : [...prev, "XL"]
-              )
-            }
-          >
-            <p
-              className={`${
-                sizes.includes("XL") ? "bg-green-200" : "bg-slate-200"
-              } px-3 py-1 cursor-pointer`}
+            <div
+              onClick={() =>
+                setSizes((prev) =>
+                  prev.includes("XL")
+                    ? prev.filter((item) => item !== "XL")
+                    : [...prev, "XL"]
+                )
+              }
             >
-              XL
-            </p>
-          </div>
+              <p
+                className={`${
+                  sizes.includes("XL") ? "bg-green-200" : "bg-slate-200"
+                } px-3 py-1 cursor-pointer`}
+              >
+                XL
+              </p>
+            </div>
 
-          <div
-            onClick={() =>
-              setSizes((prev) =>
-                prev.includes("XXL")
-                  ? prev.filter((item) => item !== "XXL")
-                  : [...prev, "XXL"]
-              )
-            }
-          >
-            <p
-              className={`${
-                sizes.includes("XXL") ? "bg-green-200" : "bg-slate-200"
-              } px-3 py-1 cursor-pointer`}
+            <div
+              onClick={() =>
+                setSizes((prev) =>
+                  prev.includes("XXL")
+                    ? prev.filter((item) => item !== "XXL")
+                    : [...prev, "XXL"]
+                )
+              }
             >
-              XXL
-            </p>
+              <p
+                className={`${
+                  sizes.includes("XXL") ? "bg-green-200" : "bg-slate-200"
+                } px-3 py-1 cursor-pointer`}
+              >
+                XXL
+              </p>
+            </div>
           </div>
-        </div>
-        <ScrollBar orientation="horizontal" />
+          <ScrollBar orientation="horizontal" />
         </ScrollArea>
       </div>
 

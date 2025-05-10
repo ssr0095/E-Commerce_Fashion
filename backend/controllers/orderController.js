@@ -5,10 +5,12 @@ import razorpay from "razorpay";
 import { uploadToR2 } from "../config/cloudflare.js";
 import { v4 as uuidv4 } from "uuid";
 import validateFile from "../utils/fileValidation.js";
+import { createAuditLog } from "./auditController.js";
 
 // global variables
 const currency = process.env.CURRENCY;
 const deliveryCharge = process.env.DELIVERY_FEE;
+const COUPON = process.env.FIRST_ORDER_DISCOUNT;
 
 // gateway initialize
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
@@ -73,15 +75,23 @@ const placeOrderGooglePay = async (req, res) => {
 
     const user = await userModel.findByIdAndUpdate(userId, { cartData: {} });
     if (!user?.has_placed_first_order) {
-      const couponCode = `${user.name.toUpperCase().trim()}${Math.floor(
-        1000 + Math.random() * 9000
-      )}`;
+      const couponCode = `${user.name
+        .substring(0, 4)
+        .toUpperCase()
+        .trim()}${Math.floor(1000 + Math.random() * 9000)}`;
       await userModel.findByIdAndUpdate(userId, {
         coupon: couponCode,
         isCouponActive: true,
         has_placed_first_order: true,
       });
     }
+
+    await createAuditLog({
+      action: "ORDER PLACED",
+      userId: userId,
+      metadata: { ip: req.ip },
+    });
+
     res.json({ success: true, message: "Order Placed", orderId: newOrder._id });
   } catch (error) {
     console.log(error);
@@ -148,7 +158,7 @@ const placeOrderStripe = async (req, res) => {
 // Verify Stripe
 const verifyStripe = async (req, res) => {
   const userId = req.user.id;
-  const { orderId, success} = req.body;
+  const { orderId, success } = req.body;
 
   try {
     if (success === "true") {
@@ -226,7 +236,7 @@ const verifyRazorpay = async (req, res) => {
 const allOrders = async (req, res) => {
   try {
     const orders = await orderModel.find({});
-    res.json({ success: true, orders });
+    return res.json({ success: true, orders });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
@@ -237,8 +247,13 @@ const allOrders = async (req, res) => {
 const userOrders = async (req, res) => {
   try {
     const userId = req.user.id;
+    const { page, limit } = req.body;
 
-    const orders = await orderModel.find({ userId });
+    const orders = await orderModel
+      .find({ userId })
+      .sort({ createdAt: -1 }) // Newest first
+      .skip((page - 1) * limit)
+      .limit(limit);
     res.json({ success: true, orders });
   } catch (error) {
     console.log(error);
@@ -292,9 +307,9 @@ const addPaymentScreenshot = async (req, res) => {
     const { orderId } = req.body;
 
     if (!req.file) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Payment screenshot not uploaded" 
+      return res.status(400).json({
+        success: false,
+        message: "Payment screenshot not uploaded",
       });
     }
 
@@ -315,20 +330,20 @@ const addPaymentScreenshot = async (req, res) => {
     });
 
     if (!order) {
-      return res.status(404).json({ 
-        success: false, 
-        message: "Order not found" 
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
       });
     }
 
-    res.json({ 
-      success: true, 
-      message: "Payment screenshot uploaded" 
+    res.json({
+      success: true,
+      message: "Payment screenshot uploaded",
     });
   } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      message: error.message 
+    res.status(500).json({
+      success: false,
+      message: error.message,
     });
   }
 };
@@ -338,9 +353,9 @@ const addDesignImage = async (req, res) => {
     const { orderId, designDetail } = req.body;
 
     if (!req.file || !designDetail) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Design image or detail missing" 
+      return res.status(400).json({
+        success: false,
+        message: "Design image or detail missing",
       });
     }
 
@@ -360,20 +375,147 @@ const addDesignImage = async (req, res) => {
     });
 
     if (!order) {
-      return res.status(404).json({ 
-        success: false, 
-        message: "Order not found" 
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
       });
     }
 
-    res.json({ 
-      success: true, 
-      message: "Design uploaded successfully" 
+    res.json({
+      success: true,
+      message: "Design uploaded successfully",
     });
   } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      message: error.message 
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// Apply Coupon on New User's First Order
+const applyCoupon = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { couponCode } = req.body;
+
+    // Validate coupon code format
+    if (
+      !couponCode ||
+      typeof couponCode !== "string" ||
+      couponCode.length < 6
+    ) {
+      await createAuditLog({
+        action: "INVALID_COUPON_FORMAT",
+        userId: userId,
+        metadata: { couponCode, ip: req.ip },
+      });
+      return res.status(400).json({
+        success: false,
+        message: "Invalid coupon code format",
+      });
+    }
+
+    const user = await userModel.findById(userId);
+
+    // Check if user has already placed an order
+    if (
+      user?.has_placed_first_order &&
+      couponCode === process.env.COUSINS_COUPON
+    ) {
+      await createAuditLog({
+        action: "COUSINS_COUPON_REJECTED",
+        userId: userId,
+        metadata: {
+          reason: "already_placed_order",
+          ip: req.ip,
+        },
+      });
+      return res.status(403).json({
+        success: false,
+        message: "First-order coupon already used",
+      });
+    }
+
+    console.log(couponCode);
+    console.log(process.env.COUSINS_COUPON);
+    console.log(couponCode === process.env.COUSINS_COUPON);
+    // Check for special coupon
+    if (couponCode === process.env.COUSINS_COUPON) {
+      await createAuditLog({
+        action: "COUSINS_COUPON_APPLIED",
+        userId: userId,
+        metadata: { ip: req.ip },
+      });
+
+      return res.json({
+        success: true,
+        message: "First-order coupon applied",
+        discount: process.env.FIRST_ORDER_DISCOUNT || 10,
+      });
+    }
+
+    // Check for user referral coupons
+    const couponOwner = await userModel.findOne({
+      coupon: couponCode,
+      isCouponActive: true,
+    });
+
+    if (!couponOwner) {
+      await createAuditLog({
+        action: "INVALID_COUPON_ATTEMPT",
+        userId: userId,
+        metadata: { couponCode, ip: req.ip },
+      });
+      return res.status(404).json({
+        success: false,
+        message: "Invalid or expired coupon",
+      });
+    }
+
+    // Check if user is trying to use their own coupon
+    if (couponOwner._id.toString() === userId.toString()) {
+      await createAuditLog({
+        action: "SELF_REFERRAL_ATTEMPT",
+        userId: userId,
+        metadata: { couponCode, ip: req.ip },
+      });
+      return res.status(400).json({
+        success: false,
+        message: "Invalid referral code",
+      });
+    }
+
+    await createAuditLog({
+      action: `REFERRAL_COUPON_APPLIED`,
+      userId: userId,
+      referrerId: couponOwner._id,
+      metadata: {
+        couponCode,
+        discount: couponOwner.couponDiscount || 10,
+        ip: req.ip,
+      },
+    });
+
+    return res.json({
+      success: true,
+      message: "Coupon applied",
+      discount: couponOwner.couponDiscount || 10,
+    });
+  } catch (error) {
+    await createAuditLog({
+      action: "COUPON_ERROR",
+      userId: req.user?.id,
+      metadata: {
+        error: error.message,
+        ip: req.ip,
+      },
+    });
+
+    console.error("Coupon application error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to process coupon",
     });
   }
 };
@@ -392,4 +534,5 @@ export {
   getUserOrder,
   addPaymentScreenshot,
   addDesignImage,
+  applyCoupon,
 };

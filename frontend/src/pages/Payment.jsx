@@ -17,21 +17,21 @@ import imageCompression from "browser-image-compression";
 const Payment = () => {
   const { token, backendUrl, currency, navigate } = useContext(ShopContext);
   const { orderId } = useParams();
-  
+
   const [isLoading, setIsLoading] = useState(false);
   const [order, setOrder] = useState(null);
   const [quantity, setQuantity] = useState(0);
   const [isCustom, setIsCustom] = useState(false);
-  
+
   // Payment image state
   const [paymentImage, setPaymentImage] = useState(null);
   const [isPaymentImageUploaded, setIsPaymentImageUploaded] = useState(false);
-  
+
   // Design image state
   const [designImage, setDesignImage] = useState(null);
   const [designDetail, setDesignDetail] = useState("");
   const [isDesignImageUploaded, setIsDesignImageUploaded] = useState(false);
-  
+
   // Constants
   const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/avif"];
   const maxSize = 3 * 1024 * 1024; // 3MB
@@ -48,7 +48,9 @@ const Payment = () => {
       const response = await axios.post(
         `${backendUrl}/api/order/getuserorder`,
         { orderId },
-        { headers: { token } }
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
 
       if (response.data.success) {
@@ -92,11 +94,11 @@ const Payment = () => {
       const options = {
         maxSizeMB: 1,
         maxWidthOrHeight: 1920,
-        useWebWorker: true
+        useWebWorker: true,
       };
       return await imageCompression(file, options);
     } catch (error) {
-      console.error("Image compression error:", error);
+      toast.error("Image compression error");
       return file; // Fallback to original if compression fails
     }
   };
@@ -126,23 +128,23 @@ const Payment = () => {
     try {
       setIsLoading(true);
       const compressedImage = await compressImage(designImage);
-      
+
       const formData = new FormData();
       formData.append("orderId", orderId);
       formData.append("designImage", compressedImage);
       formData.append("designDetail", designDetail);
 
-    const response = await axios.post(
-      `${backendUrl}/api/order/addDesignImage`,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data", // Crucial for file uploads
-          "Authorization": `Bearer ${token}`
-        },
-        withCredentials: true // For cookies if using
-      }
-    );
+      const response = await axios.post(
+        `${backendUrl}/api/order/addDesignImage`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data", // Crucial for file uploads
+            Authorization: `Bearer ${token}`,
+          },
+          // withCredentials: true, // For cookies if using
+        }
+      );
 
       if (response.data.success) {
         setIsDesignImageUploaded(true);
@@ -174,7 +176,7 @@ const Payment = () => {
     try {
       setIsLoading(true);
       const compressedImage = await compressImage(paymentImage);
-      
+
       const formData = new FormData();
       formData.append("orderId", orderId);
       formData.append("paymentImage", compressedImage);
@@ -185,9 +187,9 @@ const Payment = () => {
         {
           headers: {
             "Content-Type": "multipart/form-data", // Crucial for file uploads
-            "Authorization": `Bearer ${token}`
+            Authorization: `Bearer ${token}`,
           },
-          withCredentials: true // For cookies if using
+          // withCredentials: true, // For cookies if using
         }
       );
 
@@ -225,7 +227,7 @@ const Payment = () => {
             <div className="text-xl sm:text-2xl my-3">
               <Title text1="DESIGN" text2="INFORMATION" />
             </div>
-            
+
             <div className="w-full max-w-lg flex flex-col gap-3">
               <div className="space-y-2">
                 <Label htmlFor="designImage">Upload design</Label>
@@ -237,7 +239,7 @@ const Payment = () => {
                   disabled={isDesignImageUploaded}
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="designDetail">Detail</Label>
                 <Textarea
@@ -248,7 +250,7 @@ const Payment = () => {
                   disabled={isDesignImageUploaded}
                 />
               </div>
-              
+
               {!isDesignImageUploaded && (
                 <Button
                   className="bg-gray-950 hover:bg-gray-800 rounded-none mt-6 w-full sm:w-1/2"
@@ -258,7 +260,7 @@ const Payment = () => {
                   Upload Design
                 </Button>
               )}
-              
+
               {isDesignImageUploaded && (
                 <div className="text-green-600 mt-2">
                   Design uploaded successfully!
@@ -280,26 +282,27 @@ const Payment = () => {
               <Label htmlFor="paymentImage" className="cursor-pointer">
                 <div className="w-48 h-48 rounded-lg border-2 border-dashed border-gray-500 bg-gray-200 hover:bg-gray-300 flex flex-col items-center justify-center overflow-hidden">
                   {paymentImage ? (
-                    <img 
-                      src={URL.createObjectURL(paymentImage)} 
-                      alt="Payment preview" 
+                    <img
+                      src={URL.createObjectURL(paymentImage)}
+                      alt="Payment preview"
                       className="w-full h-full object-contain"
                     />
                   ) : (
                     <>
-                      <img 
-                        src={assets.upload_area} 
-                        alt="Upload" 
+                      <img
+                        src={assets.upload_area}
+                        alt="Upload"
                         className="w-6 h-6"
                       />
                       <p className="text-gray-500 mt-2">
-                        Upload <span className="text-blue-500 underline">image</span>
+                        Upload{" "}
+                        <span className="text-blue-500 underline">image</span>
                       </p>
                     </>
                   )}
                 </div>
               </Label>
-              
+
               <Input
                 type="file"
                 id="paymentImage"
@@ -308,12 +311,12 @@ const Payment = () => {
                 className="hidden"
                 disabled={isPaymentImageUploaded}
               />
-              
+
               <Button
                 className="bg-gray-950 hover:bg-gray-800 rounded-none mt-4 w-48"
                 onClick={uploadPaymentImage}
                 disabled={
-                  !paymentImage || 
+                  !paymentImage ||
                   (isCustom && !isDesignImageUploaded) ||
                   isPaymentImageUploaded
                 }
@@ -328,14 +331,14 @@ const Payment = () => {
             <div className="text-xl sm:text-2xl mb-3">
               <Title text1="COMPLETE" text2="PAYMENT" />
             </div>
-            
+
             <div className="flex items-center gap-2">
               <img src={assets.ok_icon} alt="OK" width={24} height={24} />
               <h1 className="text-3xl font-bold">
                 {currency} {order?.amount?.toFixed(2)}
               </h1>
             </div>
-            
+
             <QRCode
               upiId={import.meta.env.VITE_UPI}
               amount={order?.amount?.toString()}
@@ -350,7 +353,7 @@ const Payment = () => {
             <div className="text-2xl">
               <Title text1="CART" text2="TOTALS" />
             </div>
-            
+
             <div className="flex flex-col gap-2 mt-2 text-sm">
               <div className="flex justify-between">
                 <p>Quantity</p>
@@ -358,9 +361,9 @@ const Payment = () => {
                   {quantity} {quantity === 1 ? "item" : "items"}
                 </p>
               </div>
-              
+
               <hr className="my-1" />
-              
+
               <div className="flex justify-between font-semibold">
                 <span>Total</span>
                 <span>

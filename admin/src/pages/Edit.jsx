@@ -75,7 +75,9 @@ const Edit = ({ token, id, setEditDialogOpen }) => {
       const response = await axios.post(
         backendUrl + "/api/product/edit",
         formData,
-        { headers: { token } }
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
 
       // console.log(response.gee);

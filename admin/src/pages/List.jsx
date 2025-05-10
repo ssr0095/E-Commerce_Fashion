@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { backendUrl, currency } from "../App";
 import { toast } from "react-toastify";
-import {Trash2} from "lucide-react"
+import { Trash2 } from "lucide-react";
 // import Edit from "./Edit";
 import {
   Dialog,
@@ -63,10 +63,12 @@ const List = ({ token }) => {
   const removeProduct = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.post(
+      const response = await axios.delete(
         `${backendUrl}/api/product/remove`,
         { id: productId },
-        { headers: { token } }
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
       setIsLoading(false);
 
@@ -149,7 +151,7 @@ const List = ({ token }) => {
                 setDeleteDialogOpen(true);
               }}
             >
-              <Trash2/>
+              <Trash2 />
             </div>
           </div>
         ))}

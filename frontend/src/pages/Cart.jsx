@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { ShopContext } from "../context/ShopContext";
 import Title from "../components/Title";
-import {Trash2} from "lucide-react"
+import { Trash2 } from "lucide-react";
 import CartTotal from "../components/CartTotal";
 import { toast } from "react-toastify";
 import SmallNavBar from "../components/SmallNavBar";
@@ -35,11 +35,12 @@ const Cart = () => {
       return;
     }
 
-    const discountValue = await verifyDiscountCode(couponCode);
-    if (discountValue > 0) {
+    const discountPercentage = await verifyDiscountCode(couponCode);
+    if (discountPercentage > 0) {
       setCouponCode("");
+      toast.success(`${discountPercentage}% discount applied!`);
+    } else {
       setDiscount(0);
-    
     }
   };
 
@@ -56,7 +57,7 @@ const Cart = () => {
     } else {
       navigate("/place-order");
     }
-  }
+  };
 
   useEffect(() => {
     const allProducts = [...products, ...customizableProducts];
@@ -134,68 +135,66 @@ const Cart = () => {
                   min={1}
                   defaultValue={item?.quantity}
                 />
-                <Trash2 
-                onClick={() => updateQuantity(item?._id, item?.size, 0)}
+                <Trash2
+                  onClick={() => updateQuantity(item?._id, item?.size, 0)}
                   className="w-4 mr-4 sm:w-5 cursor-pointer"
                 />
               </div>
             );
           })}
         </div>
-        </div>
+      </div>
 
-        <div className="flex justify-between gap-10 my-20 flex-col lg:flex-row">
-          <form onSubmit={applyCoupon} className="flex gap-2">
-            <Input
-              type="text"
-              value={couponCode}
-              onChange={(e) => setCouponCode(e.target.value)}
-              placeholder="Enter coupon code"
-              className="flex-1 max-w-sm border border-gray-300 py-1.5 px-3.5 rounded-none"
-              disabled={applyingDiscount || discount > 0}
-            />
-            {discount > 0 ? (
-              <Button
-                type="button"
-                onClick={removeDiscount}
-                className="bg-red-500 text-white rounded-none hover:bg-red-600"
-              >
-                Remove
-              </Button>
-            ) : (
-              <Button
-                type="submit"
-                variant={"default"}
-                disabled={applyingDiscount || !couponCode.trim()}
-                className={`rounded-none ${
-                  applyingDiscount || !couponCode.trim()
-                    ? "cursor-not-allowed"
-                    : "bg-green-500 text-white hover:bg-green-600"
-                }`}
-              >
-                {applyingDiscount ? "Applying..." : "Apply"}
-              </Button>
-            )}
-          </form>
-          {discount > 0 && (
-          <p className="mt-2 text-green-600">
-            {discount}% discount applied!
-          </p>
+      <div className="flex justify-between gap-10 my-20 flex-col lg:flex-row">
+        <form onSubmit={applyCoupon} className="flex gap-2">
+          <Input
+            type="text"
+            value={couponCode}
+            onChange={(e) => setCouponCode(e.target.value)}
+            placeholder="Enter coupon code"
+            className="flex-1 max-w-sm border border-gray-300 py-1.5 px-3.5 rounded-none"
+            disabled={applyingDiscount || discount > 0}
+          />
+          {discount > 0 ? (
+            <Button
+              type="button"
+              onClick={removeDiscount}
+              className="bg-red-500 text-white rounded-none hover:bg-red-600"
+            >
+              Remove
+            </Button>
+          ) : (
+            <Button
+              type="submit"
+              variant={"default"}
+              disabled={applyingDiscount || !couponCode.trim()}
+              className={`rounded-none ${
+                applyingDiscount || !couponCode.trim()
+                  ? "cursor-not-allowed bg-gray-300"
+                  : "bg-green-500 text-white hover:bg-green-600"
+              }`}
+            >
+              {applyingDiscount ? "Applying..." : "Apply"}
+            </Button>
+          )}
+        </form>
+        {discount > 0 && (
+          <p className="mt-2 text-green-600">{discount}% discount applied!</p>
         )}
       </div>
       <div className="w-full">
-      <CartTotal />
-      <div className=" w-full text-end">
-        <Button
-          onClick={onSubmitHandler}
-          className="rounded-none my-8 px-8 w-full sm:w-fit py-3"
-        >
-          PROCEED TO CHECKOUT
-        </Button>
-      </div>
+        <CartTotal />
+        <div className=" w-full text-end">
+          <Button
+            onClick={onSubmitHandler}
+            className="rounded-none my-8 px-8 w-full sm:w-fit py-3"
+          >
+            PROCEED TO CHECKOUT
+          </Button>
         </div>
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default Cart
+export default Cart;

@@ -8,6 +8,9 @@ import userRouter from "./routes/userRoute.js";
 import productRouter from "./routes/productRoute.js";
 import cartRouter from "./routes/cartRoute.js";
 import orderRouter from "./routes/orderRoute.js";
+import authRouter from "./routes/authRoute.js";
+import { securityMiddleware } from "./middleware/security.js";
+import { errorHandler } from "./middleware/errorHandler.js";
 
 // App Config
 const app = express();
@@ -18,30 +21,45 @@ connectDB();
 const Limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 5, // 5 requests per window
-  message: "Too many upload attempts, please try later",
+  message: "Too many attempts, please try later",
 });
 
-
 // middlewares
+securityMiddleware(app);
+
 const corsOptions = {
-  origin: ['http://localhost:5173', 'https://cousinsfashion.in'],
-  credentials: true, // This is crucial
-  allowedHeaders: ['Content-Type', 'Authorization']
+  origin: [
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "https://cousinsfashion.in",
+    "https://admin.cousinsfashion.in",
+  ],
+  // credentials: true, // This is crucial
+  allowedMethods: ["GET", "POST", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 };
 
 app.use(cors(corsOptions));
-app.use(express.json());
-app.options('*', cors(corsOptions));
-app.use("/api/order/payment", Limiter);
-// app.use('/api/auth/login',Limiter);
-// app.use('/api/auth/refresh',Limiter);
+app.use(express.json({ limit: "30kb" })); // For API requests
+app.use(express.urlencoded({ limit: "30kb", extended: true })); // For form data
+app.options("*", cors(corsOptions));
+app.use("/api/order/addPaymentScreenshot", Limiter);
+app.use("/api/order/addDesignImage", Limiter);
+app.use("/api/order/place", Limiter);
+app.use("/api/order/googlepay", Limiter);
+app.use("/api/order/verifyCode", Limiter);
+app.use("/api/auth/login", Limiter);
+app.use("/api/auth/register", Limiter);
+app.use("/api/auth/refresh", Limiter);
 
 // api endpoints
 app.use("/api/user", userRouter);
 app.use("/api/product", productRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/order", orderRouter);
-app.use('/api/auth', userRouter);
+app.use("/api/auth", authRouter);
+
+app.use(errorHandler);
 
 app.get("/", (req, res) => {
   res.send("API Working");

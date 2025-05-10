@@ -18,7 +18,7 @@ const s3Client = new S3Client({
  * @returns {Promise<string>} Public URL
  */
 export const uploadToR2 = async (buffer, fileName, mimetype) => {
-  const safeFileName = fileName.replace(/[^a-zA-Z0-9.-]/g, "_");
+  const safeFileName = fileName.replace(/[^a-zA-Z0-9./-]/g, "_");
   await s3Client.send(
     new PutObjectCommand({
       Bucket: process.env.R2_BUCKET_NAME,
@@ -32,3 +32,6 @@ export const uploadToR2 = async (buffer, fileName, mimetype) => {
   // Use custom domain instead of R2 public URL
   return `https://cdn.cousinsfashion.in/${fileName}`;
 };
+
+// https://cdn.cousinsfashion.in/payments/c40ab54a-aba7-438b-9847-95427c9dc65a-blob
+// https://cdn.cousinsfashion.in/payments/c40ab54a_aba7_438b_9847_95427c9dc65a_blob

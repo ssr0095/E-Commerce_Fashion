@@ -1,123 +1,123 @@
 import React, { useContext, useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { ShopContext } from "../context/ShopContext";
 import { toast } from "react-toastify";
 import Loader from "../components/CompLoader";
 import axios from "axios";
 
+// Updated validation schema
+const authSchema = z.object({
+  name: z.string().optional(),
+  // name: z.string().min(3, "Name must be at least 3 characters").optional(),
+  email: z.string().email("Invalid email address"),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(/[A-Z]/, "Must contain at least one uppercase letter")
+    .regex(/[0-9]/, "Must contain at least one number"),
+});
+
 const Login = () => {
-  const [currentState, setCurrentState] = useState("Login");
+  const [currentState, setCurrentState] = useState("login");
   const { login, token, navigate, loadingUser, backendUrl } =
     useContext(ShopContext);
-
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-  });
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+    watch,
+  } = useForm({
+    resolver: zodResolver(authSchema),
+    mode: "onChange", // Validate on change
+  });
 
-  const handleRegister = async () => {
+  const onSubmit = async (data) => {
     setIsLoading(true);
     try {
-      const response = await axios.post(`${backendUrl}/api/user/register`, {
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
-      });
-
-      if (response.data.success) {
-        toast.success("Registration successful!");
-        setCurrentState("Login"); // Switch to login after successful registration
-      } else {
-        toast.error(response.data.message);
-      }
-    } catch (error) {
-      // console.log(error.response?.data?.message || "Registration failed");
-      toast.error(error.response?.data?.message || "Registration failed");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const onSubmitHandler = async (event) => {
-    event.preventDefault();
-    setIsLoading(true);
-
-    try {
-      if (currentState === "Sign Up") {
-        await handleRegister();
-      } else {
-        const success = await login(formData.email, formData.password);
-        if (!success) {
-          toast.error("Invalid email or password");
+      if (currentState === "register") {
+        const response = await axios.post(
+          `${backendUrl}/api/auth/register`,
+          data
+        );
+        if (response.data.success) {
+          toast.success("Registration successful!");
+          setCurrentState("login");
+          reset();
         }
+      } else {
+        await login(data.email, data.password);
       }
     } catch (error) {
-      toast.error("An unexpected error occurred");
+      // toast.error("Auth error:", error.response?.data.message);
+      const message =
+        error.response?.data?.message ||
+        (currentState === "register" ? "Registration failed" : "Login failed");
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    if (token && !loadingUser) {
-      navigate("/");
-    }
+    if (token && !loadingUser) navigate("/");
   }, [token, loadingUser, navigate]);
 
   return (
     <form
-      onSubmit={onSubmitHandler}
+      onSubmit={handleSubmit(onSubmit)}
       className="flex flex-col items-center w-[90%] sm:max-w-96 m-auto mt-14 gap-4 text-gray-800"
     >
       {(isLoading || loadingUser) && <Loader />}
 
       <div className="inline-flex items-center gap-2 mb-2 mt-10">
-        <p className="prata-regular text-3xl">{currentState}</p>
+        <p className="prata-regular text-3xl">
+          {currentState === "login" ? "Login" : "Sign Up"}
+        </p>
         <hr className="border-none h-[1.5px] w-8 bg-gray-800" />
       </div>
 
-      {currentState === "Sign Up" && (
-        <input
-          name="name"
-          onChange={handleChange}
-          value={formData.name}
-          type="text"
-          className="w-full px-3 py-2 border border-gray-800"
-          placeholder="Name"
-          required
-          minLength={3}
-        />
+      {currentState === "register" && (
+        <div className="w-full">
+          <input
+            {...register("name")}
+            type="text"
+            className="w-full px-3 py-2 border border-gray-800"
+            placeholder="Name"
+          />
+          {errors.name && (
+            <p className="text-red-500 text-xs">{errors.name.message}</p>
+          )}
+        </div>
       )}
 
-      <input
-        name="email"
-        onChange={handleChange}
-        value={formData.email}
-        type="email"
-        className="w-full px-3 py-2 border border-gray-800"
-        placeholder="Email"
-        required
-      />
+      <div className="w-full">
+        <input
+          {...register("email")}
+          type="email"
+          className="w-full px-3 py-2 border border-gray-800"
+          placeholder="Email"
+        />
+        {errors.email && (
+          <p className="text-red-500 text-xs">{errors.email.message}</p>
+        )}
+      </div>
 
-      <input
-        name="password"
-        onChange={handleChange}
-        value={formData.password}
-        type="password"
-        className="w-full px-3 py-2 border border-gray-800"
-        placeholder="Password"
-        required
-        minLength={8}
-      />
+      <div className="w-full">
+        <input
+          {...register("password")}
+          type="password"
+          className="w-full px-3 py-2 border border-gray-800"
+          placeholder="Password"
+        />
+        {errors.password && (
+          <p className="text-red-500 text-xs">{errors.password.message}</p>
+        )}
+      </div>
 
       <div className="w-full flex justify-between text-sm mt-[-8px]">
         <button
@@ -132,10 +132,10 @@ const Login = () => {
           type="button"
           className="cursor-pointer hover:underline"
           onClick={() =>
-            setCurrentState((prev) => (prev === "Login" ? "Sign Up" : "Login"))
+            setCurrentState((prev) => (prev === "login" ? "register" : "login"))
           }
         >
-          {currentState === "Login" ? "Create account" : "Login Here"}
+          {currentState === "login" ? "Create account" : "Login Here"}
         </button>
       </div>
 
@@ -144,7 +144,7 @@ const Login = () => {
         className="bg-black text-white font-light px-8 py-2 mt-4 hover:bg-gray-800 transition-colors"
         disabled={isLoading || loadingUser}
       >
-        {currentState === "Login" ? "Sign In" : "Sign Up"}
+        {currentState === "login" ? "Login" : "Sign Up"}
       </button>
     </form>
   );

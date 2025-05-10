@@ -24,6 +24,7 @@ const PlaceOrder = () => {
     products,
     customizableProducts,
     discount,
+    refreshOrders,
   } = useContext(ShopContext);
 
   const allProducts = [...products, ...customizableProducts];
@@ -102,7 +103,10 @@ const PlaceOrder = () => {
       let orderData = {
         address: formData,
         items: orderItems,
-        amount: getCartAmount() + delivery_fee - Math.round((getCartAmount() * discount) / 100),
+        amount:
+          getCartAmount() +
+          delivery_fee -
+          Math.round((getCartAmount() * discount) / 100),
       };
 
       switch (method) {
@@ -116,10 +120,14 @@ const PlaceOrder = () => {
           const responseGooglePay = await axios.post(
             backendUrl + "/api/order/googlepay",
             orderData,
-            { headers: { token } }
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
           );
+
           if (responseGooglePay.data.success) {
             clearCart();
+            refreshOrders();
             navigate(`/payment/${responseGooglePay.data.orderId}`);
           } else {
             toast.error(responseGooglePay.data.message);
