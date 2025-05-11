@@ -29,7 +29,7 @@ const Hero = () => {
               <img
                 src={img}
                 className="w-full"
-                alt="Hero"
+                alt={"Hero" + index}
                 width={1080}
                 // height={18}
                 loading="lazy"

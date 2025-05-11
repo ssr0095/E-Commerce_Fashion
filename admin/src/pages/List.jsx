@@ -113,7 +113,7 @@ const List = ({ token }) => {
               width={48}
               height={48}
               src={item.image[0]}
-              alt="cloth"
+              alt={item.name}
             />
             <p>{item.name}</p>
             <p>{item.category}</p>
