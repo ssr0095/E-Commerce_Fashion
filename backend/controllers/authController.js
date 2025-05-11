@@ -38,12 +38,18 @@ export const login = async (req, res, next) => {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { email, password } = req.body;
-    const userType = req.path.includes("admin") ? "admin" : "user";
+    const { email, password, isAdminLogin = false } = req.body; // Add isAdminLogin flag
 
-    const user = await User.findOne({ email, role: userType }).select(
-      "+password +isActive +refreshTokens"
-    );
+    // Check user type based on the flag
+    const user = await User.findOne({
+      email,
+      role: isAdminLogin ? "admin" : { $in: ["user", "admin"] }, // Admins can login through both
+    }).select("+password +isActive +refreshTokens");
+
+    // Additional check if it's admin login but user is not admin
+    if (isAdminLogin && user?.role !== "admin") {
+      return res.status(401).json({ message: "Unauthorized access" });
+    }
 
     if (!user || !user.isActive || !(await user.comparePassword(password))) {
       await createAuditLog({

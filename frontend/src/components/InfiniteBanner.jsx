@@ -19,25 +19,25 @@ const InfiniteBanner = () => {
             className="flex items-center justify-center md:justify-start [&_li]:mx-8 [&_img]:max-w-none animate-infinite-scroll"
           >
             <li>
-              <img src={assets.logo} alt="logo" className="w-24 md:w-32" />
+              <img src="/images/logo.png" alt="logo" className="w-24 md:w-32" />
             </li>
             <li>
-              <img src={assets.logo} alt="logo" className="w-24 md:w-32" />
+              <img src="/images/logo.png" alt="logo" className="w-24 md:w-32" />
             </li>
             <li>
-              <img src={assets.logo} alt="logo" className="w-24 md:w-32" />
+              <img src="/images/logo.png" alt="logo" className="w-24 md:w-32" />
             </li>
             <li>
-              <img src={assets.logo} alt="logo" className="w-24 md:w-32" />
+              <img src="/images/logo.png" alt="logo" className="w-24 md:w-32" />
             </li>
             <li>
-              <img src={assets.logo} alt="logo" className="w-24 md:w-32" />
+              <img src="/images/logo.png" alt="logo" className="w-24 md:w-32" />
             </li>
             <li>
-              <img src={assets.logo} alt="logo" className="w-24 md:w-32" />
+              <img src="/images/logo.png" alt="logo" className="w-24 md:w-32" />
             </li>
             <li>
-              <img src={assets.logo} alt="logo" className="w-24 md:w-32" />
+              <img src="/images/logo.png" alt="logo" className="w-24 md:w-32" />
             </li>
           </ul>
           <ul
@@ -45,25 +45,25 @@ const InfiniteBanner = () => {
             className="flex items-center justify-center md:justify-start [&_li]:mx-8 [&_img]:max-w-none animate-infinite-scroll"
           >
             <li>
-              <img src={assets.logo} alt="logo" className="w-24 md:w-32" />
+              <img src="/images/logo.png" alt="logo" className="w-24 md:w-32" />
             </li>
             <li>
-              <img src={assets.logo} alt="logo" className="w-24 md:w-32" />
+              <img src="/images/logo.png" alt="logo" className="w-24 md:w-32" />
             </li>
             <li>
-              <img src={assets.logo} alt="logo" className="w-24 md:w-32" />
+              <img src="/images/logo.png" alt="logo" className="w-24 md:w-32" />
             </li>
             <li>
-              <img src={assets.logo} alt="logo" className="w-24 md:w-32" />
+              <img src="/images/logo.png" alt="logo" className="w-24 md:w-32" />
             </li>
             <li>
-              <img src={assets.logo} alt="logo" className="w-24 md:w-32" />
+              <img src="/images/logo.png" alt="logo" className="w-24 md:w-32" />
             </li>
             <li>
-              <img src={assets.logo} alt="logo" className="w-24 md:w-32" />
+              <img src="/images/logo.png" alt="logo" className="w-24 md:w-32" />
             </li>
             <li>
-              <img src={assets.logo} alt="logo" className="w-24 md:w-32" />
+              <img src="/images/logo.png" alt="logo" className="w-24 md:w-32" />
             </li>
           </ul>
         </div>

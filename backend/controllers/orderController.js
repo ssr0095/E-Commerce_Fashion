@@ -59,7 +59,7 @@ const placeOrder = async (req, res) => {
 const placeOrderGooglePay = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { items, amount, address } = req.body;
+    const { items, amount, address, isCustomizable } = req.body;
 
     const orderData = {
       userId,
@@ -68,6 +68,7 @@ const placeOrderGooglePay = async (req, res) => {
       amount,
       paymentMethod: "Google Pay",
       date: Date.now(),
+      isCustomizable,
     };
 
     const newOrder = new orderModel(orderData);

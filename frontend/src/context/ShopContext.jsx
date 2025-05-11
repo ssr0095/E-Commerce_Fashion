@@ -111,7 +111,7 @@ const ShopContextProvider = ({ children }) => {
         }));
       }
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Failed to load user info");
+      // toast.error(error?.response?.data?.message || "Failed to load user info");
       setState((prev) => ({ ...prev, loadingUser: false }));
       if (error.response?.status === 401) {
         clearAuth();
@@ -183,12 +183,12 @@ const ShopContextProvider = ({ children }) => {
               }
             )
             .catch((error) => {
-              if (error.response?.status === 401) {
-                // Handle token expiration
-                // console.log("Token expired, redirect to login");
-                toast.error("Token expired, redirect to login");
-              }
-              toast.error("Cart update failed");
+              // if (error.response?.status === 401) {
+              // Handle token expiration
+              // console.log("Token expired, redirect to login");
+              // toast.error("Token expired, redirect to login");
+              // }
+              // toast.error("Cart update failed");
             });
         }
 
@@ -347,9 +347,9 @@ const ShopContextProvider = ({ children }) => {
         }
       } catch (error) {
         setState((prev) => ({ ...prev, loading: false }));
-        toast.error(
-          error.response?.data?.message || "Failed to fetch products"
-        );
+        // toast.error(
+        //   error.response?.data?.message || "Failed to fetch products"
+        // );
       }
     },
     [backendUrl]
@@ -373,7 +373,7 @@ const ShopContextProvider = ({ children }) => {
         setState((prev) => ({ ...prev, customizableProducts: filtered }));
       }
     } catch (error) {
-      toast.error("Failed to fetch customizable products");
+      // toast.error("Failed to fetch customizable products");
     }
   }, [backendUrl]);
 
@@ -384,44 +384,6 @@ const ShopContextProvider = ({ children }) => {
         typeof forceState === "boolean" ? forceState : !prev.showSearch,
     }));
   }, []);
-
-  // User authentication
-  const login = useCallback(
-    async (email, password) => {
-      try {
-        const { data } = await axios.post(
-          `${backendUrl}/api/auth/login`,
-          {
-            email,
-            password,
-          },
-          {
-            // Prevent axios from throwing errors for 401 responses
-            validateStatus: (status) => status < 500,
-          }
-        );
-
-        if (data.success) {
-          persistTokens(data.token, data.refreshToken);
-          await getUserCart(data.token);
-          await fetchUserInfo();
-          toast.success("Login successful");
-          return true;
-        }
-      } catch (error) {
-        toast.error(error.response?.data?.message || "Login failed");
-        return false;
-      }
-    },
-    [backendUrl, persistTokens, fetchUserInfo]
-  );
-
-  const logout = useCallback(() => {
-    clearAuth();
-    clearCart();
-    navigate("/login");
-    toast.success("Logged out successfully");
-  }, [clearAuth, clearCart, navigate]);
 
   const getUserCart = useCallback(
     async (userToken) => {
@@ -438,7 +400,7 @@ const ShopContextProvider = ({ children }) => {
           updateCart(data.cartData);
         }
       } catch (error) {
-        toast.error("Failed to fetch user cart");
+        // toast.error("Failed to fetch user cart");
       }
     },
     [backendUrl, updateCart]
@@ -474,7 +436,7 @@ const ShopContextProvider = ({ children }) => {
       // Get token from state or localStorage as fallback
       const token = state.token || cacheManager.get("token");
       if (!token) {
-        console.error("No token available");
+        // console.error("No token available");
         return;
       }
 
@@ -499,7 +461,6 @@ const ShopContextProvider = ({ children }) => {
           {
             headers: {
               Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
             },
           }
         );
@@ -515,10 +476,10 @@ const ShopContextProvider = ({ children }) => {
           }));
         }
       } catch (error) {
-        console.error(
-          "Order fetch error:",
-          error.response?.data || error.message
-        );
+        // console.error(
+        //   "Order fetch error:",
+        //   error.response?.data || error.message
+        // );
         setState((prev) => ({ ...prev, loadingOrders: false }));
 
         if (error.response?.status === 401) {
@@ -527,9 +488,10 @@ const ShopContextProvider = ({ children }) => {
           setState((prev) => ({ ...prev, token: "" }));
           toast.error("Session expired. Please login again");
           navigate("/login");
-        } else {
-          toast.error(error.response?.data?.message || "Failed to load orders");
         }
+        // else {
+        //   toast.error(error.response?.data?.message || "Failed to load orders");
+        // }
       }
     },
     [backendUrl, state.currentOrderPage, navigate]
@@ -545,6 +507,69 @@ const ShopContextProvider = ({ children }) => {
     },
     [state.orders]
   );
+
+  const clearOrders = useCallback(() => {
+    cacheManager.clear("userOrders");
+    setState((prev) => ({
+      ...prev,
+      orders: [],
+    }));
+  }, []);
+
+  // User authentication
+  const login = useCallback(
+    async (email, password) => {
+      try {
+        const { data } = await axios.post(
+          `${backendUrl}/api/auth/login`,
+          {
+            email,
+            password,
+          },
+          {
+            // Prevent axios from throwing errors for 401 responses
+            validateStatus: (status) => status < 500,
+          }
+        );
+
+        if (data.success) {
+          persistTokens(data.token, data.refreshToken);
+          await getUserCart(data.token);
+          await fetchUserInfo();
+          toast.success("Login successful");
+          return true;
+        }
+      } catch (error) {
+        toast.error(error.response?.data?.message || "Login failed");
+        return false;
+      }
+    },
+    [backendUrl, persistTokens, fetchUserInfo]
+  );
+
+  const logout = useCallback(async () => {
+    try {
+      const response = await axios.post(
+        `${backendUrl}/api/auth/logout`,
+        {},
+        {
+          // Prevent axios from throwing errors for 401 responses
+          validateStatus: (status) => status < 500,
+        }
+      );
+
+      if (response.status == 204) {
+        clearAuth();
+        clearCart();
+        clearOrders();
+        navigate("/login");
+        toast.success("Logged out successfully");
+      }
+    } catch (error) {
+      toast.error("Logout failed");
+      return false;
+    }
+  }, [clearAuth, clearCart, navigate, clearOrders]);
 
   // Initialize
   useEffect(() => {

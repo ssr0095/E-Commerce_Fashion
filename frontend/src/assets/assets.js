@@ -1,4 +1,4 @@
-import logo from "./logos/logo.png";
+// import logo from "./logos/logo.png";
 import cart_icon from "./cart_icon.png";
 import about_img from "./about_img.jpg";
 import profile_icon from "./profile_icon.png";
@@ -22,7 +22,7 @@ import bg_02 from "./anime/bg_02.jpg";
 import bg_03 from "./anime/bg_03.jpg";
 
 export const assets = {
-  logo,
+  // logo,
   cart_icon,
   about_img,
   profile_icon,
@@ -72,8 +72,8 @@ export const subCategoryList = [
 ];
 export const category = [
   { name: "Streetwear" },
-  { name: "aesthetics"},
-  { name: "other-collections"},
+  { name: "aesthetics" },
+  { name: "other-collections" },
 ];
 // export const category = [
 //   { name: "Streetwear", image: p_img50 },

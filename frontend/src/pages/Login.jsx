@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -55,8 +55,8 @@ const Login = () => {
     } catch (error) {
       // toast.error("Auth error:", error.response?.data.message);
       const message =
-        error.response?.data?.message ||
-        (currentState === "register" ? "Registration failed" : "Login failed");
+        // error.response?.data?.message ||
+        currentState === "register" ? "Registration failed" : "Login failed";
       toast.error(message);
     } finally {
       setIsLoading(false);

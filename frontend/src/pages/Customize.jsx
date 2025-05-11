@@ -7,7 +7,6 @@ import { assets } from "../assets/assets";
 
 const Customize = () => {
   const { customizableProducts } = useContext(ShopContext);
-
   return (
     <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
       <SmallNavBar navs={["Customize"]} />

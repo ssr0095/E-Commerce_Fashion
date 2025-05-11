@@ -15,7 +15,8 @@ import { Button } from "../components/ui/button";
 import imageCompression from "browser-image-compression";
 
 const Payment = () => {
-  const { token, backendUrl, currency, navigate } = useContext(ShopContext);
+  const { token, backendUrl, currency, navigate, refreshOrders } =
+    useContext(ShopContext);
   const { orderId } = useParams();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -65,10 +66,14 @@ const Payment = () => {
         setQuantity(totalQuantity);
 
         // Check for customizable items
-        const hasCustomItem = orderData.items.some(
-          (item) => item.customizable === true
+        // console.log(orderData);
+        setIsCustom(orderData.isCustomizable);
+        setIsPaymentImageUploaded(
+          (prev) => orderData.paymentScreenshot && !prev
         );
-        setIsCustom(hasCustomItem);
+        setIsDesignImageUploaded(
+          (prev) => orderData.customDesignImage && !prev
+        );
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to load order");
@@ -98,7 +103,7 @@ const Payment = () => {
       };
       return await imageCompression(file, options);
     } catch (error) {
-      toast.error("Image compression error");
+      // toast.error("Image compression error");
       return file; // Fallback to original if compression fails
     }
   };
@@ -377,7 +382,11 @@ const Payment = () => {
         {/* Submit Button */}
         <div className="w-full text-end">
           <Button
-            onClick={() => navigate("/orders")}
+            onClick={() => {
+              refreshOrders();
+
+              navigate("/orders");
+            }}
             className={`bg-gray-950 hover:bg-gray-800 rounded-none w-full sm:w-1/2 lg:w-1/4 ${
               !isPaymentImageUploaded ? "opacity-50 cursor-not-allowed" : ""
             }`}

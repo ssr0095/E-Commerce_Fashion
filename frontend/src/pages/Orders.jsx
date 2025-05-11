@@ -1,12 +1,18 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { ShopContext } from "../context/ShopContext";
 import Title from "../components/Title";
-import axios from "axios";
+// import axios from "axios";
 import { assets } from "../assets/assets";
 import SmallNavBar from "../components/SmallNavBar";
 import Loader from "../components/CompLoader";
-import { toast } from "react-toastify";
-import { PackageCheck, ArrowRight } from "lucide-react";
+// import { toast } from "react-toastify";
+import {
+  PackageCheck,
+  ArrowRight,
+  CircleAlert,
+  CircleCheck,
+  Ban,
+} from "lucide-react";
 
 const Orders = () => {
   const {
@@ -45,15 +51,15 @@ const Orders = () => {
         </div>
 
         {orders?.length === 0 ? (
-          <div className="col-span-full text-center py-10 text-gray-500">
-            No products found.
+          <div className="w-full text-center py-10 text-gray-500">
+            No orders found, Keep Shoping...
           </div>
         ) : (
           <div className="flex flex-col-reverse">
             {orders?.map((order, index) => (
               <div
                 key={index}
-                className="grid max-md:grid-cols-[1fr_1fr] md:grid-cols-[0.3fr_0.8fr_0.8fr_1fr_0.8fr] gap-4 items-start border-b-2 border-gray-200 py-5 md:py-8 text-sm text-gray-700 bg-white"
+                className="grid max-md:grid-cols-[1fr_1fr] md:grid-cols-[0.3fr_0.8fr_0.8fr_1fr_0.8fr] gap-4 items-start border-b-2 border-gray-200 py-5 md:py-8 text-xs text-gray-700 bg-white"
               >
                 {/* ------------ */}
                 <PackageCheck className="max-md:hidden size-12 self-start" />
@@ -106,49 +112,89 @@ const Orders = () => {
                 </div>
                 {/* ------------------- */}
                 <div
-                  className="flex items-center justify-center text-xs gap-2 border px-4 py-2 max-md:col-span-2 font-medium rounded-sm hover:bg-gray-100 active:bg-gray-200 cursor-default"
-                  onClick={() => navigate(`/payment/${order._id}`)}
+                  className="flex items-center flex-col text-xs gap-2 border p-2 max-md:col-span-2 font-medium rounded-sm hover:bg-gray-50 active:bg-gray-100 cursor-default"
+                  onClick={() => {
+                    if (
+                      !order.paymentScreenshot ||
+                      (order.isCustomizable && !order.customDesignImage)
+                    ) {
+                      navigate(`/payment/${order._id}`);
+                    }
+                  }}
                 >
-                  {order.payment === 1 ? (
-                    <>
-                      <img
-                        src={assets.ok_icon}
-                        alt="ok"
-                        width={20}
-                        height={20}
-                      />
-                      Payment success
-                    </>
-                  ) : order.payment === -1 ? (
-                    <>
-                      <img
-                        src={assets.process_icon}
-                        alt="processing"
-                        width={20}
-                        height={20}
-                      />
-                      Payment Processing
-                    </>
-                  ) : (
-                    <>
-                      <img
-                        src={assets.no_icon}
-                        alt="failed"
-                        width={20}
-                        height={20}
-                      />
-                      Payment failed
-                    </>
-                  )}
-                  <div className="flex-1 flex justify-end">
-                    <ArrowRight className="w-5 text-gray-400" />
+                  <div className="w-full flex items-center justify-between gap-2">
+                    <div className="w-full flex flex-1 items-center justify-start gap-2">
+                      {order.payment === 1 ? (
+                        <>
+                          <img
+                            src={assets.ok_icon}
+                            alt="ok"
+                            width={20}
+                            height={20}
+                          />
+                          Payment success
+                        </>
+                      ) : order.payment === -1 ? (
+                        <>
+                          <img
+                            src={assets.process_icon}
+                            alt="processing"
+                            width={20}
+                            height={20}
+                          />
+                          Payment Processing
+                        </>
+                      ) : (
+                        <>
+                          <Ban className="w-4 text-gray-400 shrink-0" />
+                          Payment failed
+                        </>
+                      )}
+                    </div>
+                    {(!order.paymentScreenshot ||
+                      (order.isCustomizable && !order.customDesignImage)) && (
+                      <div>
+                        <ArrowRight className="w-5 text-gray-400 shrink-0" />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="w-full flex items-center justify-between gap-3">
+                    <div className="w-full group flex items-center flex-col gap-2 overflow-visible sticky z-0 border p-2 text-xs font-medium rounded-sm">
+                      {order.paymentScreenshot ? (
+                        <span className="flex items-center gap-2">
+                          <CircleCheck className="w-4 text-gray-400 shrink-0" />
+                          Srceenshot uploaded
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-2">
+                          <CircleAlert className="w-4 text-gray-400 shrink-0" />
+                          Srceenshot not uploaded
+                        </span>
+                      )}
+                    </div>
+                    {order.isCustomizable && (
+                      <div className="w-full group flex items-center flex-col gap-2 overflow-visible sticky z-0 border p-2 text-xs font-medium rounded-sm">
+                        {order.customDesignImage ? (
+                          <span className="flex items-center gap-2">
+                            <CircleCheck className="w-4 text-gray-400 shrink-0" />
+                            Design uploaded
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-2">
+                            <CircleAlert className="w-4 text-gray-400 shrink-0" />
+                            Design not uploaded
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
                 {/* ------------ */}
                 <div className="flex flex-col items-center justify-evenly max-md:gap-3 gap-5 max-md:col-span-2">
-                  <div className="w-full md:w-[70%] group flex items-center flex-col gap-2 overflow-visible sticky z-0 border pl-3 pr-4 py-2 text-sm font-medium rounded-sm hover:bg-gray-100 cursor-default">
+                  <div className="w-full md:w-[70%] group flex items-center flex-col gap-2 overflow-visible sticky z-0 border pl-3 pr-4 py-2 text-xs font-medium rounded-sm hover:bg-gray-100 cursor-default">
                     Status
-                    <div className="group-hover:flex hidden absolute -top-24 -right-3 md:-top-24  md:-left-20 bg-white w-fit items-center flex-col gap-2 z-10 border pl-3 pr-4 py-2 text-sm font-medium rounded-sm">
+                    <div className="group-hover:flex hidden absolute -top-24 -right-3 md:-top-24  md:-left-20 bg-white w-fit items-center flex-col gap-2 z-10 border pl-3 pr-4 py-2 text-xs font-medium rounded-sm">
                       <span className="z-20 absolute top-[15%] left-[16.5px] w-1 h-[70%] align-middle border-gray-300 border-dashed border-2 border-y-0 border-r-0"></span>
                       <p className="flex z-30 items-center gap-2 w-full">
                         <img
@@ -213,7 +259,7 @@ const Orders = () => {
                   {/* ------------ */}
                   <button
                     onClick={() => refreshOrders()}
-                    className="w-full md:w-[70%] border px-4 py-2 text-sm font-medium rounded-sm hover:bg-gray-100 active:bg-gray-200 cursor-default"
+                    className="w-full md:w-[70%] border px-4 py-2 text-xs font-medium rounded-sm hover:bg-gray-100 active:bg-gray-200 cursor-default"
                   >
                     Track Order
                   </button>

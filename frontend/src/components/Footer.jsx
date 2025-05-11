@@ -1,11 +1,11 @@
-import React from "react";
-import { assets } from "../assets/assets";
+import { assets, categoryList, themeList } from "../assets/assets";
 
 const Footer = () => {
+  const theme = themeList.slice(0, 4);
   return (
     <footer className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw] bg-gray-50 border-t  mt-40">
       <div className="my-6">
-        <img src={assets.logo} className="mb-5 w-32" alt="logo" />
+        <img src="/images/logo.png" className="mb-5 w-32" alt="logo" />
         <p className="w-full md:w-11/12 text-gray-600 text-sm">
           CousinsFashion brings you stylish, high-quality fashion for every
           occasion. Explore trendy clothing and accessories for men and women,
@@ -15,7 +15,7 @@ const Footer = () => {
         </p>
       </div>
       <hr />
-      <div className="flex flex-col sm:grid grid-cols-[1fr_1fr_1fr_1fr] gap-7 sm:gap-14 my-10 text-sm">
+      <div className="flex flex-col sm:grid grid-cols-[1fr_1fr_1fr_1fr_1fr] gap-7 sm:gap-14 my-10 text-sm">
         <div>
           <p className="text-xl font-medium mb-5">COMPANY</p>
           <ul className="flex flex-col gap-1 text-gray-600">
@@ -33,23 +33,37 @@ const Footer = () => {
             </a>
           </ul>
         </div>
+
         <div>
           <p className="text-xl font-medium mb-5">CATEGORY</p>
           <ul className="flex flex-col gap-1 text-gray-600">
-            <a href="#" alt="#">
-              Men
-            </a>
-            <a href="#" alt="#">
-              Women
-            </a>
-            <a href="#" alt="#">
-              Aesthetic
-            </a>
-            <a href="#" alt="#">
-              Street style
-            </a>
+            {categoryList.map((item, i) => {
+              return (
+                <li key={item}>
+                  <a href="/collection" alt={item}>
+                    {item}
+                  </a>
+                </li>
+              );
+            })}
           </ul>
         </div>
+
+        <div>
+          <p className="text-xl font-medium mb-5">THEME</p>
+          <ul className="flex flex-col gap-1 text-gray-600">
+            {theme.map((item, i) => {
+              return (
+                <li key={item}>
+                  <a href="/collection" alt={item}>
+                    {item}
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+
         <div>
           <p className="text-xl font-medium mb-5">LEGAL</p>
           <ul className="flex flex-col gap-1 text-gray-600">

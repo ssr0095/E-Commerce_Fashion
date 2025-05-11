@@ -18,9 +18,21 @@ const port = process.env.PORT || 8000;
 connectDB();
 // connectCloudinary();
 
-const Limiter = rateLimit({
+const uploadLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 3, // 3 requests per window
+  message: "Too many attempts, please try later",
+});
+
+const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 5, // 5 requests per window
+  message: "Too many attempts, please try later",
+});
+
+const useLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // 5 requests per window
   message: "Too many attempts, please try later",
 });
 
@@ -29,8 +41,8 @@ securityMiddleware(app);
 
 const corsOptions = {
   origin: [
-    "http://localhost:5173",
-    "http://localhost:5174",
+    // "http://localhost:5173",
+    // "http://localhost:5174",
     "https://cousinsfashion.in",
     "https://admin.cousinsfashion.in",
   ],
@@ -43,14 +55,14 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: "30kb" })); // For API requests
 app.use(express.urlencoded({ limit: "30kb", extended: true })); // For form data
 app.options("*", cors(corsOptions));
-app.use("/api/order/addPaymentScreenshot", Limiter);
-app.use("/api/order/addDesignImage", Limiter);
-app.use("/api/order/place", Limiter);
-app.use("/api/order/googlepay", Limiter);
-app.use("/api/order/verifyCode", Limiter);
-app.use("/api/auth/login", Limiter);
-app.use("/api/auth/register", Limiter);
-app.use("/api/auth/refresh", Limiter);
+app.use("/api/order/addPaymentScreenshot", uploadLimiter);
+app.use("/api/order/addDesignImage", uploadLimiter);
+app.use("/api/order/place", useLimiter);
+app.use("/api/order/googlepay", useLimiter);
+app.use("/api/order/verifyCode", uploadLimiter);
+app.use("/api/auth/login", authLimiter);
+app.use("/api/auth/register", authLimiter);
+app.use("/api/auth/refresh", authLimiter);
 
 // api endpoints
 app.use("/api/user", userRouter);

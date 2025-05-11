@@ -28,6 +28,7 @@ const PlaceOrder = () => {
   } = useContext(ShopContext);
 
   const allProducts = [...products, ...customizableProducts];
+  const [isCustom, setIsCustom] = useState(false);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -95,10 +96,19 @@ const PlaceOrder = () => {
               itemInfo.paymentMethod = "";
 
               orderItems.push(itemInfo);
+              // console.log(orderItems);
             }
           }
         }
       }
+      // Check for customizable items
+      const hasCustomItem = orderItems.some(
+        (item) => item.customizable === true
+      );
+      setIsCustom(hasCustomItem);
+
+      // Create orderData after state update would be complete
+      // But since state updates are async, better to use hasCustomItem directly
 
       let orderData = {
         address: formData,
@@ -107,6 +117,7 @@ const PlaceOrder = () => {
           getCartAmount() +
           delivery_fee -
           Math.round((getCartAmount() * discount) / 100),
+        isCustomizable: hasCustomItem, // Use the local variable instead of state
       };
 
       switch (method) {
@@ -126,8 +137,8 @@ const PlaceOrder = () => {
           );
 
           if (responseGooglePay.data.success) {
+            await refreshOrders();
             clearCart();
-            refreshOrders();
             navigate(`/payment/${responseGooglePay.data.orderId}`);
           } else {
             toast.error(responseGooglePay.data.message);
