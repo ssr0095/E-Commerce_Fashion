@@ -85,7 +85,7 @@ const Navbar = () => {
         <nav className="screen-max-width flex w-full">
           <Link to="/" aria-label="Home">
             <img
-              src="/images/logo.png"
+              src="/logo.png"
               className="w-24"
               alt="Cousins Fashion"
               width={96}
