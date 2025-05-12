@@ -103,7 +103,7 @@ const Cart = () => {
                   <img
                     className="w-14 sm:w-16 aspect-[3/4]"
                     src={productData?.image[0]}
-                    alt="image"
+                    alt={`${productData.name} image`}
                   />
                   <div>
                     <p className="text-xs sm:text-lg font-medium">

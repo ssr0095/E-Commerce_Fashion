@@ -113,7 +113,7 @@ const List = ({ token }) => {
               width={48}
               height={48}
               src={item.image[0]}
-              alt={item.name}
+              alt={`${item.name} image` }
             />
             <p>{item.name}</p>
             <p>{item.category}</p>

@@ -39,7 +39,7 @@ const Banner = () => {
         </p>
         <a
           href="#"
-          alt="register"
+          alt="click to register"
           className="flex-none rounded-full bg-gray-900 px-3.5 py-1 text-sm font-semibold text-white shadow-xs hover:bg-gray-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
         >
           Register now <span aria-hidden="true">&rarr;</span>

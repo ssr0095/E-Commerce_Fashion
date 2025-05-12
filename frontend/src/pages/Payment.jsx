@@ -296,7 +296,7 @@ const Payment = () => {
                     <>
                       <img
                         src={assets.upload_area}
-                        alt="Upload"
+                        alt="Upload payment image"
                         className="w-6 h-6"
                       />
                       <p className="text-gray-500 mt-2">

@@ -271,7 +271,7 @@ const Orders = ({ token }) => {
             <div className="w-full h-[50vh] flex justify-center items-center overflow-auto">
               <img
                 src={image}
-                alt="screenshot"
+                alt="screenshot image"
                 width={192}
                 className="w-48 object-cover rounded-md shadow-lg"
               />
@@ -295,7 +295,7 @@ const Orders = ({ token }) => {
             <div className="w-full flex flex-col items-center gap-4 overflow-auto">
               <img
                 src={customImage}
-                alt="custom design"
+                alt="custom design image"
                 width={192}
                 className="w-48 object-cover rounded-md shadow-lg"
               />{" "}

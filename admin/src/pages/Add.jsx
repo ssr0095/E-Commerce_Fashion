@@ -153,7 +153,7 @@ const Add = ({ token }) => {
               >
                 <img
                   src={!image ? assets.upload_area : URL.createObjectURL(image)}
-                  alt={`upload${index + 1}`}
+                  alt={`upload image ${index + 1}`}
                   className="w-full h-full object-cover"
                 />
                 <input

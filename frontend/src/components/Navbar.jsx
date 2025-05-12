@@ -125,6 +125,8 @@ const Navbar = () => {
                 className="w-5 cursor-pointer"
                 alt="Search"
                 loading="lazy"
+                width={20}
+              height={20}
               />
             </button>
 
@@ -139,6 +141,8 @@ const Navbar = () => {
                         src={assets.profile_icon}
                         alt="Profile"
                         // loading="lazy"
+                        width={20}
+                        height={20}
                       />
                     </button>
                   </DropdownMenuTrigger>
@@ -206,6 +210,8 @@ const Navbar = () => {
                     src={assets.profile_icon}
                     alt="Login"
                     loading="lazy"
+                    width={20}
+                    height={20}
                   />
                 </button>
               )}
@@ -218,6 +224,8 @@ const Navbar = () => {
                 className="w-5 min-w-5"
                 alt="Cart"
                 loading="lazy"
+                width={20}
+                height={20}
               />
               {cartCount > 0 && (
                 <span className="absolute right-[-5px] bottom-[-5px] w-4 text-center leading-4 bg-black text-white aspect-square rounded-full text-[8px]">
@@ -239,6 +247,8 @@ const Navbar = () => {
                 className="w-7"
                 alt="WhatsApp"
                 loading="lazy"
+                width={28}
+              height={28}
               />
             </Link>
 

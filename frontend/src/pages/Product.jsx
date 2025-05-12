@@ -53,7 +53,7 @@ const Product = () => {
                   src={item}
                   key={index}
                   className="w-[24%] sm:w-full aspect-[3/4] sm:mb-3 flex-shrink-0 cursor-pointer"
-                  alt="image"
+                  alt={`product image ${index}`}
                 />
               ))}
             </div>

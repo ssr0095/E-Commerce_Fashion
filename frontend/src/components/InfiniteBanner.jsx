@@ -2,7 +2,7 @@
 
 const InfiniteBanner = () => {
   return (
-    <div className="w-full mx-auto px-4 md:px-5 py-4 md:py-6 shadow-2xl shadow-gray-100">
+    <div hight={100} className="w-full mx-auto px-4 md:px-5 py-4 md:py-6 shadow-2xl shadow-gray-100">
       <div className="text-center">
         <div
           x-data="{}"
@@ -17,53 +17,21 @@ const InfiniteBanner = () => {
             x-ref="logos"
             className="flex items-center justify-center md:justify-start [&_li]:mx-8 [&_img]:max-w-none animate-infinite-scroll"
           >
-            <li>
-              <img src="/logo.png" alt="logo" className="w-24 md:w-32" />
-            </li>
-            <li>
-              <img src="/logo.png" alt="logo" className="w-24 md:w-32" />
-            </li>
-            <li>
-              <img src="/logo.png" alt="logo" className="w-24 md:w-32" />
-            </li>
-            <li>
-              <img src="/logo.png" alt="logo" className="w-24 md:w-32" />
-            </li>
-            <li>
-              <img src="/logo.png" alt="logo" className="w-24 md:w-32" />
-            </li>
-            <li>
-              <img src="/logo.png" alt="logo" className="w-24 md:w-32" />
-            </li>
-            <li>
-              <img src="/logo.png" alt="logo" className="w-24 md:w-32" />
-            </li>
+           {[1,2,3,4,5,6,7].map((item,i) => (
+              <li key={i}>
+                <img src="/logo.png" width={96} height={18} alt="logo" className="w-24 md:w-32" />
+              </li>
+            ))}
           </ul>
           <ul
             x-ref="logos"
             className="flex items-center justify-center md:justify-start [&_li]:mx-8 [&_img]:max-w-none animate-infinite-scroll"
           >
-            <li>
-              <img src="/logo.png" alt="logo" className="w-24 md:w-32" />
-            </li>
-            <li>
-              <img src="/logo.png" alt="logo" className="w-24 md:w-32" />
-            </li>
-            <li>
-              <img src="/logo.png" alt="logo" className="w-24 md:w-32" />
-            </li>
-            <li>
-              <img src="/logo.png" alt="logo" className="w-24 md:w-32" />
-            </li>
-            <li>
-              <img src="/logo.png" alt="logo" className="w-24 md:w-32" />
-            </li>
-            <li>
-              <img src="/logo.png" alt="logo" className="w-24 md:w-32" />
-            </li>
-            <li>
-              <img src="/logo.png" alt="logo" className="w-24 md:w-32" />
-            </li>
+           {[1,2,3,4,5,6,7].map((item,i) => (
+              <li key={i}>
+                <img src="/logo.png" width={96} height={18} alt="logo" className="w-24 md:w-32" />
+              </li>
+            ))}
           </ul>
         </div>
       </div>

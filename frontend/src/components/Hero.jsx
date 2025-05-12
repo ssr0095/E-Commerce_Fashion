@@ -5,8 +5,8 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
+  // CarouselNext,
+  // CarouselPrevious,
 } from "@/components/ui/carousel";
 
 const Hero = () => {
@@ -29,9 +29,9 @@ const Hero = () => {
               <img
                 src={img}
                 className="w-full"
-                alt={"Hero" + index}
+                alt={"Hero image " + index}
                 width={1080}
-                // height={18}
+                height={430}
                 loading="lazy"
               />
             </CarouselItem>

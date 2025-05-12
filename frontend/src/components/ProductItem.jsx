@@ -19,7 +19,7 @@ const ProductItem = ({
       <div className="w-full aspect-[3/4] group overflow-hidden relative">
         <img
           src={image[0]}
-          alt={name}
+          alt={`${name} image`}
           className={`absolute top-0 left-0 w-full h-full object-cover transition duration-300 ${
             image[1] && "group-hover:opacity-0"
           }`}
@@ -102,6 +102,7 @@ export const CategoryItem = ({ name, image }) => {
       onClick={() => toMove(name)}
       className="relative text-gray-700 cursor-pointer w-full bg-gray-200 group"
       to={`/collection`}
+      height={500}
     >
       <div className="overflow-hidden flex items-center">
         <img
@@ -109,7 +110,7 @@ export const CategoryItem = ({ name, image }) => {
           width={200}
           height={300}
           src={image}
-          alt={name}
+          alt={`${name} image`}
         />
       </div>
       <p className="w-fit absolute bottom-5 left-5 bg-white px-4 z-10 py-2 border border-gray-700 text-xs lg:text-sm text-center hover:underline underline-offset-2">

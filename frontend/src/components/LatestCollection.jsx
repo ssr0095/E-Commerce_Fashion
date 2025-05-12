@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { ShopContext } from "../context/ShopContext";
 import Title from "./Title";
 import ProductItem from "./ProductItem";
@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/carousel";
 
 const LatestCollection = () => {
-  const { products, navigate } = useContext(ShopContext);
+  const { products} = useContext(ShopContext);
   const [latestProducts, setLatestProducts] = useState([]);
 
   useEffect(() => {
@@ -31,7 +31,7 @@ const LatestCollection = () => {
         </div>
 
         {/* Rendering Products */}
-        <Carousel className="w-full">
+        <Carousel height={500} className="w-full">
           <CarouselContent className="-ml-1">
             {latestProducts.map((item, index) => (
               <CarouselItem
