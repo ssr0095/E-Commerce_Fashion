@@ -6,7 +6,7 @@ import SmallNavBar from "../components/SmallNavBar";
 import { toast } from "react-toastify";
 import Coupon from "../components/Coupon";
 import ProductDetailsDrop from "../components/ProductDetailsDrop";
-import { ScrollArea } from "../components/ui/scroll-area"
+import { ScrollArea } from "../components/ui/scroll-area";
 
 const Product = () => {
   const { productId } = useParams();
@@ -94,7 +94,7 @@ const Product = () => {
             </div>
             <p className="text-xs text-gray-500">MRP Inclusive of all taxes</p>
 
-            <p className="mt-5 text-gray-500 text-justify md:w-4/5">
+            <p className="mt-5 text-gray-500 text-justify leading-snug md:w-4/5">
               {productData?.description}
             </p>
             <div className="w-full flex flex-col gap-4 my-8">

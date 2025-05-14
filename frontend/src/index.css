@@ -1,19 +1,17 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-
 @font-face {
-  font-family: 'Outfit';
+  font-family: "Outfit-Variable";
+  src: url("/fonts/Outfit-Variable.woff2") format("woff2");
   font-style: normal;
   font-display: swap;
-  src: url('/fonts/outfit-variable.ttf');
   font-weight: 100 900; /* Range of weights supported */
 }
 
 * {
-  font-family: "Outfit";
+  font-family: "Outfit-Variable";
 }
 
 body {

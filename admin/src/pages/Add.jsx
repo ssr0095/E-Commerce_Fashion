@@ -61,8 +61,32 @@ const Add = ({ token, setToken }) => {
     return await imageCompression(file, options);
   };
 
+  const resetForm = () => {
+    // Clear file inputs
+    document.querySelectorAll('input[type="file"]').forEach((input) => {
+      input.value = "";
+
+      setImage1(false);
+      setImage2(false);
+      setImage3(false);
+      setImage4(false);
+      setName("");
+      setDescription("");
+      setPrice("");
+      setDiscount("10");
+      setBestseller(false);
+      setCustomizable(false);
+      setTag("");
+      setTheme("");
+      setCategory("");
+      setSubCategory("");
+      setSizes([]);
+    });
+  };
+
   const onSubmitHandler = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
 
     if (!name.trim()) return toast.error("Name not provided");
     if (!description.trim()) return toast.error("Description not provided");
@@ -94,8 +118,6 @@ const Add = ({ token, setToken }) => {
       if (image3) formData.append("image3", await compressImage(image3));
       if (image4) formData.append("image4", await compressImage(image4));
 
-      setIsLoading(true);
-
       const response = await axios.post(
         backendUrl + "/api/product/add",
         formData,
@@ -106,23 +128,9 @@ const Add = ({ token, setToken }) => {
 
       if (response.data.success) {
         toast.success(response.data.message);
-        // setImage1(false);
-        // setImage2(false);
-        // setImage3(false);
-        // setImage4(false);
-        // setName("");
-        // setDescription("");
-        // setPrice("");
-        // setDiscount(10);
-        // setBestseller(false);
-        // setCustomizable(false);
-        // setTag("");
-        // setTheme("");
-        // setCategory("");
-        // setSubCategory("");
-        // setSizes([]);
-        window.location.reload()
-        
+        resetForm();
+
+        // window.location.reload()
       } else {
         toast.error(response.data.message);
       }
@@ -130,11 +138,11 @@ const Add = ({ token, setToken }) => {
       setIsLoading(false);
       toast.error(error.message);
       if (error.status == 401) {
-        setToken("")
+        setToken("");
         localStorage.removeItem("token");
-        window.location.reload();      
-      }      
-    }finally{
+        window.location.reload();
+      }
+    } finally {
       setIsLoading(false);
     }
   };

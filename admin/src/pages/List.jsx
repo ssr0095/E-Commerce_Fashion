@@ -56,25 +56,27 @@ const List = ({ token, setToken }) => {
         toast.error(response.data.message);
       }
     } catch (error) {
+      setIsLoading(false);
       toast.error(error.message);
       if (error.status == 401) {
-        setToken("")
+        setToken("");
         localStorage.removeItem("token");
-        window.location.reload();      }      
+        window.location.reload();
+      }
     }
   };
 
   const removeProduct = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.delete(
-        `${backendUrl}/api/product/remove`,
-        {
-          headers: { Authorization: `Bearer ${token}` },    // order important
+      const response = await axios.delete(`${backendUrl}/api/product/remove`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-        { id: productId },
-      );
+        data: { id: productId }, // This is how you send data with DELETE
+      });
       setIsLoading(false);
+      console.log(response);
       if (response.data.success) {
         toast.success(response.data.message);
         await fetchList(true); // force refresh cache
@@ -84,8 +86,8 @@ const List = ({ token, setToken }) => {
     } catch (error) {
       toast.error(error.message);
       if (error.status == 401) {
-        setToken("")
-        window.location.reload()
+        setToken("");
+        window.location.reload();
       }
     } finally {
       setDeleteDialogOpen(false);
@@ -104,35 +106,36 @@ const List = ({ token, setToken }) => {
         <div className="w-full text-center py-10 text-gray-500">
           No product found
         </div>
-      ) : (<>
-      <div className="flex flex-col min-w-[560px] md:min-w-[80%] no-scrollbar">
-        <div className="grid grid-cols-[1fr_2fr_1fr_1fr_1fr] px-4 py-2 border-b-2 bg-white text-sm sticky top-0">
-          <b>Image</b>
-          <b>Name</b>
-          <b>Category</b>
-          <b>Price</b>
-          {/* <b>Edit</b> */}
-          <b>Remove</b>
-        </div>
-        {list.map((item, index) => (
-          <div
-            className="grid grid-cols-[1fr_2fr_1fr_1fr_1fr] items-center py-2 px-4 border-b text-sm hover:bg-gray-50 bg-white"
-            key={index}
-          >
-            <img
-              className="w-12 aspect-[3/4]"
-              width={48}
-              height={48}
-              src={item.image[0]}
-              alt={`${item.name} image` }
-            />
-            <p>{item.name}</p>
-            <p>{item.category}</p>
-            <p>
-              {currency}
-              {item.price}
-            </p>
-            {/* <div
+      ) : (
+        <>
+          <div className="flex flex-col min-w-[560px] md:min-w-[80%] no-scrollbar">
+            <div className="grid grid-cols-[1fr_2fr_1fr_1fr_1fr] px-4 py-2 border-b-2 bg-white text-sm sticky top-0">
+              <b>Image</b>
+              <b>Name</b>
+              <b>Category</b>
+              <b>Price</b>
+              {/* <b>Edit</b> */}
+              <b>Remove</b>
+            </div>
+            {list.map((item, index) => (
+              <div
+                className="grid grid-cols-[1fr_2fr_1fr_1fr_1fr] items-center py-2 px-4 border-b text-sm hover:bg-gray-50 bg-white"
+                key={index}
+              >
+                <img
+                  className="w-12 aspect-[3/4]"
+                  width={48}
+                  height={48}
+                  src={item.image[0]}
+                  alt={`${item.name} image`}
+                />
+                <p>{item.name}</p>
+                <p>{item.category}</p>
+                <p>
+                  {currency}
+                  {item.price}
+                </p>
+                {/* <div
               className="flex items-center justify-center cursor-default size-8 p-2 rounded-full text-gray-600 hover:bg-gray-200"
               onClick={() => {
                 setProductId(item._id);
@@ -155,42 +158,42 @@ const List = ({ token, setToken }) => {
                 <path d="m15 5 4 4" />
               </svg>
             </div> */}
-            <div
-              className="flex items-center justify-center cursor-default size-8 p-2 rounded-full text-gray-600 hover:bg-gray-200"
-              onClick={() => {
-                setProductId(item._id);
-                setDeleteDialogOpen(true);
-              }}
-            >
-              <Trash2 />
-            </div>
+                <div
+                  className="flex items-center justify-center cursor-default size-8 p-2 rounded-full text-gray-600 hover:bg-gray-200"
+                  onClick={() => {
+                    setProductId(item._id);
+                    setDeleteDialogOpen(true);
+                  }}
+                >
+                  <Trash2 />
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent className="w-[80%] rounded-lg">
-          <DialogHeader>
-            <DialogTitle>Confirm Deletion</DialogTitle>
-          </DialogHeader>
-          <p>Are you sure you want to delete this product?</p>
-          <DialogFooter className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setDeleteDialogOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button variant="default" onClick={removeProduct}>
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          {/* Delete Confirmation Dialog */}
+          <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+            <DialogContent className="w-[80%] rounded-lg">
+              <DialogHeader>
+                <DialogTitle>Confirm Deletion</DialogTitle>
+              </DialogHeader>
+              <p>Are you sure you want to delete this product?</p>
+              <DialogFooter className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setDeleteDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button variant="default" onClick={removeProduct}>
+                  Delete
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
 
-      {/* Edit Product Dialog */}
-      {/* <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+          {/* Edit Product Dialog */}
+          {/* <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent>
           <Edit
             productId={productId}
@@ -201,7 +204,7 @@ const List = ({ token, setToken }) => {
           />
         </DialogContent>
       </Dialog> */}
-      </>
+        </>
       )}
     </div>
   );
