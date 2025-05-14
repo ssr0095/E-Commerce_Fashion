@@ -36,10 +36,18 @@ const cspDirectives = {
 };
 
 export const securityMiddleware = (app) => {
+  // Enable trust proxy before security headers
+  app.set("trust proxy", 1);
+
   app.use(
     helmet({
       contentSecurityPolicy: {
-        directives: cspDirectives,
+        directives: {
+          ...cspDirectives,
+          // Add these for modern browsers
+          "upgrade-insecure-requests": [],
+          "block-all-mixed-content": [],
+        },
         reportOnly: process.env.NODE_ENV === "development",
       },
       crossOriginEmbedderPolicy: false,
@@ -57,9 +65,12 @@ export const securityMiddleware = (app) => {
   );
 
   app.use((req, res, next) => {
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("X-DNS-Prefetch-Control", "off");
+    res.setHeader("Expect-CT", "max-age=0");
     res.setHeader(
       "Permissions-Policy",
-      "geolocation=(), microphone=(), camera=(), payment=()"
+      "geolocation=(), microphone=(), camera=(), payment=(), fullscreen=()"
     );
     next();
   });
