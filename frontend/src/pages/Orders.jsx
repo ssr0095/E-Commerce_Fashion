@@ -29,18 +29,19 @@ const Orders = () => {
 
   useEffect(() => {
     if (token) {
-      if (initialLoad || orders.length === 0) {
+      if (initialLoad) {
         fetchOrders();
         setInitialLoad(false);
       }
     } else {
       navigate("/login");
     }
-  }, [token, fetchOrders, navigate, initialLoad, orders.length]);
+  }, [token, fetchOrders, navigate, initialLoad]); // Removed orders.length from dependencies
 
   if (loadingOrders && orders.length === 0) {
     return <Loader />;
   }
+
   return (
     <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
       <SmallNavBar navs={["Orders"]} />

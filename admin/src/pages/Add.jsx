@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { assets } from "../assets/assets";
 import Loader from "../components/CompLoader";
 import axios from "axios";
@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const Add = ({ token }) => {
+const Add = ({ token, setToken }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [image1, setImage1] = useState(false);
   const [image2, setImage2] = useState(false);
@@ -104,31 +104,38 @@ const Add = ({ token }) => {
         }
       );
 
-      setIsLoading(false);
-
       if (response.data.success) {
         toast.success(response.data.message);
-        setImage1(false);
-        setImage2(false);
-        setImage3(false);
-        setImage4(false);
-        setName("");
-        setDescription("");
-        setPrice("");
-        setDiscount(10);
-        setBestseller(false);
-        setCustomizable(false);
-        setTag("");
-        setTheme("");
-        setCategory("");
-        setSubCategory("");
-        setSizes([]);
+        // setImage1(false);
+        // setImage2(false);
+        // setImage3(false);
+        // setImage4(false);
+        // setName("");
+        // setDescription("");
+        // setPrice("");
+        // setDiscount(10);
+        // setBestseller(false);
+        // setCustomizable(false);
+        // setTag("");
+        // setTheme("");
+        // setCategory("");
+        // setSubCategory("");
+        // setSizes([]);
+        window.location.reload()
+        
       } else {
         toast.error(response.data.message);
       }
     } catch (error) {
       setIsLoading(false);
       toast.error(error.message);
+      if (error.status == 401) {
+        setToken("")
+        localStorage.removeItem("token");
+        window.location.reload();      
+      }      
+    }finally{
+      setIsLoading(false);
     }
   };
 
@@ -159,6 +166,7 @@ const Add = ({ token }) => {
                 <input
                   type="file"
                   id={imageId}
+                  name={imageId}
                   hidden
                   accept="image/jpeg,image/png,image/webp,image/avif"
                   required={index === 0}

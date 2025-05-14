@@ -135,11 +135,9 @@ const editProduct = async (req, res) => {
       date: Date.now(),
     };
 
-    console.log("Updated Product Data:", productData);
 
     // Ensure product exists before updating
     const product = await productModel.findById(id);
-    console.log(product);
     // if (!product) {
     //   return res
     //     .status(404)

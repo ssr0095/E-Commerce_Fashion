@@ -6,7 +6,7 @@ const Coupon = () => {
       <p className="my-2">Coupon</p>
       <div className="w-full md:w-[80%] flex flex-col items-center  outline-[1.5px] outline-dashed outline-gray-300 text-sm rounded-sm cursor-default">
         <div className="w-full flex items-center gap-3 p-4 ">
-          <img src="/images/logo.png" width={64} height={24} alt="logo" />
+          <img src="/logo.png" width={64} height={24} alt="logo" />
           <div className="flex flex-col items-start justify-center gap-1">
             <p className="font-semibold">Extra 10% off</p>
             <p className="text-gray-500">

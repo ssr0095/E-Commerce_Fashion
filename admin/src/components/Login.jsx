@@ -5,19 +5,19 @@ import { toast } from "react-toastify";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Loader from "../components/CompLoader";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+// import { zodResolver } from "@hookform/resolvers/zod";
+// import { z } from "zod";
 
-const authSchema = z.object({
-  name: z.string().optional(),
-  // name: z.string().min(3, "Name must be at least 3 characters").optional(),
-  email: z.string().email("Invalid email address"),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .regex(/[A-Z]/, "Must contain at least one uppercase letter")
-    .regex(/[0-9]/, "Must contain at least one number"),
-});
+// const authSchema = z.object({
+//   name: z.string(),
+//   // name: z.string().min(3, "Name must be at least 3 characters").optional(),
+//   email: z.string().email("Invalid email address"),
+//   password: z
+//     .string()
+//     .min(8, "Password must be at least 8 characters")
+//     .regex(/[A-Z]/, "Must contain at least one uppercase letter")
+//     .regex(/[0-9]/, "Must contain at least one number"),
+// });
 
 const Login = ({ setToken }) => {
   const [email, setEmail] = useState("");
@@ -40,7 +40,7 @@ const Login = ({ setToken }) => {
         toast.error(response.data.message);
       }
     } catch (error) {
-      if (error.status == 401) return toast.error("Unauthorized acces");
+      if (error.status == 401) return toast.error("Unauthorized access");
       toast.error("Login failed");
     } finally {
       setIsLoading(false);

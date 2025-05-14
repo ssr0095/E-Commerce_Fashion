@@ -113,8 +113,9 @@ const ShopContextProvider = ({ children }) => {
     } catch (error) {
       // toast.error(error?.response?.data?.message || "Failed to load user info");
       setState((prev) => ({ ...prev, loadingUser: false }));
-      if (error.response?.status === 401) {
+      if (error?.status === 401) {
         clearAuth();
+        navigate("/login")
       }
     }
   }, [state.token, backendUrl, clearAuth]);
@@ -126,7 +127,7 @@ const ShopContextProvider = ({ children }) => {
       async (error) => {
         const originalRequest = error.config;
 
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        if (error?.status === 401 && !originalRequest._retry) {
           originalRequest._retry = true;
 
           try {
@@ -183,7 +184,7 @@ const ShopContextProvider = ({ children }) => {
               }
             )
             .catch((error) => {
-              // if (error.response?.status === 401) {
+              // if (error?.status === 401) {
               // Handle token expiration
               // console.log("Token expired, redirect to login");
               // toast.error("Token expired, redirect to login");
@@ -267,6 +268,7 @@ const ShopContextProvider = ({ children }) => {
     async (couponCode) => {
       if (!state.token) {
         toast.error("Please login to apply discount");
+        navigate("/login")
         return 0;
       }
 
@@ -287,9 +289,13 @@ const ShopContextProvider = ({ children }) => {
           return data.discount;
         }
 
-        toast.error(data.message || "Invalid discount code");
+        toast.error(data.message || data || "Invalid discount code");
         return 0;
       } catch (error) {
+      if (error?.status === 401) {
+        clearAuth();
+        navigate("/login")
+      }
         const errorMessage =
           error?.response?.data?.message || "Failed to apply discount";
         toast.error(errorMessage);
@@ -433,9 +439,10 @@ const ShopContextProvider = ({ children }) => {
     async (forceRefresh = false) => {
       // Prevent multiple simultaneous requests
       if (state.loadingOrders) return;
-      // Get token from state or localStorage as fallback
+
       const token = state.token || cacheManager.get("token");
       if (!token) {
+        navigate("/login")
         // console.error("No token available");
         return;
       }
@@ -482,16 +489,14 @@ const ShopContextProvider = ({ children }) => {
         // );
         setState((prev) => ({ ...prev, loadingOrders: false }));
 
-        if (error.response?.status === 401) {
-          // Clear invalid token and redirect to login
-          cacheManager.clear("token");
-          setState((prev) => ({ ...prev, token: "" }));
+        if (error?.status === 401) {
+          clearAuth();
           toast.error("Session expired. Please login again");
           navigate("/login");
         }
-        // else {
-        //   toast.error(error.response?.data?.message || "Failed to load orders");
-        // }
+        else {
+          toast.error(error.data?.message || error?.message || "Failed to load orders");
+        }
       }
     },
     [backendUrl, state.currentOrderPage, navigate]
@@ -538,9 +543,11 @@ const ShopContextProvider = ({ children }) => {
           await fetchUserInfo();
           toast.success("Login successful");
           return true;
+        }else{
+          toast.error(data.message || data)
         }
       } catch (error) {
-        toast.error(error.response?.data?.message || "Login failed");
+        toast.error(error?.data?.message || "Login failed");
         return false;
       }
     },

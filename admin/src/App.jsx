@@ -31,6 +31,7 @@ const App = () => {
     <div className="bg-gray-50 min-h-screen">
       <Suspense fallback={<Loading />}>
         <ToastContainer />
+        
         {token === "" ? (
           <Login setToken={setToken} />
         ) : (
@@ -41,9 +42,9 @@ const App = () => {
               <Sidebar />
               <div className="max-sm:w-full w-[70%] sm:mx-auto sm:ml-[max(5vw,25px)] my-8 text-gray-600 text-base">
                 <Routes>
-                  <Route path="/add" element={<Add token={token} />} />
-                  <Route path="/list" element={<List token={token} />} />
-                  <Route path="/orders" element={<Orders token={token} />} />
+                  <Route path="/add" element={<Add token={token} setToken={setToken} />} />
+                  <Route path="/list" element={<List token={token} setToken={setToken} />} />
+                  <Route path="/orders" element={<Orders token={token} setToken={setToken} />} />
                 </Routes>
               </div>
             </div>

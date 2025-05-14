@@ -437,10 +437,6 @@ const applyCoupon = async (req, res) => {
         message: "First-order coupon already used",
       });
     }
-
-    console.log(couponCode);
-    console.log(process.env.COUSINS_COUPON);
-    console.log(couponCode === process.env.COUSINS_COUPON);
     // Check for special coupon
     if (couponCode === process.env.COUSINS_COUPON) {
       await createAuditLog({

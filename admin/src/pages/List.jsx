@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import Loader from "../components/CompLoader";
 
-const List = ({ token }) => {
+const List = ({ token, setToken }) => {
   const [list, setList] = useState([]);
   const [productId, setProductId] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -57,6 +57,10 @@ const List = ({ token }) => {
       }
     } catch (error) {
       toast.error(error.message);
+      if (error.status == 401) {
+        setToken("")
+        localStorage.removeItem("token");
+        window.location.reload();      }      
     }
   };
 
@@ -65,13 +69,12 @@ const List = ({ token }) => {
     try {
       const response = await axios.delete(
         `${backendUrl}/api/product/remove`,
-        { id: productId },
         {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+          headers: { Authorization: `Bearer ${token}` },    // order important
+        },
+        { id: productId },
       );
       setIsLoading(false);
-
       if (response.data.success) {
         toast.success(response.data.message);
         await fetchList(true); // force refresh cache
@@ -80,6 +83,10 @@ const List = ({ token }) => {
       }
     } catch (error) {
       toast.error(error.message);
+      if (error.status == 401) {
+        setToken("")
+        window.location.reload()
+      }
     } finally {
       setDeleteDialogOpen(false);
     }
@@ -93,7 +100,11 @@ const List = ({ token }) => {
     <div className="w-full max-sm:px-6 overflow-x-auto relative">
       <p className="mb-2">All Products List</p>
       {isLoading && <Loader />}
-
+      {list?.length === 0 ? (
+        <div className="w-full text-center py-10 text-gray-500">
+          No product found
+        </div>
+      ) : (<>
       <div className="flex flex-col min-w-[560px] md:min-w-[80%] no-scrollbar">
         <div className="grid grid-cols-[1fr_2fr_1fr_1fr_1fr] px-4 py-2 border-b-2 bg-white text-sm sticky top-0">
           <b>Image</b>
@@ -190,6 +201,8 @@ const List = ({ token }) => {
           />
         </DialogContent>
       </Dialog> */}
+      </>
+      )}
     </div>
   );
 };
