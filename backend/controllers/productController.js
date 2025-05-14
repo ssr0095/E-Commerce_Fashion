@@ -26,7 +26,7 @@ const addProduct = async (req, res) => {
       req.files?.image1?.[0],
       req.files?.image2?.[0],
       req.files?.image3?.[0],
-      req.files?.image4?.[0],
+      // req.files?.image4?.[0],
     ].filter(Boolean);
 
     const imagesUrl = await Promise.all(
@@ -134,7 +134,6 @@ const editProduct = async (req, res) => {
       customizable: customizable === "true",
       date: Date.now(),
     };
-
 
     // Ensure product exists before updating
     const product = await productModel.findById(id);

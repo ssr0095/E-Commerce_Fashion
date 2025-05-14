@@ -23,7 +23,7 @@ const Add = ({ token, setToken }) => {
   const [image1, setImage1] = useState(false);
   const [image2, setImage2] = useState(false);
   const [image3, setImage3] = useState(false);
-  const [image4, setImage4] = useState(false);
+  // const [image4, setImage4] = useState(false);
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -55,7 +55,7 @@ const Add = ({ token, setToken }) => {
 
   const compressImage = async (file) => {
     const options = {
-      maxSizeMB: 2, // Compress to ≤1MB
+      maxSizeMB: 1, // Compress to ≤1MB
       maxWidthOrHeight: 1920, // Resize if needed
     };
     return await imageCompression(file, options);
@@ -69,7 +69,7 @@ const Add = ({ token, setToken }) => {
       setImage1(false);
       setImage2(false);
       setImage3(false);
-      setImage4(false);
+      // setImage4(false);
       setName("");
       setDescription("");
       setPrice("");
@@ -116,7 +116,7 @@ const Add = ({ token, setToken }) => {
       if (image1) formData.append("image1", await compressImage(image1));
       if (image2) formData.append("image2", await compressImage(image2));
       if (image3) formData.append("image3", await compressImage(image3));
-      if (image4) formData.append("image4", await compressImage(image4));
+      // if (image4) formData.append("image4", await compressImage(image4));
 
       const response = await axios.post(
         backendUrl + "/api/product/add",
@@ -158,7 +158,8 @@ const Add = ({ token, setToken }) => {
         <p className="mb-2 font-medium">Upload Image</p>
 
         <div className="w-full flex items-start gap-4 flex-wrap">
-          {[image1, image2, image3, image4].map((image, index) => {
+          {/* {[image1, image2, image3, image4].map((image, index) => { */}
+          {[image1, image2, image3].map((image, index) => {
             const imageId = `image${index + 1}`;
             return (
               <Label
@@ -195,9 +196,9 @@ const Add = ({ token, setToken }) => {
                       case 2:
                         setImage3(file);
                         break;
-                      case 3:
-                        setImage4(file);
-                        break;
+                      // case 3:
+                      //   setImage4(file);
+                      // break;
                     }
                   }}
                 />

@@ -6,7 +6,13 @@ import SmallNavBar from "../components/SmallNavBar";
 import { toast } from "react-toastify";
 import Coupon from "../components/Coupon";
 import ProductDetailsDrop from "../components/ProductDetailsDrop";
-import { ScrollArea } from "../components/ui/scroll-area";
+import { assets } from "../assets/assets";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Ruler, ArrowUpRight } from "lucide-react";
 
 const Product = () => {
   const { productId } = useParams();
@@ -98,7 +104,26 @@ const Product = () => {
               {productData?.description}
             </p>
             <div className="w-full flex flex-col gap-4 my-8">
-              <p className="font-medium">Select Size</p>
+              <div className="flex items-center gap-3">
+                <p className="font-medium">Select Size</p>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <div className="flex items-center text-xs gap-2 px-2 py-1 rounded-full bg-gray-50 text-gray-400 hover:bg-gray-100">
+                      <Ruler className="w-5 " />
+                      Size guide
+                      <ArrowUpRight className="w-4 " />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="max-md:w-[30%] w-[60%] overflow-scroll">
+                    <img
+                      src={assets.size}
+                      alt="size chart"
+                      width={1020}
+                      height={630}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
               {/* <ScrollArea> */}
               <div className="w-full flex gap-2 max-sm:overflow-scroll">
                 {productData?.sizes.map((item, index) => (

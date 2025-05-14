@@ -20,6 +20,7 @@ import rupee_icon from "./rupee_icon.png";
 import bg_01 from "./anime/bg_01.jpg";
 import bg_02 from "./anime/bg_02.jpg";
 import bg_03 from "./anime/bg_03.jpg";
+import size from "./size.jpg";
 
 export const assets = {
   // logo,
@@ -44,6 +45,7 @@ export const assets = {
   bg_01,
   bg_02,
   bg_03,
+  size,
 };
 
 export const themeList = [

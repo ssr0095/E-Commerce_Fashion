@@ -2,12 +2,30 @@ import helmet from "helmet";
 
 const cspDirectives = {
   defaultSrc: ["'self'", "cousinsfashion.in"],
-  scriptSrc: ["'self'", "'unsafe-inline'", "cdn.cousinsfashion.in", "*.vercel-dns.com", "*.cloudflare.com"],
+  scriptSrc: [
+    "'self'",
+    "'unsafe-inline'",
+    "cdn.cousinsfashion.in",
+    "*.vercel-dns.com",
+    "*.cloudflare.com",
+  ],
   styleSrc: ["'self'", "'unsafe-inline'", "fonts.googleapis.com"],
-  imgSrc: ["'self'", "data:", "cdn.cousinsfashion.in", "public.r2.dev", "*.vercel-dns.com"],
+  imgSrc: [
+    "'self'",
+    "data:",
+    "cdn.cousinsfashion.in",
+    "public.r2.dev",
+    "*.vercel-dns.com",
+  ],
   fontSrc: ["'self'", "fonts.gstatic.com", "cdn.cousinsfashion.in"],
-  connectSrc: ["'self'", "api.cousinsfashion.in", "e-commerce-fashion.onrender.com", "*.mongodb.com", "*.cloudflare.com"],
-  frameSrc: ["'self'", "https://www.youtube.com"], // if embedding videos
+  connectSrc: [
+    "'self'",
+    "api.cousinsfashion.in",
+    "e-commerce-fashion.onrender.com",
+    "*.mongodb.com",
+    "*.cloudflare.com",
+  ],
+  // frameSrc: ["'self'", "https://www.youtube.com"], // if embedding videos
   objectSrc: ["'none'"],
   mediaSrc: ["'self'", "cdn.cousinsfashion.in"],
   formAction: ["'self'"],
