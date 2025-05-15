@@ -9,7 +9,7 @@ const ShopByCategory = () => {
   return (
     // <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
     <div>
-      <div className="mt-16 mb-20">
+      <div className="mt-5 mb-20">
         <div className=" text-center text-3xl py-2">
           <Title text1={"SHOP BY"} text2={"CATEGORY"} />
         </div>

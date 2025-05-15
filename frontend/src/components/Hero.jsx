@@ -27,10 +27,10 @@ const Hero = () => {
           <CarouselItem>
               <img
                 src={assets.bg_01}
-                className="w-full"
+                className="w-full h-[80%]"
                 alt={"Hero image 0"}
-                width={1080}
-                height={630}
+                // width={1080}
+                // height={630}
                 loading="eager"
                 fetchpriority="high"
               />
@@ -39,10 +39,10 @@ const Hero = () => {
             <CarouselItem key={index}>
               <img
                 src={img}
-                className="w-full"
+                className="w-full h-[80%]"
                 alt={"Hero image " + index +1}
-                width={1080}
-                height={630}
+                // width={1080}
+                // height={630}
                 loading="lazy"
               />
             </CarouselItem>
