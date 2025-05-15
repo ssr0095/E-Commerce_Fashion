@@ -17,10 +17,13 @@ import round_icon from "./round_icon.svg";
 import whatsapp_icon_01 from "./whatsapp_icon_01.png";
 import whatsapp_icon_02 from "./whatsapp_icon_02.svg";
 import rupee_icon from "./rupee_icon.png";
-import bg_01 from "./anime/bg_01.jpg";
-import bg_02 from "./anime/bg_02.jpg";
-import bg_03 from "./anime/bg_03.jpg";
+import bg_01 from "./anime/bg_01.webp";
+import bg_02 from "./anime/bg_02.webp";
+import bg_03 from "./anime/bg_03.webp";
 import size from "./size.jpg";
+import c4 from "./category/c4.webp";
+import c5 from "./category/c5.webp";
+import c6 from "./category/c6.webp";
 
 export const assets = {
   // logo,
@@ -46,6 +49,9 @@ export const assets = {
   bg_02,
   bg_03,
   size,
+  c4,
+  c5,
+  c6,
 };
 
 export const themeList = [
@@ -73,9 +79,9 @@ export const subCategoryList = [
   "Sweatshirts",
 ];
 export const category = [
-  { name: "Streetwear" },
-  { name: "aesthetics" },
-  { name: "other-collections" },
+  { name: "aesthetics", image: c4 },
+  { name: "illustration", image: c5 },
+  { name: "other-collections", image: c6 },
 ];
 // export const category = [
 //   { name: "Streetwear", image: p_img50 },

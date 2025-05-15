@@ -14,7 +14,7 @@ const Hero = () => {
     Autoplay({ delay: 2200, stopOnInteraction: true, loop: true })
   );
 
-  const bg = [assets.bg_01, assets.bg_02, assets.bg_03];
+  const bg = [assets.bg_02, assets.bg_03];
   return (
     <div className="w-full">
       <Carousel
@@ -24,15 +24,26 @@ const Hero = () => {
         onMouseLeave={plugin.current.play}
       >
         <CarouselContent>
+          <CarouselItem>
+              <img
+                src={assets.bg_01}
+                className="w-full"
+                alt={"Hero image 0"}
+                width={1080}
+                height={630}
+                loading="eager"
+                fetchpriority="high"
+              />
+            </CarouselItem>
           {bg.map((img, index) => (
             <CarouselItem key={index}>
               <img
                 src={img}
                 className="w-full"
-                alt={"Hero image " + index}
+                alt={"Hero image " + index +1}
                 width={1080}
                 height={630}
-                loading={index == 0 ? "eager":"lazy"}
+                loading="lazy"
               />
             </CarouselItem>
           ))}

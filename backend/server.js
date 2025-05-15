@@ -32,7 +32,7 @@ const corsOptions = {
   methods: ["GET", "POST", "DELETE"], // Explicitly allowed methods
   allowedHeaders: ["Content-Type", "Authorization"],
   optionsSuccessStatus: 204, // Proper status for OPTIONS responses
-  maxAge: 86400, // Cache preflight responses for 24 hours
+  maxAge: 2629800, // Cache preflight responses for 1 month
 };
 
 app.use(cors(corsOptions));

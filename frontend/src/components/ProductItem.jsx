@@ -103,13 +103,13 @@ export const CategoryItem = ({ name, image }) => {
       onClick={() => toMove(name)}
       className="relative text-gray-700 cursor-pointer w-full bg-gray-200 group"
       to={`/collection`}
-      height={500}
+      // height={500}
     >
       <div className="overflow-hidden flex items-center">
         <img
           className="w-full aspect-[3/4] hover:scale-105 transition ease-in-out duration-500"
-          width={200}
-          height={300}
+          width={600}
+          height={700}
           src={image}
           alt={`${name} image`}
           loading="lazy"

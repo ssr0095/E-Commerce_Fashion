@@ -1,0 +1,17 @@
+User-agent: *
+Disallow: /cart/
+Disallow: /login/
+Disallow: /verify/
+Disallow: /orders/
+Disallow: /place-order/
+Disallow: /payment/
+Disallow: /add/
+Disallow: /list/
+Disallow: /*?page=
+Disallow: /*?limit=
+Disallow: /*?custom=
+Disallow: /*?orderId=
+Disallow: /*?success=
+Allow: /assets/css/
+Allow: /assets/js/
+Sitemap: https://cousinsfashion.in/sitemap.xml
