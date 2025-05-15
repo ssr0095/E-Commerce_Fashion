@@ -69,7 +69,6 @@ const addProduct = async (req, res) => {
 };
 
 const editProduct = async (req, res) => {
-  // return res.json({ gee: req.body });
   try {
     const {
       id,
@@ -84,71 +83,87 @@ const editProduct = async (req, res) => {
       theme,
       customizable,
       discount,
-      existingImages, // This should be an array of current image URLs
+      imagesToDelete,
     } = req.body;
 
-    // console.log(req.body + "jjjjjjjj");
-    // console.log(req.body);
+    const user = req.user;
 
-    // Ensure existingImages is an array
-    // const currentImages = existingImages ? JSON.parse(existingImages) : [];
+    // Delete old images if specified
+    if (imagesToDelete && imagesToDelete.length > 0) {
+      await Promise.all(
+        imagesToDelete.map(async (url) => {
+          try {
+            const key = url.split("/").pop();
+            await deleteFromR2(key);
+          } catch (error) {
+            console.error(`Error deleting image ${url}:`, error);
+          }
+        })
+      );
+    }
 
-    // // Get uploaded files
-    // const image1 = req.files?.image1?.[0];
-    // const image2 = req.files?.image2?.[0];
-    // const image3 = req.files?.image3?.[0];
-    // const image4 = req.files?.image4?.[0];
+    // Process new images
+    const newImages = [
+      req.files?.image1?.[0],
+      req.files?.image2?.[0],
+      req.files?.image3?.[0],
+    ].filter(Boolean);
 
-    // const newImages = [image1, image2, image3, image4].filter(Boolean);
+    const newImagesUrls = await Promise.all(
+      newImages.map(async (file) => {
+        const fileName = `products/${uuidv4()}-${file.originalname}`;
+        return await uploadToR2(file.buffer, fileName, file.mimetype);
+      })
+    );
 
-    // console.log("New Images Received:", name);
-    // console.log("New Images Received:", newImages);
-    // console.log("Existing Images:", currentImages);
+    // Get the current product to merge images
+    const currentProduct = await productModel.findById(id);
+    if (!currentProduct) {
+      return res.json({ success: false, message: "Product not found" });
+    }
 
-    // // Upload new images to Cloudinary
-    // let uploadedImages = await Promise.all(
-    //   newImages.map(async (item) => {
-    //     let result = await cloudinary.uploader.upload(item.path, {
-    //       resource_type: "image",
-    //     });
-    //     return result.secure_url;
-    //   })
-    // );
+    // Filter out deleted images and add new ones
+    const updatedImages = currentProduct.image
+      .filter((img) => !imagesToDelete?.includes(img))
+      .concat(newImagesUrls);
 
-    // Combine existing images with newly uploaded ones
-    // const finalImages = [...currentImages, ...uploadedImages];
-
-    // Create updated product data
-    const productData = {
-      name: name,
-      description: description,
-      category: category,
+    const updateData = {
+      name,
+      description,
+      category,
       price: Number(price),
-      subCategory: subCategory,
+      subCategory,
       bestseller: bestseller === "true",
-      sizes: sizes,
-      image: existingImages,
-      tag: tag,
-      theme: theme,
-      discount,
+      sizes: Array.isArray(sizes) ? sizes : [sizes],
+      image: updatedImages,
+      tag,
+      theme,
       customizable: customizable === "true",
-      date: Date.now(),
+      discount,
     };
 
-    // Ensure product exists before updating
-    const product = await productModel.findById(id);
-    // if (!product) {
-    //   return res
-    //     .status(404)
-    //     .json({ success: false, message: "Product not found" });
-    // }
+    const updatedProduct = await productModel.findByIdAndUpdate(
+      id,
+      updateData,
+      {
+        new: true,
+      }
+    );
 
-    await productModel.findByIdAndUpdate(id, productData);
+    await createAuditLog({
+      action: "PRODUCT EDITED",
+      userId: user.id,
+      metadata: { ip: req.ip, productId: id },
+    });
 
-    res.json({ success: true, message: "Product Updated Successfully" });
+    return res.json({
+      success: true,
+      message: "Product updated",
+      product: updatedProduct,
+    });
   } catch (error) {
-    console.error("Error in editProduct:", error);
-    res.status(500).json({ success: false, message: error.message });
+    console.error(error);
+    return res.json({ success: false, message: error.message });
   }
 };
 

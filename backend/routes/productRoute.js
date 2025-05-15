@@ -22,9 +22,19 @@ productRouter.post(
   ]),
   addProduct
 );
+productRouter.post(
+  "/edit",
+  authAdmin,
+  upload.fields([
+    { name: "image1", maxCount: 1 },
+    { name: "image2", maxCount: 1 },
+    { name: "image3", maxCount: 1 },
+  ]),
+  editProduct
+);
 productRouter.delete("/remove", authAdmin, removeProduct);
-productRouter.post("/single", singleProduct);
-// productRouter.post("/edit", authAdmin, editProduct);
+productRouter.post("/single", authAdmin, singleProduct);
+productRouter.post("/edit", authAdmin, editProduct);
 productRouter.get("/list", listProducts);
 
 export default productRouter;

@@ -1,513 +1,495 @@
-// import { useEffect, useState } from "react";
-// import { assets } from "../assets/assets";
-// import axios from "axios";
-// import { backendUrl } from "../App";
-// import { toast } from "react-toastify";
-// import { Button } from "@/components/ui/button";
-// import { Label } from "@/components/ui/label";
-// import { Input } from "@/components/ui/input";
-// import { Textarea } from "@/components/ui/textarea";
-// import {
-//   Select,
-//   SelectContent,
-//   SelectItem,
-//   SelectTrigger,
-//   SelectValue,
-// } from "@/components/ui/select";
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { toast } from "react-toastify";
+import imageCompression from "browser-image-compression";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import Loader from "../components/CompLoader";
+import { assets } from "../assets/assets";
+import { backendUrl, currency } from "../App";
+import { X } from "lucide-react";
 
-// import {
-//   DialogFooter,
-//   DialogHeader,
-//   DialogTitle,
-// } from "@/components/ui/dialog";
+const Edit = ({ token, productId, onClose, onUpdate }) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
+  const [originalImages, setOriginalImages] = useState([]);
+  const [imagesToDelete, setImagesToDelete] = useState([]);
+  const [image1, setImage1] = useState(null);
+  const [image2, setImage2] = useState(null);
+  const [image3, setImage3] = useState(null);
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [price, setPrice] = useState("");
+  const [discount, setDiscount] = useState("10");
+  const [tag, setTag] = useState("");
+  const [theme, setTheme] = useState("");
+  const [category, setCategory] = useState("");
+  const [subCategory, setSubCategory] = useState("");
+  const [bestseller, setBestseller] = useState(false);
+  const [customizable, setCustomizable] = useState(false);
+  const [sizes, setSizes] = useState([]);
 
-// const Edit = ({ token, id, setEditDialogOpen }) => {
-//   const [product, setProduct] = useState([]);
-//   const [productId, setProductId] = useState(id);
+  const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/avif"];
+  const maxSize = 3 * 1024 * 1024; // 3MB
 
-//   // console.log(id, product);
-//   // console.log("lllllllll");
-//   const [newImages, setNewImages] = useState(["", "", "", ""]);
-//   const [oldImages, setOldImages] = useState(["", "", "", ""]);
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const response = await axios.post(
+          `${backendUrl}/api/product/single`,
+          {
+            productId,
+          },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
-//   const [name, setName] = useState("tt");
-//   const [description, setDescription] = useState("");
-//   const [price, setPrice] = useState(0);
-//   const [tag, setTag] = useState("");
-//   const [discount, setDiscount] = useState(0);
-//   const [theme, setTheme] = useState("");
-//   const [category, setCategory] = useState("");
-//   const [subCategory, setSubCategory] = useState("");
-//   const [bestseller, setBestseller] = useState(false);
-//   const [customizable, setCustomizable] = useState(false);
-//   const [sizes, setSizes] = useState([]);
+        if (response.data.success) {
+          const product = response.data.product;
+          setOriginalImages(product.image);
+          setName(product.name);
+          setDescription(product.description);
+          setPrice(`${product.price}`);
+          setDiscount(`${product.discount}`);
+          setTag(product.tag);
+          setTheme(product.theme);
+          setCategory(product.category);
+          setSubCategory(product.subCategory);
+          setBestseller(product.bestseller);
+          setCustomizable(product.customizable);
+          setSizes(product.sizes);
+        } else {
+          toast.error(response.data.message);
+        }
+      } catch (error) {
+        toast.error(error.message);
+        if (error.status == 401) {
+          setToken("");
+          localStorage.removeItem("token");
+          window.location.reload();
+        }
+      } finally {
+        setFetching(false);
+      }
+    };
 
-//   const onSubmitHandler = async (e) => {
-//     e.preventDefault();
+    if (productId) fetchProduct();
+  }, [productId]);
 
-//     try {
-//       const formData = new FormData();
+  const validateFile = (file, input) => {
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Only JPG, PNG, AVIF, or WEBP images are allowed.");
+      input.value = "";
+      return false;
+    }
+    if (file.size > maxSize) {
+      toast.error("File size must be less than 3MB.");
+      input.value = "";
+      return false;
+    }
+    return true;
+  };
 
-//       formData.append("id", id);
-//       formData.append("name", name);
-//       formData.append("description", description);
-//       formData.append("price", price);
-//       formData.append("discount", discount);
-//       formData.append("extratag", tag);
-//       formData.append("theme", theme);
-//       formData.append("category", category);
-//       formData.append("subCategory", subCategory);
-//       formData.append("bestseller", bestseller);
-//       formData.append("customizable", customizable);
-//       formData.append("sizes", JSON.stringify(sizes));
-//       formData.append("existingImages", JSON.stringify(product.image));
+  const compressImage = async (file) => {
+    const options = {
+      maxSizeMB: 1, // Compress to ≤1MB
+      maxWidthOrHeight: 1920, // Resize if needed
+    };
+    return await imageCompression(file, options);
+  };
 
-//       // console.log(newImages);
-//       console.log("image");
-//       console.log(formData.get("name"));
-//       // if (newImages.length > 0) {
-//       //   newImages.forEach((file, index) => {
-//       //     formData.append(`image${index + 1}`, file);
-//       //   });
-//       // }
-//       formData.forEach((hi) => console.log(hi));
+  const handleImageChange = (e, index) => {
+    const fileInput = e.target;
+    const file = fileInput.files?.[0];
+    if (!file) return;
 
-//       const response = await axios.post(
-//         backendUrl + "/api/product/edit",
-//         formData,
-//         {
-//           headers: { Authorization: `Bearer ${token}` },
-//         }
-//       );
+    if (!validateFile(file, fileInput)) return;
 
-//       // console.log(response.gee);
+    // Mark original image for deletion if it exists
+    if (originalImages[index]) {
+      setImagesToDelete((prev) => [...prev, originalImages[index]]);
+    }
 
-//       if (response.data.success) {
-//         toast.success(response.data.message);
-//         setName("");
-//         setDescription("");
-//         setTag("");
-//         setDiscount(0);
-//         setTheme("");
-//         setPrice(0);
-//         setCategory("");
-//         setSubCategory("");
-//         setBestseller(false);
-//         setCustomizable(false);
-//         setSizes([]);
-//       } else {
-//         toast.error(response.data.message);
-//       }
-//     } catch (error) {
-//       console.log(error);
-//       toast.error(error.message);
-//     }
-//   };
+    switch (index) {
+      case 0:
+        setImage1(file);
+        break;
+      case 1:
+        setImage2(file);
+        break;
+      case 2:
+        setImage3(file);
+        break;
+    }
+  };
 
-//   //   const OnchangeHandler = (e) => {
-//   //     e.preventDefault();
-//   //   };
+  const removeImage = (index) => {
+    // Mark original image for deletion if it exists
+    if (originalImages[index]) {
+      setImagesToDelete((prev) => [...prev, originalImages[index]]);
+    }
 
-//   const fetchProduct = async () => {
-//     try {
-//       const response = await axios.post(backendUrl + "/api/product/single", {
-//         productId,
-//       });
-//       console.log(response.data);
-//       if (response.data.success) {
-//         setProduct(response.data.product);
-//       } else {
-//         toast.error(response.data.message);
-//       }
-//     } catch (error) {
-//       console.log(error);
-//       toast.error(error.message);
-//     }
-//   };
+    // Clear the image state
+    switch (index) {
+      case 0:
+        setImage1(null);
+        break;
+      case 1:
+        setImage2(null);
+        break;
+      case 2:
+        setImage3(null);
+        break;
+    }
 
-//   useEffect(() => {
-//     if (productId) fetchProduct();
-//   }, [productId]);
+    // Clear the file input
+    const input = document.getElementById(`image${index + 1}`);
+    if (input) input.value = "";
+  };
 
-//   useEffect(() => {
-//     if (product) {
-//       setName(product.name || "");
-//       setDescription(product.description || "");
-//       setPrice(product.price || "");
-//       setDiscount(product.discount || "");
-//       setTag(product.tag || "");
-//       setTheme(product.theme || "");
-//       setCategory(product.category || "");
-//       setSubCategory(product.subCategory || "");
-//       setBestseller(product.bestseller || "");
-//       setCustomizable(product.customizable || "");
-//       setSizes(product.sizes || []);
-//       if (product.image) {
-//         product.image.forEach((image, index) => {
-//           setOldImages((prev) => [(prev[index] = image)]);
-//         });
-//       }
-//     }
-//   }, [product]);
+  const onSubmitHandler = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
 
-//   return (
-//     <form onSubmit={onSubmitHandler} className="flex flex-col gap-4">
-//       <DialogHeader>
-//         <DialogTitle className="mb-3">Edit product</DialogTitle>
-//         {/* <DialogDescription>
-//               Make changes to your profile here. Click save when you're done.
-//             </DialogDescription> */}
-//       </DialogHeader>
-//       {/* IMAGES */}
-//       <div>
-//         <p className="mb-2">Upload Image</p>
+    if (!name.trim()) return toast.error("Name not provided");
+    if (!description.trim()) return toast.error("Description not provided");
+    if (!price.trim()) return toast.error("Price not provided");
+    if (!discount.trim()) return toast.error("Discount not provided");
+    if (!theme.trim()) return toast.error("Theme not provided");
+    if (!category.trim()) return toast.error("Category not provided");
+    if (!subCategory.trim()) return toast.error("SubCategory not provided");
+    if (!sizes) return toast.error("Sizes not provided");
 
-//         <div className="flex gap-2">
-//           <Label htmlFor="image1">
-//             <img
-//               className="w-20 h-20 bg-cover"
-//               src={
-//                 oldImages[0]
-//                   ? oldImages[0]
-//                   : newImages[0]
-//                   ? URL.createObjectURL(newImages[0])
-//                   : assets.upload_area
-//               }
-//               alt="upload1"
-//             />
-//             {/* {console.log(image1 + "ig" + product)} */}
-//             <input
-//               onChange={(e) =>
-//                 setNewImages((prev) => (prev[0] = e.target.files[0]))
-//               }
-//               type="file"
-//               id="image1"
-//               hidden
-//             />
-//           </Label>
-//           <Label htmlFor="image2">
-//             <img
-//               className="w-20 h-20 bg-cover"
-//               src={
-//                 oldImages[1]
-//                   ? oldImages[1]
-//                   : newImages[1]
-//                   ? URL.createObjectURL(newImages[1])
-//                   : assets.upload_area
-//               }
-//               alt="upload2"
-//             />
-//             {console.log(oldImages, newImages)}
-//             <input
-//               onChange={(e) =>
-//                 setNewImages((prev) => (prev[1] = e.target.files[0]))
-//               }
-//               type="file"
-//               id="image2"
-//               hidden
-//             />
-//           </Label>
-//           <Label htmlFor="image3">
-//             <img
-//               className="w-20 h-20 bg-cover"
-//               src={
-//                 oldImages[2]
-//                   ? oldImages[2]
-//                   : newImages[2]
-//                   ? URL.createObjectURL(newImages[2])
-//                   : assets.upload_area
-//               }
-//               alt="upload3"
-//             />
-//             <input
-//               onChange={(e) =>
-//                 setNewImages((prev) => (prev[2] = e.target.files[0]))
-//               }
-//               type="file"
-//               id="image3"
-//               hidden
-//             />
-//           </Label>
-//           <Label htmlFor="image4">
-//             <img
-//               className="w-20 h-20 bg-cover"
-//               src={
-//                 oldImages[3]
-//                   ? oldImages[3]
-//                   : newImages[3]
-//                   ? URL.createObjectURL(newImages[3])
-//                   : assets.upload_area
-//               }
-//               alt="upload4"
-//             />
-//             <input
-//               onChange={(e) =>
-//                 setNewImages((prev) => [(prev[3] = e.target.files[0])])
-//               }
-//               type="file"
-//               id="image4"
-//               hidden
-//             />
-//           </Label>
-//         </div>
-//       </div>
+    try {
+      const formData = new FormData();
 
-//       <div className="w-full">
-//         <p className="mb-2">Product name</p>
-//         <Input
-//           onChange={(e) => {
-//             setName(e.target.value);
-//           }}
-//           value={name}
-//           type="text"
-//           placeholder="Type here"
-//           required
-//         />
-//       </div>
+      formData.append("id", productId);
+      formData.append("name", name);
+      formData.append("description", description);
+      formData.append("price", price);
+      formData.append("discount", discount);
+      formData.append("tag", tag);
+      formData.append("theme", theme);
+      formData.append("category", category);
+      formData.append("subCategory", subCategory);
+      formData.append("bestseller", bestseller);
+      formData.append("customizable", customizable);
+      sizes.forEach((size) => formData.append("sizes", size));
 
-//       <div className="w-full">
-//         <p className="mb-2">Product description</p>
-//         <Textarea
-//           onChange={(e) => setDescription(e.target.value)}
-//           value={description}
-//           type="text"
-//           placeholder="Write content here"
-//           required
-//         />
-//       </div>
+      // Append images to delete
+      imagesToDelete.forEach((url) => formData.append("imagesToDelete", url));
 
-//       <div className="grid sm:grid-cols-2 gap-2 w-full">
-//         <div>
-//           <p className="mb-2">Product theme</p>
-//           <Select
-//             className="w-full"
-//             onValueChange={(value) => setTheme(value)}
-//             // value={theme}
-//           >
-//             <SelectTrigger>
-//               <SelectValue placeholder="Select theme" />
-//             </SelectTrigger>
-//             <SelectContent>
-//               {/* <SelectGroup> */}
-//               {/* <SelectLabel>Theme</SelectLabel> */}
-//               <SelectItem value="anime">Anime</SelectItem>
-//               <SelectItem value="aesthetic">Aesthetic</SelectItem>
-//               <SelectItem value="others">others</SelectItem>
-//               {/* </SelectGroup> */}
-//             </SelectContent>
-//           </Select>
-//         </div>
+      // Append new images
+      if (image1) formData.append("image1", await compressImage(image1));
+      if (image2) formData.append("image2", await compressImage(image2));
+      if (image3) formData.append("image3", await compressImage(image3));
 
-//         <div>
-//           <p className="mb-2">Product category</p>
-//           <Select
-//             onValueChange={(value) => setCategory(value)}
-//             // value={category}
-//           >
-//             <SelectTrigger>
-//               <SelectValue placeholder="Select category" />
-//             </SelectTrigger>
-//             <SelectContent>
-//               <SelectItem value="Men">Men</SelectItem>
-//               <SelectItem value="Women">Women</SelectItem>
-//               <SelectItem value="Kids">Kids</SelectItem>
-//             </SelectContent>
-//           </Select>
-//         </div>
+      const response = await axios.post(
+        `${backendUrl}/api/product/edit`,
+        formData,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
-//         <div>
-//           <p className="mb-2">Sub category</p>
-//           <Select
-//             onValueChange={(value) => setSubCategory(value)}
-//             // value={subCategory}
-//           >
-//             <SelectTrigger>
-//               <SelectValue placeholder="Select sub category" />
-//             </SelectTrigger>
-//             <SelectContent>
-//               <SelectItem value="Topwear">Topwear</SelectItem>
-//               <SelectItem value="Bottomwear">Bottomwear</SelectItem>
-//               <SelectItem value="Winterwear">Winterwear</SelectItem>
-//             </SelectContent>
-//           </Select>
-//         </div>
+      if (response.data.success) {
+        toast.success(response.data.message);
+        onUpdate(); // Refresh the product list
+        onClose(); // Close the dialog
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+      if (error.status == 401) {
+        setToken("");
+        localStorage.removeItem("token");
+        window.location.reload();
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-//         <div>
-//           <p className="mb-2">Tag</p>
-//           <Select
-//             onValueChange={(value) => setTag(value)}
-//             className="w-full px-3 py-2"
-//             // value={tag}
-//           >
-//             <SelectTrigger>
-//               <SelectValue placeholder="Select tag" />
-//             </SelectTrigger>
-//             <SelectContent>
-//               <SelectItem value="New">New</SelectItem>
-//               <SelectItem value="Limited offer">Limited offer</SelectItem>
-//               <SelectItem value="Express shipping">Express shipping</SelectItem>
-//             </SelectContent>
-//           </Select>
-//         </div>
+  if (fetching) return <Loader />;
 
-//         <div>
-//           <p className="mb-2">Product Price</p>
-//           <Input
-//             onChange={(e) => setPrice(e.target.value)}
-//             value={price}
-//             className="w-full px-3 py-2 sm:w-[120px]"
-//             type="Number"
-//             placeholder="25"
-//           />
-//         </div>
+  return (
+    <form
+      onSubmit={onSubmitHandler}
+      className="absolute flex flex-col w-full items-start gap-3 p-4 pt-16"
+    >
+      {isLoading && <Loader />}
 
-//         <div>
-//           <p className="mb-2">Product Discount</p>
-//           <Input
-//             onChange={(e) => setDiscount(e.target.value)}
-//             value={discount}
-//             className="w-full px-3 py-2 sm:w-[120px]"
-//             type="Number"
-//             placeholder="20"
-//           />
-//         </div>
-//       </div>
+      {/* IMAGES */}
+      <div>
+        <p className="mb-2 font-medium">Product Images</p>
+        <div className="flex items-start gap-4">
+          {[0, 1, 2].map((index) => {
+            const imageId = `image${index + 1}`;
+            const currentImage = [image1, image2, image3][index];
+            const originalImage = originalImages[index];
 
-//       {/* SIZES */}
-//       <div>
-//         <p className="mb-2">Product Sizes</p>
-//         <div className="flex gap-3">
-//           <div
-//             onClick={() =>
-//               setSizes((prev) =>
-//                 prev.includes("S")
-//                   ? prev.filter((item) => item !== "S")
-//                   : [...prev, "S"]
-//               )
-//             }
-//           >
-//             <p
-//               className={`${
-//                 sizes.includes("S") ? "bg-green-200" : "bg-slate-200"
-//               } px-3 py-1 cursor-pointer`}
-//             >
-//               S
-//             </p>
-//           </div>
+            return (
+              <div
+                key={imageId}
+                className="relative group w-[80px] aspect-[3/4] cursor-pointer rounded border border-gray-300 overflow-hidden"
+              >
+                <Label htmlFor={imageId} className="">
+                  <img
+                    src={
+                      currentImage
+                        ? URL.createObjectURL(currentImage)
+                        : originalImage || assets.upload_area
+                    }
+                    width={300}
+                    height={400}
+                    alt={`product image ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                  <input
+                    type="file"
+                    id={imageId}
+                    name={imageId}
+                    hidden
+                    accept="image/jpeg,image/png,image/webp,image/avif"
+                    onChange={(e) => handleImageChange(e, index)}
+                  />
+                </Label>
+                {(currentImage || originalImage) && (
+                  <button
+                    type="button"
+                    onClick={() => removeImage(index)}
+                    className="absolute -top-2 -right-2 bg-gray-500 text-gray-700 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X className="w-5" />
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
 
-//           <div
-//             onClick={() =>
-//               setSizes((prev) =>
-//                 prev.includes("M")
-//                   ? prev.filter((item) => item !== "M")
-//                   : [...prev, "M"]
-//               )
-//             }
-//           >
-//             <p
-//               className={`${
-//                 sizes.includes("M") ? "bg-green-200" : "bg-slate-200"
-//               } px-3 py-1 cursor-pointer`}
-//             >
-//               M
-//             </p>
-//           </div>
+      <div className="w-full">
+        <p className="mb-2">Product name</p>
+        <Input
+          onChange={(e) => setName(e.target.value)}
+          value={name}
+          type="text"
+          placeholder="Type here"
+          required
+        />
+      </div>
 
-//           <div
-//             onClick={() =>
-//               setSizes((prev) =>
-//                 prev.includes("L")
-//                   ? prev.filter((item) => item !== "L")
-//                   : [...prev, "L"]
-//               )
-//             }
-//           >
-//             <p
-//               className={`${
-//                 sizes.includes("L") ? "bg-green-200" : "bg-slate-200"
-//               } px-3 py-1 cursor-pointer`}
-//             >
-//               L
-//             </p>
-//           </div>
+      <div className="w-full">
+        <p className="mb-2">Product description</p>
+        <Textarea
+          onChange={(e) => setDescription(e.target.value)}
+          value={description}
+          type="text"
+          placeholder="Write content here"
+          required
+        />
+      </div>
 
-//           <div
-//             onClick={() =>
-//               setSizes((prev) =>
-//                 prev.includes("XL")
-//                   ? prev.filter((item) => item !== "XL")
-//                   : [...prev, "XL"]
-//               )
-//             }
-//           >
-//             <p
-//               className={`${
-//                 sizes.includes("XL") ? "bg-green-200" : "bg-slate-200"
-//               } px-3 py-1 cursor-pointer`}
-//             >
-//               XL
-//             </p>
-//           </div>
+      <div className="grid sm:grid-cols-2 gap-2 w-full">
+        <div>
+          <p className="mb-2">Product theme</p>
+          <Select
+            value={theme}
+            onValueChange={(value) => setTheme(value)}
+            required
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select theme" />
+            </SelectTrigger>
+            <SelectContent className="max-h-[150px]">
+              <SelectItem value="aesthetic">Aesthetic</SelectItem>
+              <SelectItem value="streetwear">Streetwear</SelectItem>
+              <SelectItem value="minimalist">Minimalist</SelectItem>
+              <SelectItem value="illustrate">Illustrate</SelectItem>
+              <SelectItem value="vintage">Vintage</SelectItem>
+              <SelectItem value="graphic">Graphic Art</SelectItem>
+              <SelectItem value="bold">Bold & Edgy</SelectItem>
+              <SelectItem value="pastel">Pastel Vibes</SelectItem>
+              <SelectItem value="typography">Typography</SelectItem>
+              <SelectItem value="quirky">Quirky & Fun</SelectItem>
+              <SelectItem value="others">Others</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
-//           <div
-//             onClick={() =>
-//               setSizes((prev) =>
-//                 prev.includes("XXL")
-//                   ? prev.filter((item) => item !== "XXL")
-//                   : [...prev, "XXL"]
-//               )
-//             }
-//           >
-//             <p
-//               className={`${
-//                 sizes.includes("XXL") ? "bg-green-200" : "bg-slate-200"
-//               } px-3 py-1 cursor-pointer`}
-//             >
-//               XXL
-//             </p>
-//           </div>
-//         </div>
-//       </div>
+        <div>
+          <p className="mb-2">Product category</p>
+          <Select
+            value={category}
+            onValueChange={(value) => setCategory(value)}
+            required
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select category" />
+            </SelectTrigger>
+            <SelectContent className="max-h-[150px]">
+              <SelectItem value="Men">Men</SelectItem>
+              <SelectItem value="Women">Women</SelectItem>
+              <SelectItem value="Unisex">Unisex</SelectItem>
+              <SelectItem value="Kids">Kids</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
-//       <div className="flex gap-2 mt-2">
-//         <Input
-//           onChange={() => setBestseller((prev) => !prev)}
-//           checked={bestseller}
-//           type="checkbox"
-//           id="bestseller"
-//           className="size-4"
-//         />
-//         <Label className="cursor-pointer" htmlFor="bestseller">
-//           Add to bestseller
-//         </Label>
-//       </div>
+        <div>
+          <p className="mb-2">Sub category</p>
+          <Select
+            value={subCategory}
+            onValueChange={(value) => setSubCategory(value)}
+            required
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select sub category" />
+            </SelectTrigger>
+            <SelectContent className="max-h-[150px]">
+              <SelectItem value="T-Shirts">T-Shirts</SelectItem>
+              <SelectItem value="Hoodies">Hoodies</SelectItem>
+              <SelectItem value="Shirts">Shirts</SelectItem>
+              <SelectItem value="Jackets">Jackets</SelectItem>
+              <SelectItem value="Joggers">Joggers</SelectItem>
+              <SelectItem value="Shorts">Shorts</SelectItem>
+              <SelectItem value="Co-ords">Co-ords</SelectItem>
+              <SelectItem value="Oversized">Oversized</SelectItem>
+              <SelectItem value="Sweatshirts">Sweatshirts</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
-//       <div className="flex gap-2 mt-2 mb-2">
-//         <Input
-//           onChange={() => setCustomizable((prev) => !prev)}
-//           checked={customizable}
-//           type="checkbox"
-//           id="customizable"
-//           className="size-4"
-//         />
-//         <Label className="cursor-pointer" htmlFor="customizable">
-//           Add to Customizable
-//         </Label>
-//       </div>
-//       <DialogFooter>
-//         <Button
-//           variant="outline"
-//           onClick={() => setEditDialogOpen(false)}
-//           className="mb-2"
-//         >
-//           Cancel
-//         </Button>
-//         <Button type="submit" onSubmit={onSubmitHandler} className="mb-2">
-//           Save
-//         </Button>
-//       </DialogFooter>
-//     </form>
-//   );
-// };
+        <div>
+          <p className="mb-2">Tag</p>
+          <Select
+            value={tag}
+            onValueChange={(value) => setTag(value)}
+            className="w-full px-3 py-2"
+            required
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select tag" />
+            </SelectTrigger>
+            <SelectContent className="max-h-[150px]">
+              <SelectItem value="New Arrival">New Arrival</SelectItem>
+              <SelectItem value="Limited Edition">Limited Edition</SelectItem>
+              <SelectItem value="Trending">Trending</SelectItem>
+              <SelectItem value="Best Seller">Best Seller</SelectItem>
+              <SelectItem value="Express Shipping">Express Shipping</SelectItem>
+              <SelectItem value="Back in Stock">Back in Stock</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
-// export default Edit;
+        <div>
+          <p className="mb-2">Product Price</p>
+          <Input
+            onChange={(e) => setPrice(e.target.value)}
+            value={price}
+            className="w-full px-3 py-2 sm:w-[120px]"
+            type="Number"
+            placeholder="₹250"
+            required
+          />
+        </div>
+        <div>
+          <p className="mb-2">Product Discount</p>
+          <Input
+            onChange={(e) => setDiscount(e.target.value)}
+            value={discount}
+            className="w-full px-3 py-2 sm:w-[120px]"
+            type="Number"
+            placeholder="10%"
+            required
+          />
+        </div>
+      </div>
+
+      {/* SIZES */}
+      <div className="w-full">
+        <p className="mb-2">Product Sizes</p>
+        <ScrollArea>
+          <div className="flex gap-3">
+            {["XXS", "XS", "S", "M", "L", "XL", "XXL"].map((size) => (
+              <div
+                key={size}
+                onClick={() =>
+                  setSizes((prev) =>
+                    prev.includes(size)
+                      ? prev.filter((item) => item !== size)
+                      : [...prev, size]
+                  )
+                }
+              >
+                <p
+                  className={`${
+                    sizes.includes(size) ? "bg-green-200" : "bg-slate-200"
+                  } px-3 py-1 cursor-pointer`}
+                >
+                  {size}
+                </p>
+              </div>
+            ))}
+          </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
+      </div>
+
+      <div className="flex items-center gap-2 mt-2">
+        <Input
+          onChange={() => setBestseller((prev) => !prev)}
+          checked={bestseller}
+          type="checkbox"
+          id="bestseller"
+          className="size-4"
+        />
+        <Label className="cursor-pointer" htmlFor="bestseller">
+          Add to bestseller
+        </Label>
+      </div>
+
+      <div className="flex items-center gap-2 mt-2 mb-2">
+        <Input
+          onChange={() => setCustomizable((prev) => !prev)}
+          checked={customizable}
+          type="checkbox"
+          id="customizable"
+          className="size-4"
+        />
+        <Label className="cursor-pointer" htmlFor="customizable">
+          Add to Customizable
+        </Label>
+      </div>
+
+      <div className="flex gap-2 w-full justify-end mt-4">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onClose}
+          className="rounded-none"
+        >
+          Cancel
+        </Button>
+        <Button type="submit" className="rounded-none">
+          Save Changes
+        </Button>
+      </div>
+    </form>
+  );
+};
+
+export default Edit;

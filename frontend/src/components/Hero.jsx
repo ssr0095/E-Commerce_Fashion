@@ -25,22 +25,22 @@ const Hero = () => {
       >
         <CarouselContent>
           <CarouselItem>
-              <img
-                src={assets.bg_01}
-                className="w-full h-[80%]"
-                alt={"Hero image 0"}
-                // width={1080}
-                // height={630}
-                loading="eager"
-                fetchpriority="high"
-              />
-            </CarouselItem>
+            <img
+              src={assets.bg_01}
+              className="w-full max-h-screen"
+              alt={"Hero image 0"}
+              // width={1080}
+              // height={630}
+              loading="eager"
+              fetchpriority="high"
+            />
+          </CarouselItem>
           {bg.map((img, index) => (
             <CarouselItem key={index}>
               <img
                 src={img}
-                className="w-full h-[80%]"
-                alt={"Hero image " + index +1}
+                className="w-full max-h-screen"
+                alt={"Hero image " + index + 1}
                 // width={1080}
                 // height={630}
                 loading="lazy"

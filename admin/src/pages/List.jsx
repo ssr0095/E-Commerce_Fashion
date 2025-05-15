@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { backendUrl, currency } from "../App";
 import { toast } from "react-toastify";
-import { Trash2 } from "lucide-react";
-// import Edit from "./Edit";
+import { Trash2, Pencil } from "lucide-react";
+import Edit from "./Edit";
 import {
   Dialog,
   DialogContent,
@@ -18,7 +18,8 @@ const List = ({ token, setToken }) => {
   const [list, setList] = useState([]);
   const [productId, setProductId] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  // const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [currentProduct, setCurrentProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchList = async (forceRefresh = false) => {
@@ -76,7 +77,7 @@ const List = ({ token, setToken }) => {
         data: { id: productId }, // This is how you send data with DELETE
       });
       setIsLoading(false);
-      console.log(response);
+
       if (response.data.success) {
         toast.success(response.data.message);
         await fetchList(true); // force refresh cache
@@ -109,17 +110,17 @@ const List = ({ token, setToken }) => {
       ) : (
         <>
           <div className="flex flex-col min-w-[560px] md:min-w-[80%] no-scrollbar">
-            <div className="grid grid-cols-[1fr_2fr_1fr_1fr_1fr] px-4 py-2 border-b-2 bg-white text-sm sticky top-0">
+            <div className="grid grid-cols-[1fr_2fr_1fr_1fr_1fr_1fr] px-4 py-2 border-b-2 bg-white text-sm sticky top-0">
               <b>Image</b>
               <b>Name</b>
               <b>Category</b>
               <b>Price</b>
-              {/* <b>Edit</b> */}
+              <b>Edit</b>
               <b>Remove</b>
             </div>
             {list.map((item, index) => (
               <div
-                className="grid grid-cols-[1fr_2fr_1fr_1fr_1fr] items-center py-2 px-4 border-b text-sm hover:bg-gray-50 bg-white"
+                className="grid grid-cols-[1fr_2fr_1fr_1fr_1fr_1fr] items-center py-2 px-4 border-b text-sm hover:bg-gray-50 bg-white"
                 key={index}
               >
                 <img
@@ -135,29 +136,15 @@ const List = ({ token, setToken }) => {
                   {currency}
                   {item.price}
                 </p>
-                {/* <div
-              className="flex items-center justify-center cursor-default size-8 p-2 rounded-full text-gray-600 hover:bg-gray-200"
-              onClick={() => {
-                setProductId(item._id);
-                setEditDialogOpen(true);
-              }}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="lucide lucide-pencil"
-              >
-                <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
-                <path d="m15 5 4 4" />
-              </svg>
-            </div> */}
+                <div
+                  className="flex items-center justify-center cursor-default size-8 p-2 rounded-full text-gray-600 hover:bg-gray-200"
+                  onClick={() => {
+                    setCurrentProduct(item._id);
+                    setEditDialogOpen(true);
+                  }}
+                >
+                  <Pencil size={16} />
+                </div>
                 <div
                   className="flex items-center justify-center cursor-default size-8 p-2 rounded-full text-gray-600 hover:bg-gray-200"
                   onClick={() => {
@@ -165,7 +152,7 @@ const List = ({ token, setToken }) => {
                     setDeleteDialogOpen(true);
                   }}
                 >
-                  <Trash2 />
+                  <Trash2 size={16} />
                 </div>
               </div>
             ))}
@@ -193,17 +180,24 @@ const List = ({ token, setToken }) => {
           </Dialog>
 
           {/* Edit Product Dialog */}
-          {/* <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent>
-          <Edit
-            productId={productId}
-            onDone={() => {
-              setEditDialogOpen(false);
-              fetchList(true);
-            }}
-          />
-        </DialogContent>
-      </Dialog> */}
+          <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+            <DialogContent className="max-sm:w-[95%] w-[80%] max-w-4xl h-[90vh] overflow-auto rounded-lg">
+              <DialogHeader>
+                <DialogTitle>Edit Product</DialogTitle>
+              </DialogHeader>
+              {currentProduct && (
+                <Edit
+                  token={token}
+                  productId={currentProduct}
+                  onClose={() => {
+                    setEditDialogOpen(false);
+                    setCurrentProduct(null);
+                  }}
+                  onUpdate={() => fetchList(true)}
+                />
+              )}
+            </DialogContent>
+          </Dialog>
         </>
       )}
     </div>

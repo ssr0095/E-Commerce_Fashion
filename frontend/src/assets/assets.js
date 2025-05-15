@@ -24,6 +24,7 @@ import size from "./size.jpg";
 import c4 from "./category/c4.webp";
 import c5 from "./category/c5.webp";
 import c6 from "./category/c6.webp";
+import c7 from "./category/c7.webp";
 
 export const assets = {
   // logo,
@@ -52,6 +53,7 @@ export const assets = {
   c4,
   c5,
   c6,
+  c7,
 };
 
 export const themeList = [
@@ -81,7 +83,7 @@ export const subCategoryList = [
 export const category = [
   { name: "aesthetics", image: c4 },
   { name: "illustration", image: c5 },
-  { name: "other-collections", image: c6 },
+  { name: "others", image: c7 },
 ];
 // export const category = [
 //   { name: "Streetwear", image: p_img50 },
