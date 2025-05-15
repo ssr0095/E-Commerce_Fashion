@@ -5,7 +5,7 @@ const Footer = () => {
   return (
     <footer className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw] bg-gray-50 border-t mt-40">
       <div className="my-6">
-        <img src="/logo.png"  width={96} height={18} className="mb-5 w-32" alt="logo" />
+        <img src="/logo.png"  width={96} height={18} className="mb-5 w-32" alt="logo" loading="lazy" />
         <p className="w-full md:w-11/12 text-gray-600 text-sm">
           CousinsFashion brings you stylish, high-quality fashion for every
           occasion. Explore trendy clothing and accessories for men and women,

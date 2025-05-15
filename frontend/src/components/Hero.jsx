@@ -31,8 +31,8 @@ const Hero = () => {
                 className="w-full"
                 alt={"Hero image " + index}
                 width={1080}
-                height={430}
-                loading="lazy"
+                height={630}
+                loading={index == 0 ? "eager":"lazy"}
               />
             </CarouselItem>
           ))}

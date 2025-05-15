@@ -23,6 +23,7 @@ const About = () => {
         <img
           className="w-full lg:max-w-[450px] aspect-[3/4]"
           src={assets.about_img}
+          loading="eager"
           alt="about"
         />
         <div className="flex flex-col justify-center gap-6 lg:w-2/4 text-gray-600">

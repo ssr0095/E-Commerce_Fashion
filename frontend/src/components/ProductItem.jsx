@@ -29,6 +29,7 @@ const ProductItem = ({
           <img
             src={image[1]}
             alt="Hover"
+            loading="lazy"
             className="absolute top-0 left-0 w-full h-full object-cover transition duration-300 opacity-0 group-hover:opacity-100"
           />
         )}
@@ -111,6 +112,7 @@ export const CategoryItem = ({ name, image }) => {
           height={300}
           src={image}
           alt={`${name} image`}
+          loading="lazy"
         />
       </div>
       <p className="w-fit absolute bottom-5 left-5 bg-white px-4 z-10 py-2 border border-gray-700 text-xs lg:text-sm text-center hover:underline underline-offset-2">

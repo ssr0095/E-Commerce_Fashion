@@ -132,6 +132,7 @@ const Orders = () => {
                             alt="ok"
                             width={20}
                             height={20}
+                            loading="lazy"
                           />
                           Payment success
                         </>
@@ -142,6 +143,7 @@ const Orders = () => {
                             alt="processing"
                             width={20}
                             height={20}
+                            loading="lazy"
                           />
                           Payment Processing
                         </>
@@ -210,6 +212,7 @@ const Orders = () => {
                           alt="ok"
                           width={12}
                           height={12}
+                            loading="lazy"
                         />
                         Order placed
                       </p>
@@ -225,6 +228,7 @@ const Orders = () => {
                           alt="ok"
                           width={12}
                           height={12}
+                            loading="lazy"
                         />
                         Shipped
                       </p>
@@ -239,6 +243,7 @@ const Orders = () => {
                           alt="ok"
                           width={12}
                           height={12}
+                            loading="lazy"
                         />
                         Out for delivery
                       </p>
@@ -252,6 +257,7 @@ const Orders = () => {
                           alt="ok"
                           width={12}
                           height={12}
+                            loading="lazy"
                         />
                         Delivered
                       </p>

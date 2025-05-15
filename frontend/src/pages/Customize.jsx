@@ -49,7 +49,9 @@ const Customize = () => {
               rel="noopener noreferrer"
               className="flex items-center gap-3 justify-center bg-green-500 text-white px-6 py-3 rounded-lg text-lg font-medium shadow-md transition hover:bg-green-600"
             >
-              <img src={assets.whatsapp_icon_01} width={24} alt="whatsapp" />
+              <img src={assets.whatsapp_icon_01} width={24} alt="whatsapp" 
+              loading="lazy"
+              />
               Chat on WhatsApp
             </a>
           </div>

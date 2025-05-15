@@ -18,7 +18,9 @@ const QRCodeComponent = ({ upiId, amount, name }) => {
 
   return (
     <div className="flex flex-col items-center space-y-4">
-      {qrSrc && <img src={qrSrc} alt="QR Code" className="w-44 h-44" />}
+      {qrSrc && (
+        <img src={qrSrc} alt="QR Code" className="w-44 h-44" loading="lazy"
+         />)}
       <p className="text-xl font-bold">Scan with any UPI app</p>
     </div>
   );

@@ -78,6 +78,7 @@ const SearchBar = () => {
           src={assets.cross_icon}
           alt="clear"
           aria-hidden="true"
+          loading="lazy"
         />
       </button>
     </div>

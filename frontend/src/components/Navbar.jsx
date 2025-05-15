@@ -75,7 +75,7 @@ const Navbar = () => {
             to="/collection"
             className="flex items-center rounded-full bg-gray-900 px-3.5 py-1 max-sm:text-xs text-sm font-semibold text-white shadow-xs hover:bg-gray-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
           >
-            Shop now <span aria-hidden="true">&rarr;</span>
+            Shop now <span className="ml-1">&rarr;</span>
           </Link>
         </div>
       </div>
@@ -90,7 +90,7 @@ const Navbar = () => {
               alt="Cousins Fashion"
               width={96}
               height={18}
-              loading="lazy"
+              loading="eager"
             />
           </Link>
 
@@ -140,7 +140,7 @@ const Navbar = () => {
                         className="w-[17px] cursor-pointer"
                         src={assets.profile_icon}
                         alt="Profile"
-                        // loading="lazy"
+                        loading="lazy"
                         width={20}
                         height={20}
                       />
@@ -269,8 +269,12 @@ const Navbar = () => {
         className={`fixed top-0 right-0 h-full w-full bg-white z-50 transition-transform duration-300 ease-in-out ${
           visible ? "translate-x-0" : "translate-x-full"
         }`}
+        // Only hide from screen readers when not visible
         aria-hidden={!visible}
+        // Add inert attribute when not visible (polyfill might be needed for full browser support)
+        inert={!visible ? "" : undefined}
       >
+        {/* Rest of your sidebar content remains the same */}
         <div className="p-4 flex flex-col gap-3 text-gray-800">
           <button
             className="flex items-center gap-3 cursor-pointer"
@@ -285,6 +289,7 @@ const Navbar = () => {
               key={item.name}
               to={item.path}
               onClick={handleCloseSidebar}
+              aria-label={`${item.name} link`}
               className={({ isActive }) =>
                 `flex items-center justify-start gap-4 py-2 pl-4 border-b ${
                   isActive ? "text-black font-medium" : "text-gray-600"

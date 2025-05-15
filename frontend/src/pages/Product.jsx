@@ -60,11 +60,12 @@ const Product = () => {
                   key={index}
                   className="w-[24%] sm:w-full aspect-[3/4] sm:mb-3 flex-shrink-0 cursor-pointer"
                   alt={`product image ${index}`}
+                  loading="lazy"
                 />
               ))}
             </div>
             <div className="w-full">
-              <img className="w-full aspect-[3/4]" src={image} alt="image" />
+              <img className="w-full aspect-[3/4]" src={image} alt="image" loading="eager"/>
             </div>
           </div>
 

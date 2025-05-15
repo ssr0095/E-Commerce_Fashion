@@ -19,7 +19,7 @@ const InfiniteBanner = () => {
           >
            {[1,2,3,4,5,6,7].map((item,i) => (
               <li key={i}>
-                <img src="/logo.png" width={96} height={18} alt="logo" className="w-24 md:w-32" />
+                <img src="/logo.png" width={96} height={18} alt="logo" className="w-24 md:w-32" loading="lazy" />
               </li>
             ))}
           </ul>
@@ -29,7 +29,7 @@ const InfiniteBanner = () => {
           >
            {[1,2,3,4,5,6,7].map((item,i) => (
               <li key={i}>
-                <img src="/logo.png" width={96} height={18} alt="logo" className="w-24 md:w-32" />
+                <img src="/logo.png" width={96} height={18} alt="logo" className="w-24 md:w-32" loading="lazy" />
               </li>
             ))}
           </ul>
