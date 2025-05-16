@@ -87,7 +87,7 @@ const Product = () => {
               <p className="line-through text-xl text-gray-500 font-medium">
                 {currency}
                 {productData?.price +
-                  Math.round(
+                  Math.ceil(
                     (productData?.discount / 100) * productData?.price
                   )}
               </p>{" "}

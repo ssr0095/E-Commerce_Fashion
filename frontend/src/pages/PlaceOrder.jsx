@@ -116,7 +116,7 @@ const PlaceOrder = () => {
         amount:
           getCartAmount() +
           delivery_fee -
-          Math.round((getCartAmount() * discount) / 100),
+          Math.ceil((getCartAmount() * discount) / 100),
         isCustomizable: hasCustomItem, // Use the local variable instead of state
       };
 

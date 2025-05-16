@@ -46,7 +46,7 @@ const ProductItem = ({
         <div className="flex-1 flex items-center gap-3">
           <p className="line-through text-md font-medium">
             {currency}
-            {price + Math.round((discount / 100) * price)}
+            {price + Math.ceil((discount / 100) * price)}
           </p>
           <p className="text-lg text-gray-800 font-semibold">
             {currency}

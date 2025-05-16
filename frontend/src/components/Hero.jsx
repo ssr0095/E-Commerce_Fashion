@@ -43,6 +43,7 @@ const Hero = () => {
                 alt={"Hero image " + index + 1}
                 // width={1080}
                 // height={630}
+              fetchpriority="low"
                 loading="lazy"
               />
             </CarouselItem>

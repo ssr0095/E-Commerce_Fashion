@@ -9,10 +9,10 @@
   <!-- --------backend & cdn----------->
     <link rel="preconnect" href="https://api.cousinsfashion.in">
     <link rel="preconnect" href="https://cdn.cousinsfashion.in">
-    <!-- <link rel="preload" href="https://cousinsfashion.in/assets/anime/bg_01.webp">
-    <link rel="preload" href="https://cousinsfashion.in/assets/category/c4.webp"> -->
+    <link rel="preload" fetchpriority="high" as="image" href="https://cousinsfashion.in/assets/bg/b1.webp" type="image/webp">
+    <link rel="preload" fetchpriority="high" as="image"  href="https://cousinsfashion.in/assets/category/c4.webp" type="image/webp">
 
-  <!-- --------font--------- -->
+    <!-- --------font--------- -->
   <!-- Preload the specific weights you use -->
   <link rel="preload" href="/fonts/Outfit-Variable.woff2" as="font" type="font/woff2" crossorigin>
   <!-- <link rel="preload" href="/fonts/outfit-variable.ttf" as="font" type="font/ttf" crossorigin> -->
@@ -84,7 +84,7 @@
     "@type": "Organization",
     "name": "Cousins Fashion",
     "url": "https://cousinsfashion.in/",
-    "logo": "https://cousinsfashion.in/logo.png",
+    "logo": "https://cousinsfashion.in/logo.webp",
     "sameAs": [
       "https://www.instagram.com/cousins_.fashion",
     ],

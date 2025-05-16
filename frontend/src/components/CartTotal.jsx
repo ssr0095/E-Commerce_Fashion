@@ -32,7 +32,7 @@ const CartTotal = () => {
             <div className="flex justify-between">
               <p>Discount <span className="ml-1 text-gray-600">{discount}%</span></p>
               <p>
-                - {currency} {Math.round((getCartAmount() * discount) / 100)}.00
+                - {currency} {Math.ceil((getCartAmount() * discount) / 100)}.00
               </p>
             </div>
             <hr />
@@ -44,7 +44,7 @@ const CartTotal = () => {
             {currency}{" "}
             {getCartAmount() === 0
               ? 0
-              : getCartAmount() + delivery_fee - Math.round((getCartAmount() * discount) / 100)}
+              : getCartAmount() + delivery_fee - Math.ceil((getCartAmount() * discount) / 100)}
             .00
           </b>
         </div>
