@@ -81,9 +81,9 @@ export const subCategoryList = [
   "Sweatshirts",
 ];
 export const category = [
-  { name: "aesthetics", image: c4 },
-  { name: "illustration", image: c5 },
-  { name: "others", image: c7 },
+  { name: "Aesthetics", value: "Aesthetic", image: c4 },
+  { name: "Illustration", value: "Illustrate", image: c5 },
+  { name: "Others", value: "", image: c7 },
 ];
 // export const category = [
 //   { name: "Streetwear", image: p_img50 },

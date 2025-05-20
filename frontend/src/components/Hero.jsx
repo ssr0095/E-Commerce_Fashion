@@ -11,26 +11,26 @@ import {
 
 const Hero = () => {
   const plugin = React.useRef(
-    Autoplay({ delay: 2200, stopOnInteraction: true, loop: true })
+    Autoplay({ delay: 2200, stopOnInteraction: false, loop: true, })
   );
 
   const bg = [assets.bg_02, assets.bg_03];
   return (
-    <div className="w-full">
+    <div className="w-full max-h-screen">
       <Carousel
         plugins={[plugin.current]}
         className="w-full"
         onMouseEnter={plugin.current.stop}
         onMouseLeave={plugin.current.play}
       >
-        <CarouselContent>
+        <CarouselContent height={700}>
           <CarouselItem>
             <img
               src={assets.bg_01}
               className="w-full max-h-screen"
               alt={"Hero image 0"}
               // width={1080}
-              // height={630}
+              height={700}
               loading="eager"
               fetchpriority="high"
             />
@@ -42,7 +42,7 @@ const Hero = () => {
                 className="w-full max-h-screen"
                 alt={"Hero image " + index + 1}
                 // width={1080}
-                // height={630}
+              height={700}
               fetchpriority="low"
                 loading="lazy"
               />

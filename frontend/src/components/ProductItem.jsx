@@ -39,7 +39,7 @@ const ProductItem = ({
         {tag}
       </p>
 
-      <p className="pt-1 text-md text-gray-800 font-semibold">{name}</p>
+      <p className="pt-1 text-md truncate text-gray-800 font-semibold">{name}</p>
       <p className="pb-2 text-sm truncate">{description}</p>
 
       <div className="w-full flex items-center justify-between">
@@ -89,7 +89,7 @@ const ProductItem = ({
   // );
 };
 
-export const CategoryItem = ({ name, image }) => {
+export const CategoryItem = ({ name, searchValue, image }) => {
   const { setSearchQuery, toggleSearch, navigate } = useContext(ShopContext);
 
   const toMove = (val) => {
@@ -100,7 +100,7 @@ export const CategoryItem = ({ name, image }) => {
 
   return (
     <Link
-      onClick={() => toMove(name)}
+      onClick={() => toMove(searchValue)}
       className="relative text-gray-700 cursor-pointer w-full bg-gray-200 group"
       to={`/collection`}
       // height={500}
@@ -112,7 +112,7 @@ export const CategoryItem = ({ name, image }) => {
           height={700}
           src={image}
           alt={`${name} image`}
-          loading="lazy"
+          loading="eager"
         />
       </div>
       <p className="w-fit absolute bottom-5 left-5 bg-white px-4 z-10 py-2 border border-gray-700 text-xs lg:text-sm text-center hover:underline underline-offset-2">

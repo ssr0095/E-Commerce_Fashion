@@ -33,7 +33,7 @@ const LatestCollection = () => {
         {/* Rendering Products */}
         <Carousel height={500} className="w-full">
           <CarouselContent className="-ml-1">
-            {latestProducts.map((item, index) => (
+            {latestProducts?.map((item, index) => (
               <CarouselItem
                 key={index}
                 className="basis-1/2 md:basis-1/3 lg:basis-1/5"
@@ -51,12 +51,8 @@ const LatestCollection = () => {
               </CarouselItem>
             ))}
           </CarouselContent>
-          {
-            <>
-              <CarouselPrevious />
-              <CarouselNext />
-            </>
-          }
+          <CarouselPrevious className="max-sm:hidden" />
+          <CarouselNext className="max-sm:hidden" />
         </Carousel>
 
         {/* <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 max-sm:gap-2 gap-4 max-sm:gap-y-4 gap-y-6">

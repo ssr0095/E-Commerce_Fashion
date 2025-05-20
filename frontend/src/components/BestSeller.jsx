@@ -33,7 +33,7 @@ const BestSeller = () => {
 
         <Carousel className="w-full">
           <CarouselContent className="-ml-1">
-            {bestSeller?.map((item, index) => (
+            {bestSeller.map((item, index) => (
               <CarouselItem
                 key={index}
                 className="basis-1/2 md:basis-1/3 lg:basis-1/5"
@@ -51,8 +51,8 @@ const BestSeller = () => {
               </CarouselItem>
             ))}
           </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
+          <CarouselPrevious className="max-sm:hidden" />
+          <CarouselNext className="max-sm:hidden" />
         </Carousel>
         <ShopMore />
       </div>

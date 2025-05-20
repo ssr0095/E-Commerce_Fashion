@@ -16,7 +16,7 @@ const ShopByCategory = () => {
 
         <div className="w-full h-[90%] grid grid-cols-1 sm:grid-cols-3 items-center justify-center gap-1">
           {category.map((item, index) => (
-            <CategoryItem key={index} name={item.name} image={item.image} />
+            <CategoryItem key={index} name={item.name} image={item.image} searchValue={item.value} />
           ))}
         </div>
       </div>

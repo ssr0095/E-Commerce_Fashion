@@ -75,8 +75,10 @@ const Collection = () => {
 
       productsCopy = productsCopy.filter(
         (item) =>
+          item.theme?.toLowerCase().startsWith(query) ||
+        regex.test(item.theme?.toLowerCase()) ||
           item.name?.toLowerCase().includes(query) ||
-          regex.test(item.theme?.toLowerCase()) ||
+        item.theme?.toLowerCase().includes(query) ||
           item.theme?.toLowerCase().startsWith(query) ||
           regex.test(item.category?.toLowerCase()) ||
           item.category?.toLowerCase().startsWith(query) ||

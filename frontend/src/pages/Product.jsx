@@ -8,6 +8,13 @@ import Coupon from "../components/Coupon";
 import ProductDetailsDrop from "../components/ProductDetailsDrop";
 import { assets } from "../assets/assets";
 import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  // CarouselNext,
+  // CarouselPrevious,
+} from "@/components/ui/carousel";
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -46,26 +53,53 @@ const Product = () => {
 
   return productData ? (
     <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
-      <SmallNavBar navs={["Collection", "Product"]} />
+      <SmallNavBar navs={
+        [productData.customizable ? "Customize":"Collection", "Product"]} />
       <div className="border-t pt-10 transition-opacity ease-in duration-500 opacity-100">
         {/*----------- Product Data-------------- */}
         <div className="flex gap-5 sm:gap-7 flex-col sm:flex-row">
           {/*---------- Product Images------------- */}
-          <div className="flex-1 flex flex-col-reverse gap-3 sm:flex-row">
-            <div className="flex sm:flex-col overflow-x-auto sm:overflow-y-scroll justify-start gap-3 sm:justify-normal sm:w-[18.7%] w-full">
+          <div className="flex-1 flex gap-3">
+            <div className="flex flex-col max-sm:hidden overflow-y-scroll justify-start gap-3 justify-normal w-[19%]">
               {productData?.image.map((item, index) => (
                 <img
                   onClick={() => setImage(item)}
                   src={item}
                   key={index}
-                  className="w-[24%] sm:w-full aspect-[3/4] sm:mb-3 flex-shrink-0 cursor-pointer"
+                  className="w-full aspect-[3/4] mb-3 flex-shrink-0 cursor-pointer"
                   alt={`product image ${index}`}
                   loading="lazy"
                 />
               ))}
             </div>
-            <div className="w-full">
+            <div className="w-full max-sm:hidden">
               <img className="w-full aspect-[3/4]" src={image} alt="image" loading="eager"/>
+            </div>
+            <div className="w-full sm:hidden">
+              <Carousel
+                // plugins={[plugin.current]}
+                className="w-full"
+                // onMouseEnter={plugin.current.stop}
+                // onMouseLeave={plugin.current.play}
+              >
+                <CarouselContent>
+                  {productData?.image.map((item, index) => (
+                    <CarouselItem key={index}>
+                      <img
+                        // onClick={() => setImage(item)}
+                        src={item}
+                        key={index}
+                        className="w-full aspect-[3/4]"
+                        alt={`product image ${index}`}
+                        loading={index==0?"eager":"lazy"}
+                      />
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                {/* <CarouselPrevious /> 
+                <CarouselNext /> */}
+              </Carousel>
+              {/* <img className="w-full aspect-[3/4]" src={image} alt="image" loading="eager"/> */}
             </div>
           </div>
 
@@ -161,7 +195,7 @@ const Product = () => {
           </div>
         </div>
 
-        <div className="w-full flex flex-col-reverse items-center justify-end md:flex-row gap-10">
+        <div className="w-full flex flex-col-reverse items-center justify-end md:mt-10 md:flex-row gap-10">
           {/* COUPON */}
           <Coupon />
           <div className="w-full md:w-[80%] lg:w-[48%]">

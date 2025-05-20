@@ -326,7 +326,7 @@ const Add = ({ token, setToken }) => {
               <SelectItem value="New Arrival">New Arrival</SelectItem>
               <SelectItem value="Limited Edition">Limited Edition</SelectItem>
               <SelectItem value="Trending">Trending</SelectItem>
-              <SelectItem value="Best Seller">Best Seller</SelectItem>
+              {/* <SelectItem value="Best Seller">Best Seller</SelectItem> */}
               <SelectItem value="Express Shipping">Express Shipping</SelectItem>
               <SelectItem value="Back in Stock">Back in Stock</SelectItem>
               {/* </ScrollArea> */}
