@@ -6,6 +6,7 @@ import SearchBar from "./components/SearchBar";
 import Loading from "./components/Loading";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import NotFound from "./pages/NotFound";
 
 const App = () => {
   const Home = lazy(() => import("./pages/Home"));
@@ -39,6 +40,7 @@ const App = () => {
           <Route path="/payment/:orderId" element={<Payment />} />
           <Route path="/orders" element={<Orders />} />
           <Route path="/verify" element={<Verify />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
         <Footer />
       </Suspense>
