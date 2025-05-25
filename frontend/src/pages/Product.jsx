@@ -55,10 +55,10 @@ const Product = () => {
     const schema = {
       "@context": "https://schema.org",
       "@type": "Product",
-      name: productData.name,
-      image: productData.image, // Array of all images
-      description: productData.description,
-      sku: productData._id, // Add product ID as SKU
+      name: productData?.name,
+      image: productData?.image, // Array of all images
+      description: productData?.description,
+      sku: productData?._id, // Add product ID as SKU
       brand: {
         "@type": "Brand",
         name: "Cousins Fashion",
@@ -69,10 +69,10 @@ const Product = () => {
       offers: {
         "@type": "Offer",
         url: `https://cousinsfashion.in/product/${
-          productData.slug || productData._id
+          productData?.slug || productData?._id
         }`,
         priceCurrency: "INR",
-        price: productData.price,
+        price: productData?.price,
         // "priceValidUntil": new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days from now
         itemCondition: "https://schema.org/NewCondition",
         availability: "https://schema.org/InStock",
@@ -84,7 +84,7 @@ const Product = () => {
         },
       },
       // Add aggregate rating if you have reviews
-      aggregateRating: productData.ratings
+      aggregateRating: productData?.ratings
         ? {
             "@type": "AggregateRating",
             ratingValue: productData.ratings.average,
@@ -106,38 +106,43 @@ const Product = () => {
   return productData ? (
     <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
       <Helmet>
-        <title>{`${productData.name} | Buy Now | Cousins Fashion`}</title>
-        <meta name="description" content={productData.description} />
+        <title>{`${productData?.name} | Buy Now | Cousins Fashion`}</title>
+        <meta name="description" content={productData?.description} />
         <link
           rel="canonical"
           href={`https://cousinsfashion.in/product/${
-            productData.slug || productData._id
+            productData?.slug || productData?._id
           }`}
         />
         {/* Open Graph */}
         <meta
           property="og:title"
-          content={`${productData.name} | Cousins Fashion`}
+          content={`${productData?.name} | Cousins Fashion`}
         />
-        <meta property="og:description" content={productData.description} />
-        <meta property="og:image" content={productData.image[0]} />
+        <meta property="og:description" content={productData?.description} />
+        <meta property="og:image" content={productData?.image[0]} />
         <meta property="og:type" content="product" />
         <meta property="og:site_name" content="Cousins Fashion" />
-        <meta property="og:url" content={window.location.href} />
+        <meta
+          property="og:url"
+          content={`https://cousinsfashion.in/product/${
+            productData?.slug || productData?._id
+          }`}
+        />
         <meta property="product:brand" content="Cousins Fashion" />
-        <meta property="product:retailer_item_id" content={productData._id} />
+        <meta property="product:retailer_item_id" content={productData?._id} />
 
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta
           name="twitter:title"
-          content={`${productData.name} | Cousins Fashion`}
+          content={`${productData?.name} | Cousins Fashion`}
         />
         <meta
           name="twitter:description"
-          content={productData.description.substring(0, 200)}
+          content={productData?.description.substring(0, 200)}
         />
-        <meta name="twitter:image" content={productData.image[0]} />
+        <meta name="twitter:image" content={productData?.image[0]} />
 
         <script type="application/ld+json">{generateProductSchema()}</script>
       </Helmet>

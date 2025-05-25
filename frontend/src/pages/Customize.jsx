@@ -33,7 +33,7 @@ const Customize = () => {
           property="og:url"
           content={"https://cousinsfashion.in/customize"}
         />
-        <meta property="og:image" content={customizableProducts[0].image[0]} />
+        <meta property="og:image" content={customizableProducts[0]?.image[0]} />
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>

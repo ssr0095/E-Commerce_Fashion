@@ -172,7 +172,7 @@ const Collection = () => {
           property="og:url"
           content={"https://cousinsfashion.in/collection"}
         />
-        <meta property="og:image" content={products[0].image[0]} />
+        <meta property="og:image" content={products[0]?.image[0]} />
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
