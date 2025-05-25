@@ -1,11 +1,18 @@
 import { categoryList, themeList } from "../assets/assets";
-import {Phone} from "lucide-react"
+import { Phone } from "lucide-react";
 const Footer = () => {
   const theme = themeList.slice(0, 4);
   return (
     <footer className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw] bg-gray-50 border-t mt-40">
       <div className="my-6">
-        <img src="/logo.webp"  width={96} height={18} className="mb-5 w-32" alt="logo" loading="lazy" />
+        <img
+          src="/logo.webp"
+          width={96}
+          height={18}
+          className="mb-5 w-32"
+          alt="logo"
+          loading="lazy"
+        />
         <p className="w-full md:w-11/12 text-gray-600 text-sm">
           CousinsFashion brings you stylish, high-quality fashion for every
           occasion. Explore trendy clothing and accessories for men and women,
@@ -15,7 +22,7 @@ const Footer = () => {
         </p>
       </div>
       <hr />
-      <div className="flex flex-col sm:grid grid-cols-[1fr_1fr_1fr_1fr_1fr] gap-7 sm:gap-14 my-10 text-sm">
+      <div className="flex flex-col sm:grid sm:grid-cols-[1fr_1fr_1fr_1fr] lg:grid-cols-[1fr_1fr_1fr_1fr_1fr] gap-7 sm:gap-14 my-10 text-sm">
         <div>
           <p className="text-xl font-medium mb-5">COMPANY</p>
           <ul className="flex flex-col gap-1 text-gray-600">
@@ -89,7 +96,7 @@ const Footer = () => {
           </ul>
         </div>
 
-        <div>
+        <div className="sm:col-span-2 lg:col-span-1">
           <p className="text-xl font-medium mb-5">NEED HELP?</p>
           <ul className="flex flex-col gap-1 text-gray-600">
             <li>
@@ -98,7 +105,7 @@ const Footer = () => {
                 alt="whatsapp"
                 href="https://wa.me/8248586654?text=Hey!%20I%20saw%20your%20collection%20and%20loved%20it.%20Can%20you%20help%20me%20with%20sizes%20and%20pricing?"
               >
-                <Phone className="w-4"/>
+                <Phone className="w-4" />
                 +91 82485 86654
               </a>
             </li>

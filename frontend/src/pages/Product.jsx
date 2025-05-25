@@ -20,6 +20,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Ruler, ArrowUpRight } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 
 const Product = () => {
   const { productId } = useParams();
@@ -47,33 +48,129 @@ const Product = () => {
     }
   };
 
+  // Generate schema markup
+  const generateProductSchema = () => {
+    if (!productData) return null;
+
+    const schema = {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      name: productData.name,
+      image: productData.image, // Array of all images
+      description: productData.description,
+      sku: productData._id, // Add product ID as SKU
+      brand: {
+        "@type": "Brand",
+        name: "Cousins Fashion",
+        // Link to your global brand info
+        url: "https://cousinsfashion.in",
+        logo: "https://cousinsfashion.in/logo.webp",
+      },
+      offers: {
+        "@type": "Offer",
+        url: `https://cousinsfashion.in/product/${
+          productData.slug || productData._id
+        }`,
+        priceCurrency: "INR",
+        price: productData.price,
+        // "priceValidUntil": new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days from now
+        itemCondition: "https://schema.org/NewCondition",
+        availability: "https://schema.org/InStock",
+        seller: {
+          "@type": "Organization",
+          name: "Cousins Fashion",
+          // Links back to your global org schema
+          sameAs: "https://cousinsfashion.in",
+        },
+      },
+      // Add aggregate rating if you have reviews
+      aggregateRating: productData.ratings
+        ? {
+            "@type": "AggregateRating",
+            ratingValue: productData.ratings.average,
+            reviewCount: productData.ratings.count,
+          }
+        : undefined,
+    };
+
+    // Clean undefined values
+    return JSON.stringify(schema, (key, value) =>
+      value === undefined ? undefined : value
+    );
+  };
+
   useEffect(() => {
     fetchProductData();
   }, [productId, products]);
 
   return productData ? (
     <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
-      <SmallNavBar navs={
-        [productData.customizable ? "Customize":"Collection", "Product"]} />
+      <Helmet>
+        <title>{`${productData.name} | Buy Now | Cousins Fashion`}</title>
+        <meta name="description" content={productData.description} />
+        <link
+          rel="canonical"
+          href={`https://cousinsfashion.in/product/${
+            productData.slug || productData._id
+          }`}
+        />
+        {/* Open Graph */}
+        <meta
+          property="og:title"
+          content={`${productData.name} | Cousins Fashion`}
+        />
+        <meta property="og:description" content={productData.description} />
+        <meta property="og:image" content={productData.image[0]} />
+        <meta property="og:type" content="product" />
+        <meta property="og:site_name" content="Cousins Fashion" />
+        <meta property="og:url" content={window.location.href} />
+        <meta property="product:brand" content="Cousins Fashion" />
+        <meta property="product:retailer_item_id" content={productData._id} />
+
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+          name="twitter:title"
+          content={`${productData.name} | Cousins Fashion`}
+        />
+        <meta
+          name="twitter:description"
+          content={productData.description.substring(0, 200)}
+        />
+        <meta name="twitter:image" content={productData.image[0]} />
+
+        <script type="application/ld+json">{generateProductSchema()}</script>
+      </Helmet>
+      <SmallNavBar
+        navs={[
+          productData.customizable ? "Customize" : "Collection",
+          "Product",
+        ]}
+      />
       <div className="border-t pt-10 transition-opacity ease-in duration-500 opacity-100">
         {/*----------- Product Data-------------- */}
         <div className="flex gap-5 sm:gap-7 flex-col sm:flex-row">
           {/*---------- Product Images------------- */}
-          <div className="flex-1 flex gap-3">
-            <div className="flex flex-col max-sm:hidden overflow-y-scroll justify-start gap-3 justify-normal w-[19%]">
+          <div className="flex-1 flex max-sm:flex-col gap-3">
+            <div className="flex sm:flex-col max-sm:order-2 sm:overflow-y-scroll justify-start gap-3 w-[19%]">
               {productData?.image.map((item, index) => (
                 <img
                   onClick={() => setImage(item)}
                   src={item}
                   key={index}
-                  className="w-full aspect-[3/4] mb-3 flex-shrink-0 cursor-pointer"
+                  className="w-full aspect-[3/4] flex-shrink-0 cursor-pointer"
                   alt={`product image ${index}`}
                   loading="lazy"
                 />
               ))}
             </div>
             <div className="w-full max-sm:hidden">
-              <img className="w-full aspect-[3/4]" src={image} alt="image" loading="eager"/>
+              <img
+                className="w-full aspect-[3/4]"
+                src={image}
+                alt="image"
+                loading="eager"
+              />
             </div>
             <div className="w-full sm:hidden">
               <Carousel
@@ -91,7 +188,7 @@ const Product = () => {
                         key={index}
                         className="w-full aspect-[3/4]"
                         alt={`product image ${index}`}
-                        loading={index==0?"eager":"lazy"}
+                        loading={index == 0 ? "eager" : "lazy"}
                       />
                     </CarouselItem>
                   ))}
@@ -121,9 +218,7 @@ const Product = () => {
               <p className="line-through text-xl text-gray-500 font-medium">
                 {currency}
                 {productData?.price +
-                  Math.ceil(
-                    (productData?.discount / 100) * productData?.price
-                  )}
+                  Math.ceil((productData?.discount / 100) * productData?.price)}
               </p>{" "}
               <p>
                 {currency}

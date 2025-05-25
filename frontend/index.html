@@ -6,26 +6,25 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- --------backend & cdn----------->
-    <link rel="preconnect" href="https://api.cousinsfashion.in">
-    <link rel="preconnect" href="https://cdn.cousinsfashion.in">
-    <!-- <link rel="preload" fetchpriority="high" as="image" href="https://cousinsfashion.in/assets/bg/b1.webp" type="image/webp"> -->
-    <!-- <link rel="preload" fetchpriority="high" as="image"  href="https://cousinsfashion.in/assets/category/c4.webp" type="image/webp"> -->
+  <link rel="preload" href="/src/main.jsx" as="script">
 
-    <!-- --------font--------- -->
-  <!-- Preload the specific weights you use -->
+  <!-- --------backend & cdn----------->
+  <link rel="preconnect" href="https://api.cousinsfashion.in">
+  <link rel="preconnect" href="https://cdn.cousinsfashion.in">
+  <!-- <link rel="preload" fetchpriority="high" as="image" href="https://cousinsfashion.in/assets/bg/b1.webp" type="image/webp"> -->
+  <!-- <link rel="preload" fetchpriority="high" as="image"  href="https://cousinsfashion.in/assets/category/c4.webp" type="image/webp"> -->
+
+  <!-- --------font--------- -->
   <link rel="preload" href="/fonts/Outfit-Variable.woff2" as="font" type="font/woff2" crossorigin>
-  <!-- <link rel="preload" href="/fonts/outfit-variable.ttf" as="font" type="font/ttf" crossorigin> -->
-  <!-- <link rel="preload" href="/fonts/outfit-v11-latin-600.woff2" as="font" type="font/woff2" crossorigin> -->
-  <!-- Add other weights you actually use -->
 
   <!-- Primary Meta Tags -->
-  <title>Cousins Fashion — Trendy & Affordable Clothing for Men & Women</title>
-  <meta name="title" content="Cousins Fashion — Trendy & Affordable Clothing for Men & Women" />
+  <title>Cousins Fashion</title>
+  <!-- <meta name="title" content="Cousins Fashion — Trendy & Affordable Clothing for Men & Women" /> -->
+  <meta name="title" content="Cousins Fashion — Trendy Streetwear & Oversized T-Shirts Online India" />
   <meta name="description"
-    content="Discover the latest fashion trends at Cousins Fashion. Shop premium quality clothing, accessories, and footwear for men and women. Fast delivery, easy returns, and great prices!" />
+    content="Shop the latest streetwear fashion at Cousins Fashion - premium oversized t-shirts, trendy clothing & accessories for men & women. Free shipping across India. 100% cotton comfort." />
   <meta name="keywords"
-    content="Cousins Fashion, fashion store, trendy clothing, men's wear, women's wear, accessories, Indian fashion, online shopping, stylish outfits" />
+    content="Cousins Fashion, Cousinsfashion, streetwear, oversized, t-shirts, oversized streetwear t-shirts, aesthetic t-shirts for men, minimalist unisex t-shirt, vintage oversized t-shirt India, urban streetwear for women, street fashion tees India, indie clothing brand India, gender-neutral fashion India, custom oversized t-shirts, affordable aesthetic clothing, fashion store, trendy clothing, men's wear, women's wear, accessories, Indian fashion, online shopping, stylish outfits" />
   <meta name="author" content="Sriram S" />
   <meta name="robots" content="index, follow" />
 
@@ -42,6 +41,8 @@
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:site_name" content="Cousins Fashion" />
+  <meta property="og:image:alt" content="Cousins Fashion - Trendy Streetwear Collection">
+  <meta property="og:locale" content="en_IN">
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
@@ -80,8 +81,7 @@
     "url": "https://cousinsfashion.in/",
     "potentialAction": {
       "@type": "SearchAction",
-      "target": "https://cousinsfashion.in/search?q={search_term_string}",
-      "query-input": "required name=search_term_string"
+      "target": "https://cousinsfashion.in/product/:productId",
     }
   }
   </script>
@@ -102,7 +102,7 @@
       "telephone": "+91-8248586654",
       "contactType": "Customer Support",
       "areaServed": "IN",
-      "availableLanguage": ["Tamil, "English", "Hindi"]
+      "availableLanguage": ["Tamil", "English", "Hindi"]
     }
   }
   </script>

@@ -339,9 +339,9 @@ const Payment = () => {
 
             <div className="flex items-center gap-2">
               <img src={assets.ok_icon} alt="OK" width={24} height={24} />
-              <h1 className="text-3xl font-bold">
+              <h2 className="text-3xl font-bold">
                 {currency} {order?.amount?.toFixed(2)}
-              </h1>
+              </h2>
             </div>
 
             <QRCode

@@ -13,6 +13,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Helmet } from "react-helmet-async";
+import { array } from "zod";
 
 const Collection = () => {
   const { products, search, showSearch, hasMore, getProductsData } =
@@ -28,9 +30,15 @@ const Collection = () => {
   const [loading, setLoading] = useState(false);
 
   // Extract unique themes from products
-  const themeList = [...new Set(products.map(product => product.theme))].filter(Boolean);
-  const categoryList = [...new Set(products.map(product => product.category))].filter(Boolean);
-  const subCategoryList = [...new Set(products.map(product => product.subCategory))].filter(Boolean);
+  const themeList = [
+    ...new Set(products.map((product) => product.theme)),
+  ].filter(Boolean);
+  const categoryList = [
+    ...new Set(products.map((product) => product.category)),
+  ].filter(Boolean);
+  const subCategoryList = [
+    ...new Set(products.map((product) => product.subCategory)),
+  ].filter(Boolean);
 
   const toggleCategory = (e) => {
     const { value } = e.target;
@@ -50,7 +58,8 @@ const Collection = () => {
     );
   };
 
-  const toggleTheme = (e) => { // New handler for theme filter
+  const toggleTheme = (e) => {
+    // New handler for theme filter
     const { value } = e.target;
     setTheme((prev) =>
       prev.includes(value)
@@ -76,9 +85,9 @@ const Collection = () => {
       productsCopy = productsCopy.filter(
         (item) =>
           item.theme?.toLowerCase().startsWith(query) ||
-        regex.test(item.theme?.toLowerCase()) ||
+          regex.test(item.theme?.toLowerCase()) ||
           item.name?.toLowerCase().includes(query) ||
-        item.theme?.toLowerCase().includes(query) ||
+          item.theme?.toLowerCase().includes(query) ||
           item.theme?.toLowerCase().startsWith(query) ||
           regex.test(item.category?.toLowerCase()) ||
           item.category?.toLowerCase().startsWith(query) ||
@@ -99,10 +108,9 @@ const Collection = () => {
       );
     }
 
-    if (theme.length > 0) { // New theme filter condition
-      productsCopy = productsCopy.filter((item) =>
-        theme.includes(item.theme)
-      );
+    if (theme.length > 0) {
+      // New theme filter condition
+      productsCopy = productsCopy.filter((item) => theme.includes(item.theme));
     }
 
     setFilterProducts(productsCopy);
@@ -141,6 +149,33 @@ const Collection = () => {
 
   return (
     <div className="px-2 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
+      <Helmet>
+        {/* Basic */}
+        <title>Collections — Cousins Fashion</title>
+        <meta
+          name="title"
+          content="Shop All Collections | Streetwear, Oversized & Vintage T-Shirts"
+        />
+        <meta
+          name="description"
+          content="Explore curated collections at Cousins Fashion. From aesthetic streetwear to bold unisex styles, find minimalist and oversized fits that stand out."
+        />
+        <link rel="canonical" href={"https://cousinsfashion.in/collection"} />
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Collections — Cousins Fashion" />
+        <meta
+          property="og:description"
+          content="Explore curated collections at Cousins Fashion. From aesthetic streetwear to bold unisex styles, find minimalist and oversized fits that stand out."
+        />
+        <meta
+          property="og:url"
+          content={"https://cousinsfashion.in/collection"}
+        />
+        <meta property="og:image" content={products[0].image[0]} />
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+      </Helmet>
       <div className="px-2">
         <SmallNavBar navs={["Collection"]} />
       </div>
@@ -164,7 +199,7 @@ const Collection = () => {
               </Button>
             </div>
           </div>
-          
+
           <div
             className={`border border-gray-300 pl-5 py-3 mt-6 ${
               showFilter ? "" : "hidden"
@@ -186,7 +221,7 @@ const Collection = () => {
               ))}
             </div>
           </div>
-          
+
           <div
             className={`border border-gray-300 px-4 pl-5 py-3 my-5 ${
               showFilter ? "" : "hidden"
@@ -208,7 +243,7 @@ const Collection = () => {
               ))}
             </div>
           </div>
-          
+
           {/* New Theme Filter Section */}
           {themeList.length > 0 && (
             <div

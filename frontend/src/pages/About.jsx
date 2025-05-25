@@ -2,18 +2,36 @@
 import Title from "../components/Title";
 import { assets } from "../assets/assets";
 // import NewsletterBox from "../components/NewsletterBox";
-// import { ShopContext } from "../context/ShopContext";
 import SmallNavBar from "../components/SmallNavBar";
+import { Helmet } from "react-helmet-async";
 
 const About = () => {
-  // const { smallNav, setSmallNav } = useContext(ShopContext);
-
-  // useEffect(() => {
-  //   setSmallNav((prev) => [...prev, "About"]);
-  // }, []);
-
   return (
     <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
+      <Helmet>
+        {/* Basic */}
+        <title>About Us — Cousins Fashion</title>
+        <meta
+          name="title"
+          content="About Us | Cousins Fashion - Streetwear for the Bold"
+        />
+        <meta
+          name="description"
+          content="Discover the story behind Cousins Fashion, where streetwear meets personality. We're redefining style through oversized, minimalist, and vintage pieces for all."
+        />
+        <link rel="canonical" href={"https://cousinsfashion.in/about"} />
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="About — Cousins Fashion" />
+        <meta
+          property="og:description"
+          content="Discover the story behind Cousins Fashion, where streetwear meets personality. We're redefining style through oversized, minimalist, and vintage pieces for all."
+        />
+        <meta property="og:url" content={"https://cousinsfashion.in/about"} />
+        <meta property="og:image" content={assets.about_img} />
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+      </Helmet>
       <SmallNavBar navs={["About"]} />
       <div className="text-2xl text-center pt-8 border-t">
         <Title text1={"ABOUT"} text2={"US"} />

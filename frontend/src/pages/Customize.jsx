@@ -4,11 +4,39 @@ import Title from "../components/Title";
 import ProductItem from "../components/ProductItem";
 import SmallNavBar from "../components/SmallNavBar";
 import { assets } from "../assets/assets";
+import { Helmet } from "react-helmet-async";
 
 const Customize = () => {
   const { customizableProducts } = useContext(ShopContext);
   return (
     <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
+      <Helmet>
+        {/* Basic */}
+        <title>Customize — Cousins Fashion</title>
+        <meta
+          name="title"
+          content="Customize Your Style | Personalized Streetwear T-Shirts"
+        />
+        <meta
+          name="description"
+          content="Create your own vibe with customizable t-shirts. Cousins Fashion offers personal prints, oversized fits, and vintage aesthetics – tailored your way."
+        />
+        <link rel="canonical" href={"https://cousinsfashion.in/customize"} />
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Customize — Cousins Fashion" />
+        <meta
+          property="og:description"
+          content="Create your own vibe with customizable t-shirts. Cousins Fashion offers personal prints, oversized fits, and vintage aesthetics – tailored your way."
+        />
+        <meta
+          property="og:url"
+          content={"https://cousinsfashion.in/customize"}
+        />
+        <meta property="og:image" content={customizableProducts[0].image[0]} />
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+      </Helmet>
       <SmallNavBar navs={["Customize"]} />
       <div className="flex flex-col pt-10 border-t">
         <div className="sm:text-2xl mb-4">
@@ -49,8 +77,11 @@ const Customize = () => {
               rel="noopener noreferrer"
               className="flex items-center gap-3 justify-center bg-green-500 text-white px-6 py-3 rounded-lg text-lg font-medium shadow-md transition hover:bg-green-600"
             >
-              <img src={assets.whatsapp_icon_01} width={24} alt="whatsapp" 
-              loading="lazy"
+              <img
+                src={assets.whatsapp_icon_01}
+                width={24}
+                alt="whatsapp"
+                loading="lazy"
               />
               Chat on WhatsApp
             </a>

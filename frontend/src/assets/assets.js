@@ -25,7 +25,7 @@ import c4 from "./category/c4.webp";
 import c5 from "./category/c5.webp";
 import c6 from "./category/c6.webp";
 import c7 from "./category/c7.webp";
-import notFound from "./404.jpg";
+import notFound from "./404.svg";
 
 export const assets = {
   // logo,
