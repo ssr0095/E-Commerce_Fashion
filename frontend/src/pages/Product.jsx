@@ -50,54 +50,80 @@ const Product = () => {
 
   // Generate schema markup
   const generateProductSchema = () => {
-    if (!productData) return null;
+  if (!productData) return null;
 
-    const schema = {
-      "@context": "https://schema.org",
-      "@type": "Product",
-      name: productData?.name,
-      image: productData?.image, // Array of all images
-      description: productData?.description,
-      sku: productData?._id, // Add product ID as SKU
-      brand: {
-        "@type": "Brand",
-        name: "Cousins Fashion",
-        // Link to your global brand info
-        url: "https://cousinsfashion.in",
-        logo: "https://cousinsfashion.in/logo.webp",
-      },
-      offers: {
-        "@type": "Offer",
-        url: `https://cousinsfashion.in/product/${
-          productData?.slug || productData?._id
-        }`,
-        priceCurrency: "INR",
-        price: productData?.price,
-        // "priceValidUntil": new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days from now
-        itemCondition: "https://schema.org/NewCondition",
-        availability: "https://schema.org/InStock",
-        seller: {
-          "@type": "Organization",
-          name: "Cousins Fashion",
-          // Links back to your global org schema
-          sameAs: "https://cousinsfashion.in",
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: productData?.name,
+    image: productData?.image,
+    description: productData?.description,
+    sku: productData?._id,
+    brand: {
+      "@type": "Brand",
+      name: "Cousins Fashion",
+      url: "https://cousinsfashion.in",
+      logo: "https://cousinsfashion.in/logo.webp",
+    },
+    offers: {
+      "@type": "Offer",
+      url: `https://cousinsfashion.in/product/${productData?.slug || productData?._id}`,
+      priceCurrency: "INR",
+      price: productData?.price,
+      priceValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      itemCondition: "https://schema.org/NewCondition",
+      availability: "https://schema.org/InStock",
+      shippingDetails: {
+        "@type": "OfferShippingDetails",
+        shippingRate: {
+          "@type": "MonetaryAmount",
+          value: "0",
+          currency: "INR"
         },
-      },
-      // Add aggregate rating if you have reviews
-      aggregateRating: productData?.ratings
-        ? {
-            "@type": "AggregateRating",
-            ratingValue: productData.ratings.average,
-            reviewCount: productData.ratings.count,
+        shippingDestination: {
+          "@type": "DefinedRegion",
+          addressCountry: "IN"
+        },
+        deliveryTime: {
+          "@type": "ShippingDeliveryTime",
+          handlingTime: {
+            "@type": "QuantitativeValue",
+            minValue: "1",
+            maxValue: "2"
+          },
+          transitTime: {
+            "@type": "QuantitativeValue",
+            minValue: "3",
+            maxValue: "7"
           }
-        : undefined,
-    };
-
-    // Clean undefined values
-    return JSON.stringify(schema, (key, value) =>
-      value === undefined ? undefined : value
-    );
+        }
+      },
+      hasMerchantReturnPolicy: {
+        "@type": "MerchantReturnPolicy",
+        returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+        merchantReturnDays: 7,
+        returnMethod: "https://schema.org/ReturnByMail",
+        returnFees: "https://schema.org/FreeReturn"
+      },
+      seller: {
+        "@type": "Organization",
+        name: "Cousins Fashion",
+        sameAs: "https://cousinsfashion.in",
+      }
+    },
+    aggregateRating: productData?.ratings
+      ? {
+          "@type": "AggregateRating",
+          ratingValue: productData.ratings.average,
+          reviewCount: productData.ratings.count,
+        }
+      : undefined,
   };
+
+  return JSON.stringify(schema, (key, value) =>
+    value === undefined ? undefined : value
+  );
+};
 
   useEffect(() => {
     fetchProductData();

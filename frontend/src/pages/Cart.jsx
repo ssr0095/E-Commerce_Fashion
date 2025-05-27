@@ -90,7 +90,7 @@ const Cart = () => {
 
         {cartData?.length === 0 ? (
           <div className="w-full text-center py-10 text-gray-500">
-            No items found, keep shopping
+            <p>No items found, keep shopping</p>
           </div>
         ) : (
             <div>
@@ -108,7 +108,7 @@ const Cart = () => {
                       <img
                         className="w-14 sm:w-16 aspect-[3/4]"
                         src={productData?.image[0]}
-                        alt={`${productData.name} image`}
+                        alt={`${productData?.name} image`}
                       />
                       <div>
                         <p className="text-xs sm:text-lg font-medium">

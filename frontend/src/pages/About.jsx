@@ -13,7 +13,7 @@ const About = () => {
         <title>About Us — Cousins Fashion</title>
         <meta
           name="title"
-          content="About Us | Cousins Fashion - Streetwear for the Bold"
+          content="About Us | Cousins Fashion — Streetwear for the Bold"
         />
         <meta
           name="description"
@@ -61,7 +61,7 @@ const About = () => {
             using premium fabrics and contemporary designs that make you stand
             out.
           </p>
-          <b className="text-gray-800">Our Mission</b>
+          <h2 className="text-gray-800">Our Mission</h2>
           <p>
             Shop online with ease and enjoy seamless shopping, secure payments,
             and quick deliveries. Whether you're looking for the latest trends
@@ -78,21 +78,21 @@ const About = () => {
 
       <div className="flex flex-col md:flex-row text-sm mb-20">
         <div className="border px-10 md:px-16 py-8 sm:py-20 flex flex-col gap-5">
-          <b>Quality Assurance:</b>
+          <h2>Quality Assurance:</h2>
           <p className=" text-gray-600">
             We meticulously select and vet each product to ensure it meets our
             stringent quality standards.
           </p>
         </div>
         <div className="border px-10 md:px-16 py-8 sm:py-20 flex flex-col gap-5">
-          <b>Convenience:</b>
+          <h2>Convenience:</h2>
           <p className=" text-gray-600">
             With our user-friendly interface and hassle-free ordering process,
             shopping has never been easier.
           </p>
         </div>
         <div className="border px-10 md:px-16 py-8 sm:py-20 flex flex-col gap-5">
-          <b>Exceptional Customer Service:</b>
+          <h2>Exceptional Customer Service:</h2>
           <p className=" text-gray-600">
             Our team of dedicated professionals is here to assist you the way,
             ensuring your satisfaction is our top priority.

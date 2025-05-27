@@ -10,7 +10,7 @@ const Footer = () => {
           width={96}
           height={18}
           className="mb-5 w-32"
-          alt="logo"
+          alt="Cousins Fashion"
           loading="lazy"
         />
         <p className="w-full md:w-11/12 text-gray-600 text-sm">

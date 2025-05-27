@@ -14,7 +14,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Helmet } from "react-helmet-async";
-import { array } from "zod";
 
 const Collection = () => {
   const { products, search, showSearch, hasMore, getProductsData } =
