@@ -3,6 +3,7 @@ import cors from "cors";
 import "dotenv/config";
 import connectDB from "./config/mongodb.js";
 import rateLimit from "express-rate-limit";
+import cookieParser from "cookie-parser";
 // import connectCloudinary from "./config/cloudinary.js";
 import userRouter from "./routes/userRoute.js";
 import productRouter from "./routes/productRoute.js";
@@ -29,6 +30,7 @@ const corsOptions = {
     "https://cousinsfashion.in",
     "https://admin.cousinsfashion.in",
   ],
+  credentials: true,
   methods: ["GET", "POST", "DELETE"], // Explicitly allowed methods
   allowedHeaders: ["Content-Type", "Authorization"],
   optionsSuccessStatus: 204, // Proper status for OPTIONS responses
@@ -41,6 +43,7 @@ app.options("*", cors(corsOptions));
 app.use(express.json());
 app.use(express.json({ limit: "30kb" })); // For API requests
 app.use(express.urlencoded({ limit: "40kb", extended: true })); // For form data
+app.use(cookieParser());
 
 const RateLimiter = (max) =>
   rateLimit({
@@ -59,9 +62,9 @@ app.use("/api/order/addDesignImage", RateLimiter(3));
 app.use("/api/order/place", RateLimiter(10));
 app.use("/api/order/googlepay", RateLimiter(10));
 app.use("/api/order/verifyCode", RateLimiter(3));
-app.use("/api/auth/login", RateLimiter(5));
-app.use("/api/auth/register", RateLimiter(3));
-app.use("/api/auth/refresh", RateLimiter(5));
+// app.use("/api/auth/login", RateLimiter(5));
+// app.use("/api/auth/register", RateLimiter(3));
+// app.use("/api/auth/refresh", RateLimiter(5));
 
 // api endpoints
 app.use("/api/user", userRouter);
@@ -70,10 +73,18 @@ app.use("/api/cart", cartRouter);
 app.use("/api/order", orderRouter);
 app.use("/api/auth", authRouter);
 
+// ERROR HANDLER
 app.use(errorHandler);
+
+// HEALTH CHECK
+app.get("/health", (req, res) => {
+  res.status(200).send("API is Healthy");
+});
 
 app.get("/", (req, res) => {
   res.send("API Working");
 });
 
-app.listen(port, () => console.log("Server started on PORT : " + port));
+app.listen(port, () =>
+  console.log("Server started on PORT: http://localhost:" + port)
+);

@@ -22,13 +22,36 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
-      select: false, // Never return password in queries
+      required: function () {
+        return this.authProvider === "credentials";
+      },
+      select: false,
     },
+    googleId: { type: String, sparse: true },
+    picture: { type: String },
+    authProvider: {
+      type: String,
+      enum: ["credentials", "google", "both"],
+      default: "credentials",
+    },
+    emailVerified: { type: Date },
     cartData: { type: Object, default: {} },
     lastLogin: { type: Date },
     isActive: { type: Boolean, default: true },
-    refreshTokens: { type: [String], select: false, default: [] },
+    refreshTokens: [
+      {
+        token: String,
+        provider: {
+          type: String,
+          enum: ["credentials", "google"],
+          default: "credentials",
+        },
+        createdAt: { type: Date, default: Date.now },
+        expiresAt: Date,
+        deviceInfo: String,
+        ipAddress: String,
+      },
+    ],
     has_placed_first_order: { type: Boolean, default: false },
     coupon: { type: String, unique: true, sparse: true },
     isCouponActive: { type: Boolean, default: false },
@@ -39,9 +62,10 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// Password hashing middleware
+// Update the password hashing middleware
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
+  // Only hash password if it's modified and exists
+  if (!this.isModified("password") || !this.password) return next();
 
   try {
     const salt = await bcrypt.genSalt(10);
@@ -52,9 +76,21 @@ userSchema.pre("save", async function (next) {
   }
 });
 
-// Method to compare passwords
+// Method to compare passwords - handle OAuth users
 userSchema.methods.comparePassword = async function (candidatePassword) {
+  if (!this.password) return false; // OAuth users don't have passwords
   return await bcrypt.compare(candidatePassword, this.password);
+};
+
+userSchema.methods.cleanExpiredRefreshTokens = function () {
+  this.refreshTokens = this.refreshTokens.filter(
+    (token) => token.expiresAt > new Date()
+  );
+};
+
+userSchema.methods.canLoginWith = function (provider) {
+  if (this.authProvider === "both") return true;
+  return this.authProvider === provider;
 };
 
 export default mongoose.models.User || mongoose.model("User", userSchema);

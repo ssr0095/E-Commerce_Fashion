@@ -39,7 +39,9 @@ const ProductItem = ({
         {tag}
       </p>
 
-      <p className="pt-1 text-md truncate text-gray-800 font-semibold">{name}</p>
+      <p className="pt-1 text-md truncate text-gray-800 font-semibold">
+        {name}
+      </p>
       <p className="pb-2 text-sm truncate">{description}</p>
 
       <div className="w-full flex items-center justify-between">
@@ -90,12 +92,12 @@ const ProductItem = ({
 };
 
 export const CategoryItem = ({ name, searchValue, image }) => {
-  const { setSearchQuery, toggleSearch, navigate } = useContext(ShopContext);
+  const shop = useContext(ShopContext);
 
   const toMove = (val) => {
-    toggleSearch(true);
-    setSearchQuery(val);
-    navigate("/collection");
+    shop?.toggleSearch(true);
+    shop?.setSearchQuery(val);
+    shop?.navigate("/collection");
   };
 
   return (

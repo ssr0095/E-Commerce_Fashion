@@ -278,7 +278,7 @@ const Payment = () => {
         {/* Payment Section */}
         <div className="flex flex-col md:flex-row justify-center items-start gap-8 md:gap-20 mb-16">
           {/* Payment Upload */}
-          <div className="w-full md:w-[450px] space-y-6">
+          <div className="w-full md:w-[450px] space-y-6 max-sm:order-1">
             <div className="text-xl sm:text-2xl text-center mb-3">
               <Title text1="UPLOAD" text2="PAYMENT SCREENSHOT" />
             </div>

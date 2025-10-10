@@ -167,58 +167,142 @@ const editProduct = async (req, res) => {
   }
 };
 
-// Function for listing products with pagination
 const listProducts = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const custom = req.query.custom === "true";
-    const admin = req.query.admin === "true";
+    const {
+      page = 1,
+      limit = 8,
+      custom,
+      admin,
+      category,
+      subCategory,
+      theme,
+      sortBy = "newest",
+      search,
+    } = req.query;
+
     const skip = (page - 1) * limit;
+    let query = {};
+    let sort = {};
 
-    // For admin view - return all products without pagination
-    if (admin) {
-      const products = await productModel.find({}).sort({ date: -1 }); // Sort by newest first
+    // Build query based on filters
+    if (category)
+      query.category = { $in: Array.isArray(category) ? category : [category] };
+    if (subCategory)
+      query.subCategory = {
+        $in: Array.isArray(subCategory) ? subCategory : [subCategory],
+      };
+    if (theme) query.theme = { $in: Array.isArray(theme) ? theme : [theme] };
+    if (custom) query.customizable = custom === "true";
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { theme: { $regex: search, $options: "i" } },
+        { category: { $regex: search, $options: "i" } },
+        { subCategory: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    // Build sort
+    switch (sortBy) {
+      case "price-low":
+        sort = { price: 1 };
+        break;
+      case "price-high":
+        sort = { price: -1 };
+        break;
+      case "newest":
+      default:
+        sort = { date: -1 };
+        break;
+    }
+
+    // For admin view
+    if (admin === "true") {
+      const products = await productModel.find({}).sort(sort);
       return res.json({ success: true, products });
     }
 
-    // For custom products view
-    if (custom) {
-      const products = await productModel
-        .find({ customizable: true })
-        .sort({ date: -1 });
-      return res.json({ success: true, products });
-    }
-
-    // For regular paginated view
+    // Get products with filters
     const products = await productModel
-      .find({})
-      .sort({ date: -1 }) // Sort by newest first
+      .find(query)
+      .sort(sort)
       .skip(skip)
-      .limit(limit);
+      .limit(parseInt(limit));
 
-    const totalProducts = await productModel.countDocuments();
+    // Get total count for pagination
+    const totalProducts = await productModel.countDocuments(query);
     const hasMore = skip + products.length < totalProducts;
+
+    // Get available filters for current query (for filter options)
+    const availableFilters = await getAvailableFilters(query);
 
     return res.json({
       success: true,
       products,
       hasMore,
       totalProducts,
-      currentPage: page,
+      currentPage: parseInt(page),
       totalPages: Math.ceil(totalProducts / limit),
+      availableFilters,
     });
   } catch (error) {
     console.error("Product listing error:", error);
     return res.status(500).json({
       success: false,
       message: "Failed to fetch products",
-      error: error.message,
     });
   }
 };
 
-// function for removing product
+const getAvailableFilters = async (baseQuery = {}) => {
+  const [categories, subCategories, themes] = await Promise.all([
+    productModel.distinct("category", baseQuery),
+    productModel.distinct("subCategory", baseQuery),
+    productModel.distinct("theme", baseQuery),
+  ]);
+
+  return {
+    categories: categories.filter(Boolean),
+    subCategories: subCategories.filter(Boolean),
+    themes: themes.filter(Boolean),
+  };
+};
+
+const getFilterOptions = async (req, res) => {
+  try {
+    const { category, subCategory, theme, search } = req.query;
+    let query = {};
+
+    if (category)
+      query.category = { $in: Array.isArray(category) ? category : [category] };
+    if (subCategory)
+      query.subCategory = {
+        $in: Array.isArray(subCategory) ? subCategory : [subCategory],
+      };
+    if (theme) query.theme = { $in: Array.isArray(theme) ? theme : [theme] };
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { theme: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    const availableFilters = await getAvailableFilters(query);
+
+    return res.json({
+      success: true,
+      filters: availableFilters,
+    });
+  } catch (error) {
+    console.error("Filter options error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch filter options",
+    });
+  }
+};
+
 const removeProduct = async (req, res) => {
   const user = req.user;
 
@@ -238,7 +322,6 @@ const removeProduct = async (req, res) => {
   }
 };
 
-// function for single product info
 const singleProduct = async (req, res) => {
   try {
     const { productId } = req.body;
@@ -250,4 +333,11 @@ const singleProduct = async (req, res) => {
   }
 };
 
-export { listProducts, addProduct, removeProduct, singleProduct, editProduct };
+export {
+  listProducts,
+  addProduct,
+  removeProduct,
+  singleProduct,
+  editProduct,
+  getFilterOptions,
+};

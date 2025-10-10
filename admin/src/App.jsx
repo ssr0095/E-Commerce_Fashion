@@ -13,7 +13,7 @@ import { lazy } from "react";
 import { Suspense } from "react";
 
 export const backendUrl = import.meta.env.VITE_BACKEND_URL;
-export const currency = import.meta.env.VITE_CURRENCY
+export const currency = import.meta.env.VITE_CURRENCY;
 
 const App = () => {
   const [token, setToken] = useState(localStorage.getItem("token") || "");
@@ -31,20 +31,29 @@ const App = () => {
     <div className="bg-gray-50 min-h-screen">
       <Suspense fallback={<Loading />}>
         <ToastContainer />
-        
+
         {token === "" ? (
           <Login setToken={setToken} />
         ) : (
           <>
-            <Navbar setToken={setToken} />
+            <Navbar setToken={setToken} backendUrl={backendUrl} />
             <hr />
             <div className="flex h-full w-full flex-col items-center bg-gray-100 font-outfit md:flex-row md:items-start">
               <Sidebar />
               <div className="max-sm:w-full w-[70%] sm:mx-auto sm:ml-[max(5vw,25px)] my-8 text-gray-600 text-base">
                 <Routes>
-                  <Route path="/add" element={<Add token={token} setToken={setToken} />} />
-                  <Route path="/list" element={<List token={token} setToken={setToken} />} />
-                  <Route path="/orders" element={<Orders token={token} setToken={setToken} />} />
+                  <Route
+                    path="/add"
+                    element={<Add token={token} setToken={setToken} />}
+                  />
+                  <Route
+                    path="/list"
+                    element={<List token={token} setToken={setToken} />}
+                  />
+                  <Route
+                    path="/orders"
+                    element={<Orders token={token} setToken={setToken} />}
+                  />
                 </Routes>
               </div>
             </div>

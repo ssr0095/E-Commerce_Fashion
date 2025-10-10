@@ -1,8 +1,6 @@
-import React, { Suspense, lazy } from "react";
+import { Suspense, lazy } from "react";
 import { Routes, Route } from "react-router-dom";
-import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
-import SearchBar from "./components/SearchBar";
+import { MainLayout, AuthLayout } from "./layouts/layout";
 import Loading from "./components/Loading";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -13,7 +11,6 @@ const App = () => {
   const Collection = lazy(() => import("./pages/Collection"));
   const Customize = lazy(() => import("./pages/Customize"));
   const About = lazy(() => import("./pages/About"));
-  // const Contact = lazy(() => import("./pages/Contact"));
   const Product = lazy(() => import("./pages/Product"));
   const Cart = lazy(() => import("./pages/Cart"));
   const Login = lazy(() => import("./pages/Login"));
@@ -21,30 +18,113 @@ const App = () => {
   const Payment = lazy(() => import("./pages/Payment"));
   const Orders = lazy(() => import("./pages/Orders"));
   const Verify = lazy(() => import("./pages/Verify"));
+
   return (
-    <>
-      <Suspense fallback={<Loading />}>
-        <Navbar />
-        <ToastContainer />
-        <SearchBar />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/collection" element={<Collection />} />
-          <Route path="/customize" element={<Customize />} />
-          <Route path="/about" element={<About />} />
-          {/* <Route path="/contact" element={<Contact />} /> */}
-          <Route path="/product/:productId" element={<Product />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/place-order" element={<PlaceOrder />} />
-          <Route path="/payment/:orderId" element={<Payment />} />
-          <Route path="/orders" element={<Orders />} />
-          <Route path="/verify" element={<Verify />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <Footer />
-      </Suspense>
-    </>
+    <Suspense fallback={<Loading />}>
+      <ToastContainer />
+      <Routes>
+        {/* Routes with Navbar & Footer */}
+        <Route
+          path="/"
+          element={
+            <MainLayout>
+              <Home />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/collection"
+          element={
+            <MainLayout>
+              <Collection />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/customize"
+          element={
+            <MainLayout>
+              <Customize />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/about"
+          element={
+            <MainLayout>
+              <About />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/product/:productId"
+          element={
+            <MainLayout>
+              <Product />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/cart"
+          element={
+            <MainLayout>
+              <Cart />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/orders"
+          element={
+            <MainLayout>
+              <Orders />
+            </MainLayout>
+          }
+        />
+
+        {/* Routes without Navbar & Footer */}
+        <Route
+          path="/login"
+          element={
+            <AuthLayout>
+              <Login />
+            </AuthLayout>
+          }
+        />
+        <Route
+          path="/place-order"
+          element={
+            <AuthLayout>
+              <PlaceOrder />
+            </AuthLayout>
+          }
+        />
+        <Route
+          path="/payment/:orderId"
+          element={
+            <AuthLayout>
+              <Payment />
+            </AuthLayout>
+          }
+        />
+        <Route
+          path="/verify"
+          element={
+            <AuthLayout>
+              <Verify />
+            </AuthLayout>
+          }
+        />
+
+        <Route
+          path="*"
+          element={
+            <MainLayout>
+              <NotFound />
+            </MainLayout>
+          }
+        />
+      </Routes>
+    </Suspense>
   );
 };
 

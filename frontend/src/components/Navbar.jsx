@@ -19,6 +19,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const navItems = [
   { name: "HOME", path: "/", icon: <House className="w-5" /> },
@@ -126,7 +127,7 @@ const Navbar = () => {
                 alt="Search"
                 loading="lazy"
                 width={20}
-              height={20}
+                height={20}
               />
             </button>
 
@@ -134,16 +135,29 @@ const Navbar = () => {
             <div className="flex items-center group relative shrink-0">
               {token ? (
                 <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
+                  <DropdownMenuTrigger
+                    asChild
+                    className="border-none outline-none"
+                  >
                     <button aria-label="Account menu">
-                      <img
-                        className="w-[17px] cursor-pointer"
-                        src={assets.profile_icon}
-                        alt="Profile"
-                        loading="lazy"
-                        width={20}
-                        height={20}
-                      />
+                      {user?.picture ? (
+                        <Avatar className="size-8 hover:border-2 hover:border-gray-400">
+                          <AvatarImage src={user.picture} alt="profile" />
+                          {/* className="size-[50px] cursor-pointer rounded-full border-2 border-gray-300 hover:border-gray-500" */}
+                          <AvatarFallback className="border border-gray-400">
+                            CF
+                          </AvatarFallback>
+                        </Avatar>
+                      ) : (
+                        <img
+                          className="w-[17px] cursor-pointer"
+                          src={assets.profile_icon}
+                          alt="Profile"
+                          loading="lazy"
+                          width={20}
+                          height={20}
+                        />
+                      )}
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56">
@@ -248,7 +262,7 @@ const Navbar = () => {
                 alt="WhatsApp"
                 loading="lazy"
                 width={28}
-              height={28}
+                height={28}
               />
             </Link>
 

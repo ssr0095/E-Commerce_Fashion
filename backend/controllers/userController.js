@@ -5,7 +5,7 @@ const getUserInfo = async (req, res) => {
   try {
     const user = await userModel
       .findById(req.user.id)
-      .select("name email coupon isCouponActive cartData")
+      .select("name email coupon isCouponActive cartData picture")
       .lean();
 
     if (!user) {
@@ -28,6 +28,7 @@ const getUserInfo = async (req, res) => {
       success: true,
       name: user.name,
       email: user.email,
+      picture: user.picture,
       coupon: user.coupon,
       cartCount,
       isCouponActive: user.isCouponActive,

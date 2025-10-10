@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ShopContext } from "../context/ShopContext";
 import RelatedProducts from "../components/RelatedProducts";
@@ -70,7 +70,7 @@ const Product = () => {
       url: `https://cousinsfashion.in/product/${productData?.slug || productData?._id}`,
       priceCurrency: "INR",
       price: productData?.price,
-      priceValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      // priceValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       itemCondition: "https://schema.org/NewCondition",
       availability: "https://schema.org/InStock",
       shippingDetails: {

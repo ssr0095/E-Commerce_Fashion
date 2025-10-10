@@ -3,13 +3,13 @@ import { ShopContext } from "../context/ShopContext";
 import { Button } from "@/components/ui/button";
 
 const ShopMore = () => {
-  const { navigate } = useContext(ShopContext);
+  const shop = useContext(ShopContext);
 
   return (
     <div className="w-full flex items-center justify-center mt-14 px-4 relative">
       <div className="w-full flex items-center justify-center z-10">
         <Button
-          onClick={() => navigate("/collection")}
+          onClick={() => shop?.navigate("/collection")}
           variant="outline"
           className="rounded-none"
         >

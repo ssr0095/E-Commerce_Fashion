@@ -16,6 +16,9 @@ const cspDirectives = {
     "cdn.cousinsfashion.in",
     "public.r2.dev",
     "*.vercel-dns.com",
+    "lh3.googleusercontent.com", // Google profile images
+    "*.googleusercontent.com",
+    "*.ggpht.com",
   ],
   fontSrc: ["'self'", "fonts.gstatic.com", "cdn.cousinsfashion.in"],
   connectSrc: [
@@ -24,6 +27,7 @@ const cspDirectives = {
     "e-commerce-fashion.onrender.com",
     "*.mongodb.com",
     "*.cloudflare.com",
+    "lh3.googleusercontent.com",
   ],
   // frameSrc: ["'self'", "https://www.youtube.com"], // if embedding videos
   objectSrc: ["'none'"],

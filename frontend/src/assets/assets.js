@@ -26,6 +26,7 @@ import c5 from "./category/c5.webp";
 import c6 from "./category/c6.webp";
 import c7 from "./category/c7.webp";
 import notFound from "./404.svg";
+import googleIcon from "./google-icon.svg";
 
 export const assets = {
   // logo,
@@ -56,6 +57,7 @@ export const assets = {
   c6,
   c7,
   notFound,
+  googleIcon,
 };
 
 export const themeList = [
