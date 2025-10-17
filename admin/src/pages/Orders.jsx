@@ -73,10 +73,10 @@ const Orders = ({ token, setToken }) => {
     } catch (error) {
       toast.error(error.message);
       if (error.status == 401) {
-        setToken("")
+        setToken("");
         localStorage.removeItem("token");
-        window.location.reload();        
-    }
+        window.location.reload();
+      }
     }
   };
 
@@ -98,9 +98,10 @@ const Orders = ({ token, setToken }) => {
     } catch (error) {
       toast.error("Failed to update order status.");
       if (error.status == 401) {
-        setToken("")
+        setToken("");
         localStorage.removeItem("token");
-        window.location.reload();      }      
+        window.location.reload();
+      }
     }
   };
 
@@ -122,9 +123,10 @@ const Orders = ({ token, setToken }) => {
     } catch (error) {
       toast.error("Failed to update payment status.");
       if (error.status == 401) {
-        setToken("")
+        setToken("");
         localStorage.removeItem("token");
-        window.location.reload();      }      
+        window.location.reload();
+      }
     }
   };
 
@@ -155,172 +157,181 @@ const Orders = ({ token, setToken }) => {
 
   return (
     <div className="max-sm:px-6">
-      <h3>Order Page</h3>
+      <div className="flex items-center justify-between">
+        <h3>Order Page</h3>
+        <Button
+          className=""
+          variant="outline"
+          onClick={() => fetchAllOrders(true)}
+        >
+          Refresh
+        </Button>
+      </div>
       {isLoading && <Loader />}
 
       {orders?.length === 0 ? (
         <div className="w-full text-center py-10 text-gray-500">
           No orders found
         </div>
-      ) : (<>
-      {orders.map((order, index) => {
-        const customizableItem = order.isCustomizable;
-        return (
-          <div
-            key={index}
-            className="grid max-sm:grid-cols-[1fr_1fr] sm:grid-cols-[0.5fr_2fr_1fr] gap-4 items-start border-2 border-gray-200 p-5 md:p-8 my-3 text-sm text-gray-700 bg-white"
-          >
-            <PackageCheck className="max-sm:hidden size-10" />
-            <div>
-              {order.items.map((item, i) => (
-                <p className="py-0.5" key={i}>
-                  {item.name} x {item.quantity} <span>{item.size}</span>
-                  {i < order.items.length - 1 ? "," : ""}
-                </p>
-              ))}
-              <p className="mt-3 mb-2 font-bold">
-                {order.address.firstName + " " + order.address.lastName}
-              </p>
-              <p>{order.address.street},</p>
-              <p>{`${order.address.city}, ${order.address.state}, ${order.address.country}, ${order.address.zipcode}`}</p>
-              <p>{order.address.phone}</p>
-            </div>
-            <div>
-              <p className="text-sm sm:text-[15px]">
-                Items : {order.items.length}
-              </p>
-              <p className="text-sm sm:text-[15px] my-2">
-                Amount:{" "}
-                <span className="font-bold">
-                  {currency}
-                  {order.amount}
-                </span>
-              </p>
-              <p>Method: {order.paymentMethod}</p>
-              <p>
-                Payment:{" "}
-                {order.payment === 1
-                  ? "Done"
-                  : order.payment === -1
-                  ? "Pending"
-                  : "Failed"}
-              </p>
-              <p>Date: {new Date(order.date).toLocaleDateString()}</p>
-            </div>
-            <div className="w-full flex-1 flex-col items-center gap-3 sm:col-start-2 col-span-2">
-              <p className="my-2 flex items-center gap-2">
-                Payment status
-                <Button
-                  className="px-3 py-0.5"
-                  variant="default"
-                  onClick={() => {
-                    setImage(order.paymentScreenshot);
-                    setImagePreivewOpen(true);
-                  }}
-                >
-                  Screen shot
-                  <Eye />
-                </Button>
-              </p>
-              <Select
-                onValueChange={(value) => PstatusHandler(value, order._id)}
-                value={order.payment}
-                className="w-full p-2 font-semibold"
+      ) : (
+        <>
+          {orders.map((order, index) => {
+            const customizableItem = order.isCustomizable;
+            return (
+              <div
+                key={index}
+                className="grid max-sm:grid-cols-[1fr_1fr] sm:grid-cols-[0.5fr_2fr_1fr] gap-4 items-start border-2 border-gray-200 p-5 md:p-8 my-3 text-sm text-gray-700 bg-white"
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={-1}>Processing</SelectItem>
-                  <SelectItem value={1}>Success</SelectItem>
-                  <SelectItem value={0}>Failed</SelectItem>
-                </SelectContent>
-              </Select>
-              <p className=" my-2">Order status</p>
-              <Select
-                onValueChange={(value) => statusHandler(value, order._id)}
-                value={order.status}
-                className="w-full p-2 font-semibold"
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Order Placed">Order Placed</SelectItem>
-                  <SelectItem value="Shipped">Shipped</SelectItem>
-                  <SelectItem value="Out for delivery">
-                    Out for delivery
-                  </SelectItem>
-                  <SelectItem value="Delivered">Delivered</SelectItem>
-                </SelectContent>
-              </Select>
+                <PackageCheck className="max-sm:hidden size-10" />
+                <div>
+                  {order.items.map((item, i) => (
+                    <p className="py-0.5" key={i}>
+                      {item.name} x {item.quantity} <span>{item.size}</span>
+                      {i < order.items.length - 1 ? "," : ""}
+                    </p>
+                  ))}
+                  <p className="mt-3 mb-2 font-bold">
+                    {order.address.firstName + " " + order.address.lastName}
+                  </p>
+                  <p>{order.address.street},</p>
+                  <p>{`${order.address.city}, ${order.address.state}, ${order.address.country}, ${order.address.zipcode}`}</p>
+                  <p>{order.address.phone}</p>
+                </div>
+                <div>
+                  <p className="text-sm sm:text-[15px]">
+                    Items : {order.items.length}
+                  </p>
+                  <p className="text-sm sm:text-[15px] my-2">
+                    Amount:{" "}
+                    <span className="font-bold">
+                      {currency}
+                      {order.amount}
+                    </span>
+                  </p>
+                  <p>Method: {order.paymentMethod}</p>
+                  <p>
+                    Payment:{" "}
+                    {order.payment === 1
+                      ? "Done"
+                      : order.payment === -1
+                      ? "Pending"
+                      : "Failed"}
+                  </p>
+                  <p>Date: {new Date(order.date).toLocaleDateString()}</p>
+                </div>
+                <div className="w-full flex-1 flex-col items-center gap-3 sm:col-start-2 col-span-2">
+                  <p className="my-2 flex items-center gap-2">
+                    Payment status
+                    <Button
+                      className="px-3 py-0.5"
+                      variant="default"
+                      onClick={() => {
+                        setImage(order.paymentScreenshot);
+                        setImagePreivewOpen(true);
+                      }}
+                    >
+                      Screen shot
+                      <Eye />
+                    </Button>
+                  </p>
+                  <Select
+                    onValueChange={(value) => PstatusHandler(value, order._id)}
+                    value={order.payment}
+                    className="w-full p-2 font-semibold"
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={-1}>Processing</SelectItem>
+                      <SelectItem value={1}>Success</SelectItem>
+                      <SelectItem value={0}>Failed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className=" my-2">Order status</p>
+                  <Select
+                    onValueChange={(value) => statusHandler(value, order._id)}
+                    value={order.status}
+                    className="w-full p-2 font-semibold"
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Order Placed">Order Placed</SelectItem>
+                      <SelectItem value="Shipped">Shipped</SelectItem>
+                      <SelectItem value="Out for delivery">
+                        Out for delivery
+                      </SelectItem>
+                      <SelectItem value="Delivered">Delivered</SelectItem>
+                    </SelectContent>
+                  </Select>
 
-              {/* Customization Button */}
-              {customizableItem && (
-                <Button
-                  variant="default"
-                  className="mt-3"
-                  onClick={() => {
-                    setCustomImage(
-                      order.customDesignImage.replace(
-                        "/upload/",
-                        "/upload/fl_attachment/"
-                      )
-                    );
-                    setCustomDetail(order.customDesignDetail);
-                    setCustomOpen(true);
-                  }}
-                >
-                  Customization
-                  <Settings2 />
-                </Button>
+                  {/* Customization Button */}
+                  {customizableItem && (
+                    <Button
+                      variant="default"
+                      className="mt-3"
+                      onClick={() => {
+                        setCustomImage(
+                          order.customDesignImage.replace(
+                            "/upload/",
+                            "/upload/fl_attachment/"
+                          )
+                        );
+                        setCustomDetail(order.customDesignDetail);
+                        setCustomOpen(true);
+                      }}
+                    >
+                      Customization
+                      <Settings2 />
+                    </Button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Payment Screenshot Dialog */}
+          <Dialog open={imagePreivewOpen} onOpenChange={setImagePreivewOpen}>
+            <DialogContent className="max-sm:w-[80%] max-h-[80%] rounded-md">
+              <DialogHeader>
+                <DialogTitle className="mb-3">Payment screenshot</DialogTitle>
+              </DialogHeader>
+              {image ? (
+                <div className="w-full h-[50vh] flex justify-center items-center overflow-auto">
+                  <img
+                    src={image}
+                    alt="screenshot image"
+                    width={192}
+                    className="w-48 object-cover rounded-md shadow-lg"
+                  />
+                </div>
+              ) : (
+                <p>No image added</p>
               )}
-            </div>
-          </div>
-        );
-        })
-      }
+              <DialogFooter>
+                <Button onClick={() => setImagePreivewOpen(false)}>Done</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
 
-      {/* Payment Screenshot Dialog */}
-      <Dialog open={imagePreivewOpen} onOpenChange={setImagePreivewOpen}>
-        <DialogContent className="max-sm:w-[80%] max-h-[80%] rounded-md">
-          <DialogHeader>
-            <DialogTitle className="mb-3">Payment screenshot</DialogTitle>
-          </DialogHeader>
-          {image ? (
-            <div className="w-full h-[50vh] flex justify-center items-center overflow-auto">
-              <img
-                src={image}
-                alt="screenshot image"
-                width={192}
-                className="w-48 object-cover rounded-md shadow-lg"
-              />
-            </div>
-          ) : (
-            <p>No image added</p>
-          )}
-          <DialogFooter>
-            <Button onClick={() => setImagePreivewOpen(false)}>Done</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Customization Dialog */}
-      <Dialog open={customOpen} onOpenChange={setCustomOpen}>
-        <DialogContent className="max-sm:w-[80%] max-h-[80%] overflow-y-auto rounded-md">
-          <DialogHeader>
-            <DialogTitle className="mb-3">Custom Design</DialogTitle>
-          </DialogHeader>
-          {customImage ? (
-            <div className="w-full flex flex-col items-center gap-4 overflow-auto">
-              <img
-                src={customImage}
-                alt="custom design image"
-                width={192}
-                className="w-48 object-cover rounded-md shadow-lg"
-              />{" "}
-              {/* Download Button */}
-              {/* <a
+          {/* Customization Dialog */}
+          <Dialog open={customOpen} onOpenChange={setCustomOpen}>
+            <DialogContent className="max-sm:w-[80%] max-h-[80%] overflow-y-auto rounded-md">
+              <DialogHeader>
+                <DialogTitle className="mb-3">Custom Design</DialogTitle>
+              </DialogHeader>
+              {customImage ? (
+                <div className="w-full flex flex-col items-center gap-4 overflow-auto">
+                  <img
+                    src={customImage}
+                    alt="custom design image"
+                    width={192}
+                    className="w-48 object-cover rounded-md shadow-lg"
+                  />{" "}
+                  {/* Download Button */}
+                  {/* <a
                 target="_blank"
                 href={customImage}
                 download={`custom-design-${Date.now()}.jpg`}
@@ -328,28 +339,28 @@ const Orders = ({ token, setToken }) => {
               >
                 ......
               </a> */}
-              <Button
-                variant="default"
-                className="w-48"
-                onClick={ImageDownload}
-              >
-                Download
-              </Button>
-              <div className="w-full self-start text-sm p-3 rounded-md border border-gray-400">
-                <p className="font-medium">Detail</p>
-                <p className="text-gray-700">{customDetail}</p>
-              </div>
-            </div>
-          ) : (
-            <p>No customization found</p>
-          )}
-          {/* <DialogFooter>
+                  <Button
+                    variant="default"
+                    className="w-48"
+                    onClick={ImageDownload}
+                  >
+                    Download
+                  </Button>
+                  <div className="w-full self-start text-sm p-3 rounded-md border border-gray-400">
+                    <p className="font-medium">Detail</p>
+                    <p className="text-gray-700">{customDetail}</p>
+                  </div>
+                </div>
+              ) : (
+                <p>No customization found</p>
+              )}
+              {/* <DialogFooter>
             <Button onClick={() => setCustomOpen(false)}>Close</Button>
           </DialogFooter> */}
-        </DialogContent>
-      </Dialog>
-      </>)
-}
+            </DialogContent>
+          </Dialog>
+        </>
+      )}
     </div>
   );
 };

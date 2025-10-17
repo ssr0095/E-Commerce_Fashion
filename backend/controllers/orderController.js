@@ -6,7 +6,7 @@ import { uploadToR2 } from "../config/cloudflare.js";
 import { v4 as uuidv4 } from "uuid";
 import validateFile from "../utils/fileValidation.js";
 import { createAuditLog } from "./auditController.js";
-
+import crypto from "crypto";
 // global variables
 const currency = process.env.CURRENCY;
 const deliveryCharge = process.env.DELIVERY_FEE;
@@ -55,7 +55,8 @@ const placeOrder = async (req, res) => {
     res.json({ success: false, message: error.message });
   }
 };
-// Placing orders using COD Method
+
+// Placing orders using GoogePay Method
 const placeOrderGooglePay = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -199,11 +200,16 @@ const placeOrderRazorpay = async (req, res) => {
       amount: amount * 100,
       currency: currency.toUpperCase(),
       receipt: newOrder._id.toString(),
+      notes: {
+        orderId: newOrder._id.toString(),
+        //   user_id: userId.toString(),
+      },
     };
 
-    await razorpayInstance.orders.create(options, (error, order) => {
+    razorpayInstance.orders.create(options, (error, order) => {
       if (error) {
         console.log(error);
+        orderModel.findByIdAndDelete(newOrder._id);
         return res.json({ success: false, message: error });
       }
       return res.json({ success: true, order });
@@ -217,14 +223,35 @@ const placeOrderRazorpay = async (req, res) => {
 const verifyRazorpay = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { razorpay_order_id } = req.body;
+    const {
+      razorpay_payment_id,
+      razorpay_order_id,
+      razorpay_signature,
+      orderId, // Your database order ID from frontend
+    } = req.body;
+    // console.log(req.body);
+    const expectedSignature = crypto
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+      .update(razorpay_order_id + "|" + razorpay_payment_id)
+      .digest("hex");
+
+    if (expectedSignature !== razorpay_signature) {
+      orderModel.findByIdAndDelete(orderId);
+
+      return res.json({
+        success: false,
+        message: "Payment signature verification failed",
+      });
+    }
 
     const orderInfo = await razorpayInstance.orders.fetch(razorpay_order_id);
+
     if (orderInfo.status === "paid") {
-      await orderModel.findByIdAndUpdate(orderInfo.receipt, { payment: true });
+      await orderModel.findByIdAndUpdate(orderInfo.receipt, { payment: 1 });
       await userModel.findByIdAndUpdate(userId, { cartData: {} });
       res.json({ success: true, message: "Payment Successful" });
     } else {
+      orderModel.findByIdAndDelete(orderId);
       res.json({ success: false, message: "Payment Failed" });
     }
   } catch (error) {

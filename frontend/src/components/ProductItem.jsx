@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 
 const ProductItem = ({
   id,
+  slug,
   image,
   name,
   price,
@@ -63,7 +64,7 @@ const ProductItem = ({
   );
   return (
     <Link
-      to={`/product/${id}`}
+      to={`/product/${slug}`}
       onClick={() => scrollTo(0, 0)}
       className="text-gray-700 cursor-pointer"
     >

@@ -163,19 +163,23 @@ const Orders = () => {
                   </div>
 
                   <div className="w-full flex items-center justify-between gap-3">
-                    <div className="w-full group flex items-center flex-col gap-2 overflow-visible sticky z-0 border p-2 text-xs font-medium rounded-sm">
-                      {order.paymentScreenshot ? (
-                        <span className="flex items-center gap-2">
-                          <CircleCheck className="w-4 text-gray-400 shrink-0" />
-                          Srceenshot uploaded
-                        </span>
-                      ) : (
-                        <span className="flex items-center gap-2">
-                          <CircleAlert className="w-4 text-gray-400 shrink-0" />
-                          Srceenshot not uploaded
-                        </span>
-                      )}
-                    </div>
+                    {order.paymentMethod === "Google Pay" ? (
+                      <div className="w-full group flex items-center flex-col gap-2 overflow-visible sticky z-0 border p-2 text-xs font-medium rounded-sm">
+                        {order.paymentScreenshot ? (
+                          <span className="flex items-center gap-2">
+                            <CircleCheck className="w-4 text-gray-400 shrink-0" />
+                            Srceenshot uploaded
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-2">
+                            <CircleAlert className="w-4 text-gray-400 shrink-0" />
+                            Srceenshot not uploaded
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <></>
+                    )}
                     {order.isCustomizable && (
                       <div className="w-full group flex items-center flex-col gap-2 overflow-visible sticky z-0 border p-2 text-xs font-medium rounded-sm">
                         {order.customDesignImage ? (
@@ -212,7 +216,7 @@ const Orders = () => {
                           alt="ok"
                           width={12}
                           height={12}
-                            loading="lazy"
+                          loading="lazy"
                         />
                         Order placed
                       </p>
@@ -228,7 +232,7 @@ const Orders = () => {
                           alt="ok"
                           width={12}
                           height={12}
-                            loading="lazy"
+                          loading="lazy"
                         />
                         Shipped
                       </p>
@@ -243,7 +247,7 @@ const Orders = () => {
                           alt="ok"
                           width={12}
                           height={12}
-                            loading="lazy"
+                          loading="lazy"
                         />
                         Out for delivery
                       </p>
@@ -257,7 +261,7 @@ const Orders = () => {
                           alt="ok"
                           width={12}
                           height={12}
-                            loading="lazy"
+                          loading="lazy"
                         />
                         Delivered
                       </p>

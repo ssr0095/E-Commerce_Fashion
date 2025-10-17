@@ -2,6 +2,26 @@ import productModel from "../models/productModel.js";
 import { uploadToR2 } from "../config/cloudflare.js";
 import { v4 as uuidv4 } from "uuid";
 import { createAuditLog } from "./auditController.js";
+import slugify from "slugify";
+
+const generateUniqueSlug = async (name) => {
+  let baseSlug = slugify(name, {
+    lower: true,
+    strict: true,
+    locale: "en",
+  });
+
+  let slug = baseSlug;
+  let counter = 1;
+
+  // Check if slug exists and make it unique
+  while (await productModel.findOne({ slug })) {
+    slug = `${baseSlug}-${Math.random().toString(36).substring(2, 7)}`;
+    counter++;
+  }
+
+  return slug;
+};
 
 const addProduct = async (req, res) => {
   try {
@@ -21,12 +41,14 @@ const addProduct = async (req, res) => {
 
     const user = req.user;
 
+    // Generate unique slug
+    const slug = await generateUniqueSlug(name);
+
     // Process images
     const images = [
       req.files?.image1?.[0],
       req.files?.image2?.[0],
       req.files?.image3?.[0],
-      // req.files?.image4?.[0],
     ].filter(Boolean);
 
     const imagesUrl = await Promise.all(
@@ -38,6 +60,7 @@ const addProduct = async (req, res) => {
 
     const productData = {
       name,
+      slug, // Add slug
       description,
       category,
       price: Number(price),
@@ -61,7 +84,11 @@ const addProduct = async (req, res) => {
       metadata: { ip: req.ip },
     });
 
-    return res.json({ success: true, message: "Product Added" });
+    return res.json({
+      success: true,
+      message: "Product Added",
+      slug: product.slug,
+    });
   } catch (error) {
     console.error(error);
     return res.json({ success: false, message: error.message });
@@ -87,6 +114,19 @@ const editProduct = async (req, res) => {
     } = req.body;
 
     const user = req.user;
+
+    // Get current product
+    const currentProduct = await productModel.findById(id);
+    if (!currentProduct) {
+      return res.json({ success: false, message: "Product not found" });
+    }
+
+    let slug = currentProduct.slug;
+
+    // Regenerate slug if name changed
+    if (name && name !== currentProduct.name) {
+      slug = await generateUniqueSlug(name);
+    }
 
     // Delete old images if specified
     if (imagesToDelete && imagesToDelete.length > 0) {
@@ -116,12 +156,6 @@ const editProduct = async (req, res) => {
       })
     );
 
-    // Get the current product to merge images
-    const currentProduct = await productModel.findById(id);
-    if (!currentProduct) {
-      return res.json({ success: false, message: "Product not found" });
-    }
-
     // Filter out deleted images and add new ones
     const updatedImages = currentProduct.image
       .filter((img) => !imagesToDelete?.includes(img))
@@ -129,6 +163,7 @@ const editProduct = async (req, res) => {
 
     const updateData = {
       name,
+      slug, // Updated slug
       description,
       category,
       price: Number(price),
@@ -173,6 +208,7 @@ const listProducts = async (req, res) => {
       page = 1,
       limit = 8,
       custom,
+      bestSeller,
       admin,
       category,
       subCategory,
@@ -194,6 +230,7 @@ const listProducts = async (req, res) => {
       };
     if (theme) query.theme = { $in: Array.isArray(theme) ? theme : [theme] };
     if (custom) query.customizable = custom === "true";
+    if (bestSeller) query.bestseller = bestSeller === "true";
     if (search) {
       query.$or = [
         { name: { $regex: search, $options: "i" } },
@@ -324,6 +361,28 @@ const removeProduct = async (req, res) => {
 
 const singleProduct = async (req, res) => {
   try {
+    const { slug } = req.params; // Change from req.body to req.params
+
+    const product = await productModel.findOne({ slug });
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+
+    return res.json({ success: true, product });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+const singleProductById = async (req, res) => {
+  try {
     const { productId } = req.body;
     const product = await productModel.findById(productId);
     return res.json({ success: true, product });
@@ -338,6 +397,7 @@ export {
   addProduct,
   removeProduct,
   singleProduct,
+  singleProductById,
   editProduct,
   getFilterOptions,
 };

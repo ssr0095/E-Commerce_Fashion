@@ -33,7 +33,8 @@ const cacheManager = {
     }
   },
 
-  set: (key, value, ttl = 3600000) => {
+  set: (key, value, ttl = 259200000) => {
+    // 3 days
     try {
       const item = {
         value,
@@ -117,6 +118,8 @@ const ShopContextProvider = ({ children }) => {
     products: cacheManager.get("products") || [],
     cartItems: cacheManager.get("cart") || {},
     customizableProducts: cacheManager.get("customizableProducts") || [],
+    bestSellerProducts: cacheManager.get("bestSellerProducts") || [],
+    latestProducts: cacheManager.get("latestProducts") || [],
     token: cacheManager.get("accessToken") || "",
     search: "",
     showSearch: false,
@@ -124,6 +127,8 @@ const ShopContextProvider = ({ children }) => {
     smallNav: ["Home"],
     page: 1,
     hasMore: true,
+    totalPages: 0,
+    currentPage: 0,
     loading: false,
     applyingDiscount: false,
     orders: cacheManager.get("orders") || [],
@@ -303,7 +308,7 @@ const ShopContextProvider = ({ children }) => {
           typeof updater === "function" ? updater(prev.cartItems) : updater;
         const newCartCount = calculateCartCount(newCart);
 
-        cacheManager.set("cart", newCart, 1800000);
+        cacheManager.set("cart", newCart);
 
         // Queue the API call
         requestQueue.current.set(requestId, { newCart, requestId });
@@ -496,9 +501,10 @@ const ShopContextProvider = ({ children }) => {
             hasMore: cached.hasMore,
             loading: false,
             page,
+            currentPage: cached.currentPage || page, // Add this
+            totalPages: cached.totalPages || 1, // Add this
             filterOptions: cached.filterOptions || prev.filterOptions,
           }));
-          // setFilterOptions(cached.filterOptions || prev.filterOptions);
           return;
         }
       }
@@ -508,7 +514,7 @@ const ShopContextProvider = ({ children }) => {
       try {
         const params = new URLSearchParams({
           page: page.toString(),
-          limit: "8",
+          limit: "20",
           sortBy: currentFilters.sortBy,
         });
 
@@ -538,22 +544,25 @@ const ShopContextProvider = ({ children }) => {
           const cacheData = {
             products: data.products,
             hasMore: data.hasMore,
+            currentPage: data.currentPage, // Make sure backend returns this
+            totalPages: data.totalPages, // Make sure backend returns this
             filterOptions: data.availableFilters,
           };
 
-          cacheManager.set(cacheKey, cacheData, page === 1 ? 300000 : 600000);
+          cacheManager.set(cacheKey, cacheData);
 
           setState((prev) => ({
             ...prev,
             products:
-              page === 1 ? data.products : [...prev.products, ...data.products],
+              // page === 1 ? data.products : [...prev.products, ...data.products],
+              data.products,
             hasMore: data.hasMore,
             loading: false,
             page,
+            currentPage: data.currentPage || page, // Add this
+            totalPages: data.totalPages || 1, // Add this
             filterOptions: data.availableFilters,
           }));
-
-          // setFilterOptions(data.availableFilters);
         }
       } catch (error) {
         setState((prev) => ({ ...prev, loading: false }));
@@ -603,6 +612,47 @@ const ShopContextProvider = ({ children }) => {
     }
   }, [backendUrl]);
 
+  const getBestSellerProductsData = useCallback(async () => {
+    const cached = cacheManager.get("bestSellerProducts");
+    if (cached) {
+      setState((prev) => ({ ...prev, bestSellerProducts: cached }));
+      return;
+    }
+
+    try {
+      const { data } = await axios.get(`${backendUrl}/api/product/list`, {
+        params: { bestSeller: true },
+      });
+
+      if (data.success) {
+        const filtered = data.products.filter((p) => p.bestseller);
+        cacheManager.set("bestSellerProducts", filtered);
+        setState((prev) => ({ ...prev, bestSellerProducts: filtered }));
+      }
+    } catch (error) {
+      // toast.error("Failed to fetch customizable products");
+    }
+  }, [backendUrl]);
+
+  const getlatestProductsProductsData = useCallback(async () => {
+    const cached = cacheManager.get("latestProducts");
+    if (cached) {
+      setState((prev) => ({ ...prev, latestProducts: cached }));
+      return;
+    }
+
+    try {
+      const { data } = await axios.get(`${backendUrl}/api/product/list`);
+
+      if (data.success) {
+        cacheManager.set("latestProducts", data.products);
+        setState((prev) => ({ ...prev, latestProducts: data.products }));
+      }
+    } catch (error) {
+      // toast.error("Failed to fetch customizable products");
+    }
+  }, [backendUrl]);
+
   const toggleSearch = useCallback((forceState) => {
     setState((prev) => ({
       ...prev,
@@ -638,7 +688,7 @@ const ShopContextProvider = ({ children }) => {
       }
 
       const cacheKey = "userOrders";
-      const cacheExpiry = 5 * 60 * 1000; // 5 minutes cache
+      const cacheExpiry = 2 * 60 * 1000; // 5 minutes cache
 
       // Check cache if not forcing refresh
       if (!forceRefresh) {
@@ -861,7 +911,12 @@ const ShopContextProvider = ({ children }) => {
     const initApp = async () => {
       const token = state.token || cacheManager.get("accessToken");
       if (token) await checkAuthStatus();
-      await Promise.all([getProductsData(1), getCustomizableProductsData()]);
+      await Promise.all([
+        getProductsData(1),
+        getCustomizableProductsData(),
+        getBestSellerProductsData(),
+        getlatestProductsProductsData(),
+      ]);
     };
 
     initApp();
@@ -885,6 +940,8 @@ const ShopContextProvider = ({ children }) => {
       clearCart,
       getProductsData,
       getCustomizableProductsData,
+      getBestSellerProductsData,
+      getlatestProductsProductsData,
       login,
       register,
       googleLogin,
@@ -918,6 +975,8 @@ const ShopContextProvider = ({ children }) => {
       clearCart,
       getProductsData,
       getCustomizableProductsData,
+      getBestSellerProductsData,
+      getlatestProductsProductsData,
       login,
       register,
       googleLogin,

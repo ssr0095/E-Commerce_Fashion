@@ -17,6 +17,7 @@ import {
 } from "../controllers/orderController.js";
 import { authUser, authAdmin } from "../middleware/auth.js";
 import upload from "../middleware/multer.js";
+import validateOrder from "../middleware/order.js";
 
 const orderRouter = express.Router();
 
@@ -26,10 +27,10 @@ orderRouter.post("/status", authAdmin, updateStatus);
 orderRouter.post("/paymentstatus", authAdmin, updatePaymentStatus);
 
 // Payment Features
-orderRouter.post("/place", authUser, placeOrder);
-orderRouter.post("/googlepay", authUser, placeOrderGooglePay);
-orderRouter.post("/stripe", authUser, placeOrderStripe);
-orderRouter.post("/razorpay", authUser, placeOrderRazorpay);
+orderRouter.post("/place", authUser, validateOrder, placeOrder);
+orderRouter.post("/googlepay", authUser, validateOrder, placeOrderGooglePay);
+orderRouter.post("/stripe", authUser, validateOrder, placeOrderStripe);
+orderRouter.post("/razorpay", authUser, validateOrder, placeOrderRazorpay);
 
 // User Feature
 orderRouter.post("/userorders", authUser, userOrders);

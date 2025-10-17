@@ -12,12 +12,12 @@ import {
 } from "@/components/ui/carousel";
 
 const LatestCollection = () => {
-  const { products} = useContext(ShopContext);
-  const [latestProducts, setLatestProducts] = useState([]);
+  const { latestProducts } = useContext(ShopContext);
+  const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    setLatestProducts(products.slice(0, 10));
-  }, [products]);
+    setProducts(latestProducts.slice(0, 10));
+  }, [latestProducts]);
 
   return (
     <div className="px-2 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
@@ -33,7 +33,7 @@ const LatestCollection = () => {
         {/* Rendering Products */}
         <Carousel height={500} className="w-full">
           <CarouselContent className="-ml-1">
-            {latestProducts?.map((item, index) => (
+            {products?.map((item, index) => (
               <CarouselItem
                 key={index}
                 className="basis-1/2 md:basis-1/3 lg:basis-1/5"
@@ -41,6 +41,7 @@ const LatestCollection = () => {
                 <ProductItem
                   key={index}
                   id={item._id}
+                  slug={item.slug}
                   image={item.image}
                   name={item.name}
                   price={item.price}

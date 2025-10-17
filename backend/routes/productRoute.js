@@ -4,6 +4,7 @@ import {
   addProduct,
   removeProduct,
   singleProduct,
+  singleProductById,
   editProduct,
   getFilterOptions,
 } from "../controllers/productController.js";
@@ -34,9 +35,10 @@ productRouter.post(
   editProduct
 );
 productRouter.delete("/remove", authAdmin, removeProduct);
-productRouter.post("/single", authAdmin, singleProduct);
-productRouter.post("/edit", authAdmin, editProduct);
+productRouter.get("/single/:slug", singleProduct);
+productRouter.post("/single-by-id", singleProductById);
+// productRouter.post("/edit", authAdmin, editProduct);
 productRouter.get("/list", listProducts);
-productRouter.get("/filterOptions", getFilterOptions);
+productRouter.get("/filters", getFilterOptions);
 
 export default productRouter;

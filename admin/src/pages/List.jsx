@@ -26,7 +26,7 @@ const List = ({ token, setToken }) => {
     setIsLoading(true);
     const cacheKey = "cachedProductList";
     const cacheTimeKey = "cachedProductListTime";
-    const cacheExpiry = 5 * 60 * 1000;
+    const cacheExpiry = 30 * 60 * 1000;
 
     const now = Date.now();
     const cachedData = localStorage.getItem(cacheKey);
@@ -101,7 +101,12 @@ const List = ({ token, setToken }) => {
 
   return (
     <div className="w-full max-sm:px-6 overflow-x-auto relative">
-      <p className="mb-2">All Products List</p>
+      <div className="flex items-center justify-between">
+        <p className="mb-2">All Products List</p>
+        <Button className="" variant="outline" onClick={() => fetchList(true)}>
+          Refresh
+        </Button>
+      </div>
       {isLoading && <Loader />}
       {list?.length === 0 ? (
         <div className="w-full text-center py-10 text-gray-500">

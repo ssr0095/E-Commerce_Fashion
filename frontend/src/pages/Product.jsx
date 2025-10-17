@@ -23,19 +23,47 @@ import { Ruler, ArrowUpRight } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 
 const Product = () => {
-  const { productId } = useParams();
+  const { slug } = useParams();
   const { products, currency, addToCart, navigate, customizableProducts } =
     useContext(ShopContext);
   const [productData, setProductData] = useState(false);
   const [image, setImage] = useState("");
   const [size, setSize] = useState(null);
+  const [loading, setLoading] = useState(true);
+  console.log(slug);
 
   const fetchProductData = async () => {
-    const allProducts = [...products, ...customizableProducts]; // merge both
-    const found = allProducts.find((item) => item._id === productId);
-    if (found) {
-      setProductData(found);
-      setImage(found?.image[0]);
+    try {
+      setLoading(true);
+
+      // First try to find in local state (for faster navigation)
+      const allProducts = [...products, ...customizableProducts];
+      const found = allProducts.find((item) => item.slug === slug);
+
+      console.log(found);
+      if (found) {
+        setProductData(found);
+        setImage(found?.image[0]);
+        setLoading(false);
+        return;
+      }
+
+      // If not found locally, fetch from API
+      const response = await fetch(`/api/products/single/${slug}`);
+      const data = await response.json();
+
+      if (data.success) {
+        setProductData(data.product);
+        setImage(data.product?.image[0]);
+      } else {
+        console.error("Product not found");
+        navigate("/404"); // Redirect to 404 page
+      }
+    } catch (error) {
+      console.error("Error fetching product:", error);
+      navigate("/404");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -50,84 +78,97 @@ const Product = () => {
 
   // Generate schema markup
   const generateProductSchema = () => {
-  if (!productData) return null;
+    if (!productData) return null;
 
-  const schema = {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    name: productData?.name,
-    image: productData?.image,
-    description: productData?.description,
-    sku: productData?._id,
-    brand: {
-      "@type": "Brand",
-      name: "Cousins Fashion",
-      url: "https://cousinsfashion.in",
-      logo: "https://cousinsfashion.in/logo.webp",
-    },
-    offers: {
-      "@type": "Offer",
-      url: `https://cousinsfashion.in/product/${productData?.slug || productData?._id}`,
-      priceCurrency: "INR",
-      price: productData?.price,
-      // priceValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      itemCondition: "https://schema.org/NewCondition",
-      availability: "https://schema.org/InStock",
-      shippingDetails: {
-        "@type": "OfferShippingDetails",
-        shippingRate: {
-          "@type": "MonetaryAmount",
-          value: "0",
-          currency: "INR"
-        },
-        shippingDestination: {
-          "@type": "DefinedRegion",
-          addressCountry: "IN"
-        },
-        deliveryTime: {
-          "@type": "ShippingDeliveryTime",
-          handlingTime: {
-            "@type": "QuantitativeValue",
-            minValue: "1",
-            maxValue: "2"
-          },
-          transitTime: {
-            "@type": "QuantitativeValue",
-            minValue: "3",
-            maxValue: "7"
-          }
-        }
-      },
-      hasMerchantReturnPolicy: {
-        "@type": "MerchantReturnPolicy",
-        returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
-        merchantReturnDays: 7,
-        returnMethod: "https://schema.org/ReturnByMail",
-        returnFees: "https://schema.org/FreeReturn"
-      },
-      seller: {
-        "@type": "Organization",
+    const schema = {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      name: productData?.name,
+      image: productData?.image,
+      description: productData?.description,
+      sku: productData?._id,
+      brand: {
+        "@type": "Brand",
         name: "Cousins Fashion",
-        sameAs: "https://cousinsfashion.in",
-      }
-    },
-    aggregateRating: productData?.ratings
-      ? {
-          "@type": "AggregateRating",
-          ratingValue: productData.ratings.average,
-          reviewCount: productData.ratings.count,
-        }
-      : undefined,
+        url: "https://cousinsfashion.in",
+        logo: "https://cousinsfashion.in/logo.webp",
+      },
+      offers: {
+        "@type": "Offer",
+        url: `https://cousinsfashion.in/product/${
+          productData?.slug || productData?._id
+        }`,
+        priceCurrency: "INR",
+        price: productData?.price,
+        // priceValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        itemCondition: "https://schema.org/NewCondition",
+        availability: "https://schema.org/InStock",
+        shippingDetails: {
+          "@type": "OfferShippingDetails",
+          shippingRate: {
+            "@type": "MonetaryAmount",
+            value: "0",
+            currency: "INR",
+          },
+          shippingDestination: {
+            "@type": "DefinedRegion",
+            addressCountry: "IN",
+          },
+          deliveryTime: {
+            "@type": "ShippingDeliveryTime",
+            handlingTime: {
+              "@type": "QuantitativeValue",
+              minValue: "1",
+              maxValue: "2",
+            },
+            transitTime: {
+              "@type": "QuantitativeValue",
+              minValue: "3",
+              maxValue: "7",
+            },
+          },
+        },
+        hasMerchantReturnPolicy: {
+          "@type": "MerchantReturnPolicy",
+          returnPolicyCategory:
+            "https://schema.org/MerchantReturnFiniteReturnWindow",
+          merchantReturnDays: 7,
+          returnMethod: "https://schema.org/ReturnByMail",
+          returnFees: "https://schema.org/FreeReturn",
+        },
+        seller: {
+          "@type": "Organization",
+          name: "Cousins Fashion",
+          sameAs: "https://cousinsfashion.in",
+        },
+      },
+      aggregateRating: productData?.ratings
+        ? {
+            "@type": "AggregateRating",
+            ratingValue: productData.ratings.average,
+            reviewCount: productData.ratings.count,
+          }
+        : undefined,
+    };
+
+    return JSON.stringify(schema, (key, value) =>
+      value === undefined ? undefined : value
+    );
   };
 
-  return JSON.stringify(schema, (key, value) =>
-    value === undefined ? undefined : value
-  );
-};
-
   useEffect(() => {
-    fetchProductData();
-  }, [productId, products]);
+    if (slug) {
+      fetchProductData();
+    }
+  }, [slug, products]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-[50vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
 
   return productData ? (
     <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
@@ -364,7 +405,9 @@ const Product = () => {
       </div>
     </div>
   ) : (
-    <div className=" opacity-0"></div>
+    <div className="flex justify-center items-center min-h-[50vh]">
+      <p>Product not found</p>
+    </div>
   );
 };
 

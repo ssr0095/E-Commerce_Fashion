@@ -23,6 +23,7 @@ const Payment = () => {
   const [order, setOrder] = useState(null);
   const [quantity, setQuantity] = useState(0);
   const [isCustom, setIsCustom] = useState(false);
+  const [isGoodlePay, setIsGoodlePay] = useState(false);
 
   // Payment image state
   const [paymentImage, setPaymentImage] = useState(null);
@@ -68,6 +69,7 @@ const Payment = () => {
         // Check for customizable items
         // console.log(orderData);
         setIsCustom(orderData.isCustomizable);
+        setIsGoodlePay(orderData.paymentMethod === "Google Pay");
         setIsPaymentImageUploaded(
           (prev) => orderData.paymentScreenshot && !prev
         );
@@ -220,7 +222,7 @@ const Payment = () => {
   }
 
   return (
-    <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
+    <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw] mb-20">
       {isLoading && <Loader />}
 
       <SmallNavBar navs={["Orders", "Payment"]} />
@@ -274,84 +276,84 @@ const Payment = () => {
             </div>
           </div>
         )}
-
         {/* Payment Section */}
-        <div className="flex flex-col md:flex-row justify-center items-start gap-8 md:gap-20 mb-16">
-          {/* Payment Upload */}
-          <div className="w-full md:w-[450px] space-y-6 max-sm:order-1">
-            <div className="text-xl sm:text-2xl text-center mb-3">
-              <Title text1="UPLOAD" text2="PAYMENT SCREENSHOT" />
-            </div>
+        {isGoodlePay && (
+          <div className="flex flex-col md:flex-row justify-center items-start gap-8 md:gap-20 mb-16">
+            {/* Payment Upload */}
+            <div className="w-full md:w-[450px] space-y-6 max-sm:order-1">
+              <div className="text-xl sm:text-2xl text-center mb-3">
+                <Title text1="UPLOAD" text2="PAYMENT SCREENSHOT" />
+              </div>
 
-            <div className="flex flex-col items-center space-y-4">
-              <Label htmlFor="paymentImage" className="cursor-pointer">
-                <div className="w-48 h-48 rounded-lg border-2 border-dashed border-gray-500 bg-gray-200 hover:bg-gray-300 flex flex-col items-center justify-center overflow-hidden">
-                  {paymentImage ? (
-                    <img
-                      src={URL.createObjectURL(paymentImage)}
-                      alt="Payment preview"
-                      className="w-full h-full object-contain"
-                    />
-                  ) : (
-                    <>
+              <div className="flex flex-col items-center space-y-4">
+                <Label htmlFor="paymentImage" className="cursor-pointer">
+                  <div className="w-48 h-48 rounded-lg border-2 border-dashed border-gray-500 bg-gray-200 hover:bg-gray-300 flex flex-col items-center justify-center overflow-hidden">
+                    {paymentImage ? (
                       <img
-                        src={assets.upload_area}
-                        alt="Upload payment image"
-                        className="w-6 h-6"
+                        src={URL.createObjectURL(paymentImage)}
+                        alt="Payment preview"
+                        className="w-full h-full object-contain"
                       />
-                      <p className="text-gray-500 mt-2">
-                        Upload{" "}
-                        <span className="text-blue-500 underline">image</span>
-                      </p>
-                    </>
-                  )}
-                </div>
-              </Label>
+                    ) : (
+                      <>
+                        <img
+                          src={assets.upload_area}
+                          alt="Upload payment image"
+                          className="w-6 h-6"
+                        />
+                        <p className="text-gray-500 mt-2">
+                          Upload{" "}
+                          <span className="text-blue-500 underline">image</span>
+                        </p>
+                      </>
+                    )}
+                  </div>
+                </Label>
 
-              <Input
-                type="file"
-                id="paymentImage"
-                accept={allowedTypes.join(",")}
-                onChange={(e) => handleFileChange(e, setPaymentImage)}
-                className="hidden"
-                disabled={isPaymentImageUploaded}
+                <Input
+                  type="file"
+                  id="paymentImage"
+                  accept={allowedTypes.join(",")}
+                  onChange={(e) => handleFileChange(e, setPaymentImage)}
+                  className="hidden"
+                  disabled={isPaymentImageUploaded}
+                />
+
+                <Button
+                  className="bg-gray-950 hover:bg-gray-800 rounded-none mt-4 w-48"
+                  onClick={uploadPaymentImage}
+                  disabled={
+                    !paymentImage ||
+                    (isCustom && !isDesignImageUploaded) ||
+                    isPaymentImageUploaded
+                  }
+                >
+                  {isPaymentImageUploaded ? "Uploaded" : "Upload Payment"}
+                </Button>
+              </div>
+            </div>
+
+            {/* Payment Details */}
+            <div className="w-full flex items-center flex-col md:w-[450px] space-y-6">
+              <div className="text-xl sm:text-2xl mb-3">
+                <Title text1="COMPLETE" text2="PAYMENT" />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <img src={assets.ok_icon} alt="OK" width={24} height={24} />
+                <h2 className="text-3xl font-bold">
+                  {currency} {order?.amount?.toFixed(2)}
+                </h2>
+              </div>
+
+              <QRCode
+                upiId={import.meta.env.VITE_UPI}
+                amount={order?.amount?.toString()}
+                name={import.meta.env.VITE_BANKNAME}
               />
-
-              <Button
-                className="bg-gray-950 hover:bg-gray-800 rounded-none mt-4 w-48"
-                onClick={uploadPaymentImage}
-                disabled={
-                  !paymentImage ||
-                  (isCustom && !isDesignImageUploaded) ||
-                  isPaymentImageUploaded
-                }
-              >
-                {isPaymentImageUploaded ? "Uploaded" : "Upload Payment"}
-              </Button>
             </div>
           </div>
-
-          {/* Payment Details */}
-          <div className="w-full flex items-center flex-col md:w-[450px] space-y-6">
-            <div className="text-xl sm:text-2xl mb-3">
-              <Title text1="COMPLETE" text2="PAYMENT" />
-            </div>
-
-            <div className="flex items-center gap-2">
-              <img src={assets.ok_icon} alt="OK" width={24} height={24} />
-              <h2 className="text-3xl font-bold">
-                {currency} {order?.amount?.toFixed(2)}
-              </h2>
-            </div>
-
-            <QRCode
-              upiId={import.meta.env.VITE_UPI}
-              amount={order?.amount?.toString()}
-              name={import.meta.env.VITE_BANKNAME}
-            />
-          </div>
-        </div>
-
+        )}
         {/* Order Summary */}
         <div className="w-full my-8 flex justify-end">
           <div className="min-w-72">
@@ -378,7 +380,6 @@ const Payment = () => {
             </div>
           </div>
         </div>
-
         {/* Submit Button */}
         <div className="w-full text-end">
           <Button
@@ -392,7 +393,7 @@ const Payment = () => {
             }`}
             disabled={!isPaymentImageUploaded}
           >
-            PLACE ORDER
+            {isGoodlePay ? "PLACE ORDER" : "CONTINUE"}
           </Button>
         </div>
       </div>

@@ -12,13 +12,16 @@ import {
 } from "@/components/ui/carousel";
 
 const BestSeller = () => {
-  const { products } = useContext(ShopContext);
-  const [bestSeller, setBestSeller] = useState([]);
+  const { bestSellerProducts } = useContext(ShopContext);
+  // const [bestSeller, setBestSeller] = useState(
+  //   // products.filter((item) => item.bestseller)
+  //   []
+  // );
+  // const bestProduct = ;
 
-  useEffect(() => {
-    const bestProduct = products.filter((item) => item.bestseller);
-    setBestSeller(bestProduct.slice(0, 5));
-  }, [products]);
+  // useEffect(() => {
+  //   setBestSeller(products.filter((item) => item.customizable));
+  // }, []);
 
   return (
     <div className="px-2 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
@@ -33,7 +36,7 @@ const BestSeller = () => {
 
         <Carousel className="w-full">
           <CarouselContent className="-ml-1">
-            {bestSeller.map((item, index) => (
+            {bestSellerProducts.map((item, index) => (
               <CarouselItem
                 key={index}
                 className="basis-1/2 md:basis-1/3 lg:basis-1/5"
@@ -41,6 +44,7 @@ const BestSeller = () => {
                 <ProductItem
                   key={index}
                   id={item._id}
+                  slug={item.slug}
                   image={item.image}
                   name={item.name}
                   price={item.price}

@@ -59,12 +59,12 @@ const RateLimiter = (max) =>
   });
 app.use("/api/order/addPaymentScreenshot", RateLimiter(3));
 app.use("/api/order/addDesignImage", RateLimiter(3));
-app.use("/api/order/place", RateLimiter(10));
-app.use("/api/order/googlepay", RateLimiter(10));
+app.use("/api/order/place", RateLimiter(5));
+app.use("/api/order/googlepay", RateLimiter(5));
 app.use("/api/order/verifyCode", RateLimiter(3));
-// app.use("/api/auth/login", RateLimiter(5));
-// app.use("/api/auth/register", RateLimiter(3));
-// app.use("/api/auth/refresh", RateLimiter(5));
+app.use("/api/auth/login", RateLimiter(5));
+app.use("/api/auth/register", RateLimiter(3));
+app.use("/api/auth/refresh", RateLimiter(5));
 
 // api endpoints
 app.use("/api/user", userRouter);
