@@ -46,7 +46,7 @@ const Edit = ({ token, productId, onClose, onUpdate }) => {
     const fetchProduct = async () => {
       try {
         const response = await axios.post(
-          `${backendUrl}/api/product/single`,
+          `${backendUrl}/api/product/single-by-id`,
           {
             productId,
           },
@@ -55,7 +55,7 @@ const Edit = ({ token, productId, onClose, onUpdate }) => {
           }
         );
 
-        if (response.data.success) {
+        if (response.data?.success) {
           const product = response.data.product;
           setOriginalImages(product.image);
           setName(product.name);

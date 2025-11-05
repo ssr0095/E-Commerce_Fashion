@@ -5,9 +5,19 @@ import ProductItem from "../components/ProductItem";
 import SmallNavBar from "../components/SmallNavBar";
 import { assets } from "../assets/assets";
 import { Helmet } from "react-helmet-async";
+import { Spinner } from "@/components/ui/spinner";
 
 const Customize = () => {
-  const { customizableProducts } = useContext(ShopContext);
+  const { customizableProducts, loading } = useContext(ShopContext);
+
+  // if (loading) {
+  //   return (
+  //     <div className="flex justify-center items-center min-h-[50vh]">
+  //       <Spinner className="size-12" />
+  //     </div>
+  //   );
+  // }
+
   return (
     <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
       <Helmet>
@@ -42,10 +52,11 @@ const Customize = () => {
         <div className="sm:text-2xl mb-4">
           <Title text1={"CUSTOMIZE"} text2={"PRODUCTS"} />
         </div>
+
         {/* Map Products */}
-        <div>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 gap-y-6">
-            {customizableProducts?.map((item, index) => (
+        {customizableProducts?.length > 0 ? (
+          <div className="w-fll grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 gap-y-6">
+            {customizableProducts.map((item, index) => (
               <ProductItem
                 key={index}
                 name={item.name}
@@ -60,7 +71,18 @@ const Customize = () => {
               />
             ))}
           </div>
-        </div>
+        ) : (
+          <div className="w-full flex items-center justify-center py-10 text-gray-500">
+            {loading ? (
+              <>
+                <Spinner /> Loading products..."
+              </>
+            ) : (
+              "No products found."
+            )}{" "}
+          </div>
+        )}
+
         {/* ------WHATSAPP------ */}
         <div className="flex flex-col items-center justify-center min-h-[50%] mt-16 p-6">
           <div className="bg-gray-50 shadow-xl rounded-2xl p-8 max-w-lg text-center">

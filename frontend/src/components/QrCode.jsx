@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import QRCode from "qrcode";
+import errorHandler from "../lib/errorHandler";
 
 const QRCodeComponent = ({ upiId, amount, name }) => {
   const [qrSrc, setQrSrc] = useState("");
@@ -13,14 +14,19 @@ const QRCodeComponent = ({ upiId, amount, name }) => {
     // Generate QR Code and set as image source
     QRCode.toDataURL(upiUrl, { width: 175, errorCorrectionLevel: "H" })
       .then((url) => setQrSrc(url))
-      .catch((err) => console.error(err));
+      .catch((err) =>
+        errorHandler.handle(err, {
+          component: "QrCode",
+          action: "useEffect",
+        })
+      );
   }, [upiId, amount, name]);
 
   return (
     <div className="flex flex-col items-center space-y-4">
       {qrSrc && (
-        <img src={qrSrc} alt="QR Code" className="w-44 h-44" loading="lazy"
-         />)}
+        <img src={qrSrc} alt="QR Code" className="w-44 h-44" loading="lazy" />
+      )}
       <p className="text-xl font-bold">Scan with any UPI app</p>
     </div>
   );

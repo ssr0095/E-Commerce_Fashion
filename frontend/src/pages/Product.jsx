@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { ShopContext } from "../context/ShopContext";
 import RelatedProducts from "../components/RelatedProducts";
 import SmallNavBar from "../components/SmallNavBar";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import Coupon from "../components/Coupon";
 import ProductDetailsDrop from "../components/ProductDetailsDrop";
 import { assets } from "../assets/assets";
@@ -14,6 +14,8 @@ import {
   // CarouselNext,
   // CarouselPrevious,
 } from "@/components/ui/carousel";
+import { Spinner } from "@/components/ui/spinner";
+import { Button } from "@/components/ui/button";
 import {
   Popover,
   PopoverContent,
@@ -21,16 +23,19 @@ import {
 } from "@/components/ui/popover";
 import { Ruler, ArrowUpRight } from "lucide-react";
 import { Helmet } from "react-helmet-async";
+import CartSyncIndicator from "../components/CartSyncIndicator";
+import axios from "axios";
 
 const Product = () => {
   const { slug } = useParams();
-  const { products, currency, addToCart, navigate, customizableProducts } =
+  const { products, currency, addToCart, navigate, customizableProducts, backendUrl } =
     useContext(ShopContext);
   const [productData, setProductData] = useState(false);
   const [image, setImage] = useState("");
   const [size, setSize] = useState(null);
   const [loading, setLoading] = useState(true);
-  console.log(slug);
+  const { getCartSyncStatus } = useContext(ShopContext);
+  const [status, setStatus] = useState({ pending: 0, isProcessing: false });
 
   const fetchProductData = async () => {
     try {
@@ -40,7 +45,6 @@ const Product = () => {
       const allProducts = [...products, ...customizableProducts];
       const found = allProducts.find((item) => item.slug === slug);
 
-      console.log(found);
       if (found) {
         setProductData(found);
         setImage(found?.image[0]);
@@ -49,12 +53,11 @@ const Product = () => {
       }
 
       // If not found locally, fetch from API
-      const response = await fetch(`/api/products/single/${slug}`);
-      const data = await response.json();
+      const response = await axios.get(`${backendUrl}/api/product/single/${slug}`);
 
-      if (data.success) {
-        setProductData(data.product);
-        setImage(data.product?.image[0]);
+      if (response.data?.success) {
+        setProductData(response.data.product);
+        setImage(response.data.product?.image[0]);
       } else {
         console.error("Product not found");
         navigate("/404"); // Redirect to 404 page
@@ -72,7 +75,7 @@ const Product = () => {
       addToCart(productData?._id, size);
       navigate("/cart");
     } else {
-      toast.error("Select Product Size");
+      toast.error("Please select a size");
     }
   };
 
@@ -162,10 +165,18 @@ const Product = () => {
     }
   }, [slug, products]);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setStatus(getCartSyncStatus());
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, [getCartSyncStatus]);
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[50vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+        <Spinner className="size-12" />
       </div>
     );
   }
@@ -289,8 +300,9 @@ const Product = () => {
             <div className="flex items-center gap-3 mt-3 text-3xl font-medium">
               <p className="line-through text-xl text-gray-500 font-medium">
                 {currency}
-                {productData?.price +
-                  Math.ceil((productData?.discount / 100) * productData?.price)}
+                {Math.ceil(
+                  (productData?.price / (100 - productData?.discount)) * 100
+                )}
               </p>{" "}
               <p>
                 {currency}
@@ -345,19 +357,37 @@ const Product = () => {
               {/* </ScrollArea> */}
             </div>
 
-            <button
-              onClick={() => addToCart(productData?._id, size)}
-              className="min-w-[30%] w-full bg-black text-white px-8 py-3 text-sm mb-2 active:bg-gray-700"
+            <Button
+              onClick={() => {
+                if (!size) {
+                  return toast.error("Please select a size");
+                }
+                const success = addToCart(productData?._id, size);
+
+                if (success) {
+                  toast.success("Product added to cart");
+                } else {
+                  toast.error("Failed to add to cart");
+                }
+              }}
+              className="min-w-[30%] rounded-none px-8 w-full py-3"
+              disabled={status.isProcessing && status.pending !== 0}
             >
-              {/* {console.log(productData?._id, size)} */}
-              ADD TO CART
-            </button>
-            <button
+              {status.isProcessing && status.pending !== 0 ? (
+                <>
+                  <CartSyncIndicator /> Loading...
+                </>
+              ) : (
+                "ADD TO CART"
+              )}
+            </Button>
+            <Button
               onClick={() => buy()}
-              className="min-w-[30%] w-full bg-white text-black px-8 py-3 text-sm border border-gray-500 active:bg-gray-700"
+              className="min-w-[30%] rounded-none my-4 px-8 w-full py-3"
+              variant="outline"
             >
-              BUY
-            </button>
+              BUY NOW
+            </Button>
             <hr className="mt-8 sm:w-4/5" />
           </div>
         </div>

@@ -12,6 +12,7 @@ import orderRouter from "./routes/orderRoute.js";
 import authRouter from "./routes/authRoute.js";
 import { securityMiddleware } from "./middleware/security.js";
 import { errorHandler } from "./middleware/errorHandler.js";
+import csrf from "csrf";
 
 // App Config
 const app = express();
@@ -37,6 +38,14 @@ const corsOptions = {
   maxAge: 2629800, // Cache preflight responses for 1 month
 };
 
+// const csrfProtection = csrf({
+//   cookie: {
+//     httpOnly: true,
+//     secure: process.env.NODE_ENV === "production",
+//     sameSite: "strict",
+//   },
+// });
+
 app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
 
@@ -61,15 +70,23 @@ app.use("/api/order/addPaymentScreenshot", RateLimiter(3));
 app.use("/api/order/addDesignImage", RateLimiter(3));
 app.use("/api/order/place", RateLimiter(5));
 app.use("/api/order/googlepay", RateLimiter(5));
+app.use("/api/order/stripe", RateLimiter(5));
+app.use("/api/order/razorpay", RateLimiter(5));
+app.use("/api/order/verifyStripe", RateLimiter(5));
+app.use("/api/order/verifyRazorpay", RateLimiter(5));
 app.use("/api/order/verifyCode", RateLimiter(3));
+app.use("/api/cart/update", RateLimiter(20));
 app.use("/api/auth/login", RateLimiter(5));
 app.use("/api/auth/register", RateLimiter(3));
 app.use("/api/auth/refresh", RateLimiter(5));
+app.use("/api/auth/verify", RateLimiter(10));
 
 // api endpoints
 app.use("/api/user", userRouter);
 app.use("/api/product", productRouter);
 app.use("/api/cart", cartRouter);
+// app.use("/api/order", csrfProtection, orderRouter);
+// app.use("/api/auth", csrfProtection, authRouter);
 app.use("/api/order", orderRouter);
 app.use("/api/auth", authRouter);
 

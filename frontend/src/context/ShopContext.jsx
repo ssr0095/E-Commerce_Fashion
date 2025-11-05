@@ -7,8 +7,9 @@ import {
   useMemo,
 } from "react";
 import axios from "axios";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import errorHandler from "../lib/errorHandler";
 
 //#region HELPERS
 
@@ -67,35 +68,93 @@ const cacheManager = {
   },
 };
 
-const debounce = (func, delay) => {
-  let timeoutId;
-  return (...args) => {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => func.apply(null, args), delay);
-  };
-};
+// const debounce = (func, delay) => {
+//   let timeoutId;
+//   return (...args) => {
+//     clearTimeout(timeoutId);
+//     timeoutId = setTimeout(() => func.apply(null, args), delay);
+//   };
+// };
 
-const withRetry = async (fn, retries = 3, delay = 1000) => {
-  try {
-    return await fn();
-  } catch (error) {
-    if (retries > 0) {
-      await new Promise((resolve) => setTimeout(resolve, delay));
-      return withRetry(fn, retries - 1, delay * 2);
-    }
-    throw error;
+// const withRetry = async (fn, retries = 3, delay = 1500) => {
+//   try {
+//     return await fn();
+//   } catch (error) {
+//     if (retries > 0) {
+//       await new Promise((resolve) => setTimeout(resolve, delay));
+//       return withRetry(fn, retries - 1, delay * 2);
+//     }
+//     throw error;
+//   }
+// };
+
+// const fetchWithRetry = async (url, options = {}) => {
+//   return withRetry(() =>
+//     axios({
+//       ...options,
+//       url,
+//       timeout: 10000,
+//     })
+//   );
+// };
+
+// handling refreshToken life
+
+class TokenManager {
+  constructor() {
+    this.refreshPromise = null;
+    this.isRefreshing = false;
+    this.failedQueue = [];
   }
-};
 
-const fetchWithRetry = async (url, options = {}) => {
-  return withRetry(() =>
-    axios({
-      ...options,
-      url,
-      timeout: 10000,
-    })
-  );
-};
+  async refreshToken() {
+    if (this.isRefreshing) {
+      return new Promise((resolve, reject) => {
+        this.failedQueue.push({ resolve, reject });
+      });
+    }
+
+    this.isRefreshing = true;
+
+    try {
+      const response = await axios.post(
+        `${backendUrl}/api/auth/refresh`,
+        {},
+        {
+          withCredentials: true,
+          timeout: 10000,
+          // Don't use interceptors for refresh to avoid loops
+          transformRequest: [
+            (data, headers) => {
+              delete headers.Authorization;
+              return data;
+            },
+          ],
+        }
+      );
+
+      if (response.data?.success) {
+        const newToken = response.data.accessToken;
+        persistToken(newToken);
+
+        // Process queued requests
+        this.failedQueue.forEach(({ resolve }) => resolve(newToken));
+        this.failedQueue = [];
+
+        return newToken;
+      }
+      throw new Error("Refresh failed");
+    } catch (error) {
+      this.failedQueue.forEach(({ reject }) => reject(error));
+      this.failedQueue = [];
+      throw error;
+    } finally {
+      this.isRefreshing = false;
+    }
+  }
+}
+
+const tokenManager = new TokenManager();
 
 //#endregion
 
@@ -108,8 +167,7 @@ const ShopContextProvider = ({ children }) => {
   const whatsappNumber = import.meta.env.VITE_WHATSAPP;
   // const discountPercentage = Number(import.meta.env.FIRST_ORDER_DISCOUNT || 0);
   const navigate = useNavigate();
-  // const productCache = useRef({});
-  const requestQueue = useRef(new Map());
+  const cartManagerRef = useRef(null);
 
   const [state, setState] = useState(() => ({
     user: null,
@@ -166,6 +224,65 @@ const ShopContextProvider = ({ children }) => {
     }));
   }, []);
 
+  const createAuthClient = () => {
+    const client = axios.create({
+      timeout: 10000,
+      withCredentials: true,
+    });
+
+    client.interceptors.request.use(
+      (config) => {
+        const token = cacheManager.get("accessToken");
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+      },
+      (error) => Promise.reject(error)
+    );
+
+    client.interceptors.response.use(
+      (response) => response,
+      async (error) => {
+        const originalRequest = error.config;
+
+        if (error.response?.status === 401 && !originalRequest._retry) {
+          const errorCode = error.response?.data?.code;
+
+          if (
+            errorCode === "TOKEN_EXPIRED" ||
+            errorCode === "SESSION_EXPIRED"
+          ) {
+            originalRequest._retry = true;
+
+            try {
+              const newToken = await tokenManager.refreshToken();
+              originalRequest.headers.Authorization = `Bearer ${newToken}`;
+              return authClient(originalRequest);
+            } catch (refreshError) {
+              clearAuth();
+              navigate("/login");
+              console.log("refreshError: ");
+              console.log(refreshError);
+              throw refreshError;
+            }
+          }
+        }
+
+        return Promise.reject(error);
+      }
+    );
+
+    return client;
+  };
+
+  const authClient = createAuthClient();
+
+  const axiosPOST = async (url, data = {}) => {
+    // need to handle error here
+    return authClient.post(url, data);
+  };
+
   //#endregion
 
   //#region AUTH MANAGENT
@@ -176,17 +293,10 @@ const ShopContextProvider = ({ children }) => {
       return;
     }
     setState((prev) => ({ ...prev, loadingUser: true }));
+
     try {
-      const response = await fetchWithRetry(`${backendUrl}/api/user/userInfo`, {
-        method: "POST",
-        data: {},
-        headers: {
-          Authorization: `Bearer ${state.token}`,
-          "Content-Type": "application/json",
-        },
-        withCredentials: true,
-      });
-      console.log(response);
+      const response = await axiosPOST(`${backendUrl}/api/user/userInfo`);
+
       if (response.data?.success) {
         setState((prev) => ({
           ...prev,
@@ -194,11 +304,17 @@ const ShopContextProvider = ({ children }) => {
           cartCount: response.data.cartCount || 0,
           loadingUser: false,
         }));
-      } else console.log("error fetching user info");
+      }
     } catch (error) {
-      toast.error(error?.message || "Failed to load user info");
+      errorHandler.handle(error, {
+        component: "ShopContext",
+        action: "fetchUserInfo",
+        userId: state.user?.id,
+      });
+
       setState((prev) => ({ ...prev, loadingUser: false }));
-      if (error?.status === 401) {
+
+      if (error?.response?.status === 401) {
         clearAuth();
         navigate("/login");
       }
@@ -215,25 +331,21 @@ const ShopContextProvider = ({ children }) => {
       }
 
       // Verify token validity
-      const response = await axios.post(
-        `${backendUrl}/api/auth/verify`,
-        {},
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          withCredentials: true,
-        }
-      );
+      const response = await axiosPOST(`${backendUrl}/api/auth/verify`);
 
-      if (response.data.valid) {
-        // Token is valid, ensure user data is fresh
+      if (response.data?.valid) {
         await fetchUserInfo();
       } else {
         // Token invalid, try refresh
         await refreshToken();
       }
     } catch (error) {
-      console.error("Auth check failed:", error);
-      await refreshToken(); // Try refresh on any error
+      // console.error("Auth check failed:", error);
+      errorHandler.handle(error, {
+        component: "ShopContext",
+        action: "checkAuthStatus",
+        userId: state.user?.id,
+      });
     } finally {
       setState((prev) => ({ ...prev, loading: false }));
     }
@@ -241,23 +353,11 @@ const ShopContextProvider = ({ children }) => {
 
   const refreshToken = useCallback(async () => {
     try {
-      const response = await axios.post(
-        `${backendUrl}/api/auth/refresh`,
-        {},
-        {
-          withCredentials: true,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-
-      if (response.data?.accessToken) {
-        persistToken(response.data.accessToken);
-        await fetchUserInfo();
-        return true;
-      }
-      throw new Error("Refresh failed");
+      await tokenManager.refreshToken();
+      await fetchUserInfo();
+      return true;
     } catch (error) {
-      console.error("Token refresh failed:", error);
+      // console.error("Token refresh failed:", error);
       clearAuth();
       navigate("/login");
       toast.error("Session expired. Please login again");
@@ -269,6 +369,106 @@ const ShopContextProvider = ({ children }) => {
 
   //#region CART MANAGENT
 
+  class CartManager {
+    constructor(backendUrl, getToken) {
+      this.backendUrl = backendUrl;
+      this.getToken = getToken;
+      this.updateQueue = [];
+      this.isProcessing = false;
+      this.retryCount = 0;
+      this.maxRetries = 2;
+    }
+
+    async queueUpdate(cartData) {
+      // Add to queue
+      this.updateQueue.push({
+        cartData,
+        timestamp: Date.now(),
+      });
+
+      // Start processing if not already running
+      if (!this.isProcessing) {
+        await this.processQueue();
+      }
+    }
+
+    async processQueue() {
+      if (this.updateQueue.length === 0) return;
+
+      this.isProcessing = true;
+
+      while (this.updateQueue.length > 0) {
+        // Get the latest cart state (most recent update)
+        const latestUpdate = this.updateQueue[this.updateQueue.length - 1];
+
+        // Clear the queue since we're sending the latest state
+        this.updateQueue = [];
+
+        try {
+          await this.sendCartUpdate(latestUpdate.cartData);
+          this.retryCount = 0; // Reset retry count on success
+        } catch (error) {
+          errorHandler.handle(error, {
+            component: "ShopContext",
+            action: "CartManaget -> processQueue",
+          });
+          // console.error("Cart update failed:", error);
+
+          // Re-queue if it failed
+          if (this.retryCount < this.maxRetries) {
+            this.updateQueue.unshift(latestUpdate);
+            this.retryCount++;
+
+            // Exponential backoff
+            const delay = Math.min(1000 * Math.pow(2, this.retryCount), 10000);
+            await new Promise((resolve) => setTimeout(resolve, delay));
+          } else {
+            // Max retries reached, notify user
+            toast.error("Failed to sync cart. Changes may be lost.");
+            this.retryCount = 0;
+          }
+        }
+      }
+
+      this.isProcessing = false;
+    }
+
+    async sendCartUpdate(cartData) {
+      const token = this.getToken();
+      if (!token) {
+        throw new Error("No authentication token");
+      }
+
+      const response = await axiosPOST(`${this.backendUrl}/api/cart/update`, {
+        cartData,
+      });
+
+      if (!response.data?.success) {
+        throw new Error("Cart update failed", {
+          message: response.data?.message,
+        });
+      }
+
+      return response.data;
+    }
+
+    // Clear queue (useful for logout)
+    clearQueue() {
+      this.updateQueue = [];
+      this.isProcessing = false;
+      this.retryCount = 0;
+    }
+
+    // Get queue status (useful for UI indicators)
+    getStatus() {
+      return {
+        pending: this.updateQueue.length,
+        isProcessing: this.isProcessing,
+        retryCount: this.retryCount,
+      };
+    }
+  }
+
   const calculateCartCount = (newCart) => {
     return Object.values(newCart).reduce(
       (total, sizes) =>
@@ -277,60 +477,68 @@ const ShopContextProvider = ({ children }) => {
     );
   };
 
-  const sendCartUpdate = useCallback(
-    debounce(async (cartData) => {
-      if (!state.token) return;
+  // const sendCartUpdate = useCallback(
+  //   debounce(async (cartData) => {
+  //     if (!state.token) return;
 
-      try {
-        await axios.post(
-          `${backendUrl}/api/cart/update`,
-          { cartData },
-          {
-            headers: { Authorization: `Bearer ${state.token}` },
-            timeout: 5000,
-          }
-        );
-      } catch (error) {
-        if (error?.response?.status === 401) {
-          await refreshToken();
-        }
-      }
-    }, 1000),
-    [state.token, backendUrl, refreshToken]
-  );
+  //     try {
+  //       await axios.post(
+  //         `${backendUrl}/api/cart/update`,
+  //         { cartData },
+  //         {
+  //           headers: { Authorization: `Bearer ${state.token}` },
+  //           timeout: 5000,
+  //         }
+  //       );
+  //     } catch (error) {
+  //       if (error?.response?.status === 401) {
+  //         await refreshToken();
+  //       }
+  //     }
+  //   }, 1000),
+  //   [state.token, backendUrl, refreshToken]
+  // );
 
   const updateCart = useCallback(
     async (updater) => {
-      const requestId = Date.now().toString();
-
       setState((prev) => {
         const newCart =
           typeof updater === "function" ? updater(prev.cartItems) : updater;
         const newCartCount = calculateCartCount(newCart);
 
+        // Update local storage
         cacheManager.set("cart", newCart);
 
-        // Queue the API call
-        requestQueue.current.set(requestId, { newCart, requestId });
+        // Queue the update to backend (non-blocking)
+        if (cartManagerRef.current && state.token) {
+          cartManagerRef.current.queueUpdate(newCart);
+        }
 
-        setTimeout(() => {
-          if (requestQueue.current.has(requestId)) {
-            sendCartUpdate(newCart);
-            requestQueue.current.delete(requestId);
-          }
-        }, 500); // Batch updates
-
-        return { ...prev, cartItems: newCart, cartCount: newCartCount };
+        return {
+          ...prev,
+          cartItems: newCart,
+          cartCount: newCartCount,
+        };
       });
     },
-    [state.token, backendUrl, sendCartUpdate]
+    [state.token]
   );
+
+  const getCartSyncStatus = useCallback(() => {
+    return (
+      cartManagerRef.current?.getStatus() || {
+        pending: 0,
+        isProcessing: false,
+        retryCount: 0,
+      }
+    );
+  }, []);
 
   const addToCart = useCallback(
     (itemId, size) => {
       if (!size) {
         toast.error("Please select a size");
-        return;
+        return false;
       }
 
       updateCart((prev) => ({
@@ -340,6 +548,8 @@ const ShopContextProvider = ({ children }) => {
           [size]: (prev[itemId]?.[size] || 0) + 1,
         },
       }));
+
+      return true;
     },
     [updateCart]
   );
@@ -382,30 +592,22 @@ const ShopContextProvider = ({ children }) => {
     updateCart({});
   }, [updateCart]);
 
-  const getUserCart = useCallback(
-    async (userToken) => {
-      try {
-        const { data } = await axios.post(
-          `${backendUrl}/api/cart/get`,
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${userToken}`,
-              "Content-Type": "application/json",
-            },
-            withCredentials: true,
-          }
-        );
+  const getUserCart = useCallback(async () => {
+    try {
+      const { data } = await axiosPOST(`${backendUrl}/api/cart/get`);
 
-        if (data.success) {
-          updateCart(data.cartData);
-        }
-      } catch (error) {
-        // toast.error("Failed to fetch user cart");
+      if (data?.success) {
+        updateCart(data.cartData);
       }
-    },
-    [backendUrl, updateCart]
-  );
+    } catch (error) {
+      errorHandler.handle(error, {
+        component: "ShopContext",
+        action: "getUserCart",
+        userId: state.user?.id,
+      });
+      toast.error("Failed to fetch cart data");
+    }
+  }, [backendUrl, updateCart]);
 
   const getCartAmount = useCallback(() => {
     return Object.entries(state.cartItems).reduce((total, [itemId, sizes]) => {
@@ -422,6 +624,7 @@ const ShopContextProvider = ({ children }) => {
   //#endregion
 
   //#region DISCOUNT MANAGENT
+
   const setDiscount = useCallback((value) => {
     setState((prev) => ({ ...prev, discount: value }));
   }, []);
@@ -440,17 +643,9 @@ const ShopContextProvider = ({ children }) => {
 
       setApplyingDiscount(true);
       try {
-        const { data } = await axios.post(
-          `${backendUrl}/api/order/verifyCode`,
-          { couponCode },
-          {
-            headers: {
-              Authorization: `Bearer ${state.token}`,
-              "Content-Type": "application/json",
-            },
-            withCredentials: true,
-          }
-        );
+        const { data } = await axiosPOST(`${backendUrl}/api/order/verifyCode`, {
+          couponCode,
+        });
 
         if (data.success && data.discount) {
           setDiscount(data.discount);
@@ -702,18 +897,22 @@ const ShopContextProvider = ({ children }) => {
       setState((prev) => ({ ...prev, loadingOrders: true }));
 
       try {
-        const response = await fetchWithRetry(
-          `${backendUrl}/api/order/userorders`,
-          {
-            method: "POST",
-            data: { page: forceRefresh ? 1 : state.currentOrderPage },
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-            withCredentials: true,
-          }
-        );
+        // const response = await fetchWithRetry(
+        //   `${backendUrl}/api/order/userorders`,
+        //   {
+        //     method: "POST",
+        //     data: { page: forceRefresh ? 1 : state.currentOrderPage },
+        //     headers: {
+        //       Authorization: `Bearer ${token}`,
+        //       "Content-Type": "application/json",
+        //     },
+        //     withCredentials: true,
+        //   }
+        // );
+
+        const response = await axiosPOST(`${backendUrl}/api/order/userorders`, {
+          data: { page: forceRefresh ? 1 : state.currentOrderPage },
+        });
 
         if (response.data?.success) {
           const orders = response.data.orders;
@@ -726,21 +925,13 @@ const ShopContextProvider = ({ children }) => {
           }));
         }
       } catch (error) {
-        // console.error(
-        //   "Order fetch error:",
-        //   error.response?.data || error.message
-        // );
+        errorHandler.handle(error, {
+          component: "ShopContext",
+          action: "fetchOrders",
+          userId: state.user?.id,
+          page: state.currentOrderPage,
+        });
         setState((prev) => ({ ...prev, loadingOrders: false }));
-
-        if (error?.status === 401) {
-          clearAuth();
-          toast.error("Session expired. Please login again");
-          navigate("/login");
-        } else {
-          toast.error(
-            error.data?.message || error?.message || "Failed to load orders"
-          );
-        }
       }
     },
     [backendUrl, state.currentOrderPage, navigate]
@@ -772,32 +963,30 @@ const ShopContextProvider = ({ children }) => {
   const login = useCallback(
     async (email, password) => {
       try {
-        const { data } = await axios.post(
+        const { data } = await axiosPOST(
           `${backendUrl}/api/auth/login`,
+          { email, password },
           {
-            email,
-            password,
-          },
-          {
-            // Prevent axios from throwing errors for 401 responses
             validateStatus: (status) => status < 500,
-            withCredentials: true,
-            headers: { "Content-Type": "application/json" },
           }
         );
+
         if (data.success) {
           persistToken(data.user.accessToken);
-          await getUserCart(data.user.accessToken);
+          await getUserCart();
           await fetchUserInfo();
           toast.success("Login successful");
-          // navigate("/");
           return true;
         } else {
           if (data?.message) toast.error(data.message);
+          return false;
         }
       } catch (error) {
-        console.log(error);
-        toast.error(error?.message || "Login failed");
+        errorHandler.handle(error, {
+          component: "ShopContext",
+          action: "login",
+          email, // Don't include password!
+        });
         return false;
       }
     },
@@ -807,7 +996,7 @@ const ShopContextProvider = ({ children }) => {
   const register = useCallback(
     async (name, email, password) => {
       try {
-        const { data } = await axios.post(
+        const { data } = await axiosPOST(
           `${backendUrl}/api/auth/register`,
           {
             name,
@@ -817,13 +1006,11 @@ const ShopContextProvider = ({ children }) => {
           {
             // Prevent axios from throwing errors for 401 responses
             validateStatus: (status) => status < 500,
-            withCredentials: true,
-            headers: { "Content-Type": "application/json" },
           }
         );
-        if (data.success) {
+        if (data?.success) {
           persistToken(data.user.accessToken);
-          await getUserCart(data.user.accessToken);
+          await getUserCart();
           await fetchUserInfo();
           toast.success("Sign up successful");
           // navigate('/');
@@ -832,8 +1019,11 @@ const ShopContextProvider = ({ children }) => {
           if (data?.message) toast.error(data.message);
         }
       } catch (error) {
-        console.log(error);
-        toast.error(error?.message || "Sign up failed");
+        errorHandler.handle(error, {
+          component: "ShopContext",
+          action: "signup",
+          email,
+        });
         return false;
       }
     },
@@ -843,20 +1033,17 @@ const ShopContextProvider = ({ children }) => {
   const googleLogin = useCallback(
     async (googleData) => {
       try {
-        const { data } = await axios.post(
+        const { data } = await axiosPOST(
           `${backendUrl}/api/auth/google`,
           JSON.stringify(googleData),
           {
-            // Prevent axios from throwing errors for 401 responses
             validateStatus: (status) => status < 500,
-            withCredentials: true,
-            headers: { "Content-Type": "application/json" },
           }
         );
 
-        if (data.success && data.user.accessToken) {
+        if (data?.success && data?.user?.accessToken) {
           persistToken(data.user.accessToken);
-          await getUserCart(data.user.accessToken);
+          await getUserCart();
           await fetchUserInfo();
           toast.success("Login successful");
           // navigate("/");
@@ -865,8 +1052,10 @@ const ShopContextProvider = ({ children }) => {
           if (data?.message) toast.error(data.message);
         }
       } catch (error) {
-        console.log(error);
-        toast.error(error?.message || "Login failed");
+        errorHandler.handle(error, {
+          component: "ShopContext",
+          action: "googleLogin",
+        });
         return false;
       }
     },
@@ -875,29 +1064,26 @@ const ShopContextProvider = ({ children }) => {
 
   const logout = useCallback(async () => {
     try {
-      const response = await axios.post(
+      await axiosPOST(
         `${backendUrl}/api/auth/logout`,
         {},
         {
-          // Prevent axios from throwing errors for 401 responses
           validateStatus: (status) => status < 500,
-          withCredentials: true,
         }
       );
 
-      if (response.status == 204) {
-        clearAuth();
-        // clearCart();
-        clearOrders();
-        // navigate("/");
-        window.location.href = "/";
-        toast.success("Logged out successfully");
-      }
+      // Clear cart manager queue
+      cartManagerRef.current?.clearQueue();
+
+      clearAuth();
+      clearOrders();
+      window.location.href = "/";
+      toast.success("Logged out successfully");
     } catch (error) {
       toast.error("Logout failed");
       return false;
     }
-  }, [clearAuth, navigate, clearOrders]);
+  }, [clearAuth, clearOrders, backendUrl]);
 
   //#endregion
 
@@ -923,8 +1109,15 @@ const ShopContextProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
+    cartManagerRef.current = new CartManager(
+      backendUrl,
+      () => cacheManager.get("accessToken") // Get fresh token
+    );
+  }, [backendUrl]);
+
+  useEffect(() => {
     return () => {
-      requestQueue.current.clear();
+      cartManagerRef?.current.clearQueue();
     };
   }, []);
 
@@ -965,6 +1158,7 @@ const ShopContextProvider = ({ children }) => {
       refreshOrders,
       getOrderById,
       updateFilters,
+      getCartSyncStatus,
     }),
     [
       state,
@@ -994,6 +1188,7 @@ const ShopContextProvider = ({ children }) => {
       refreshOrders,
       getOrderById,
       updateFilters,
+      getCartSyncStatus,
     ]
   );
 

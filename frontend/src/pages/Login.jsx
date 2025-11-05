@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { ShopContext } from "../context/ShopContext";
-import { toast } from "react-toastify";
+// import { toast } from "sonner";
 // import Loader from "../components/CompLoader";
 import GoogleLoginButton from "../components/GoogleLoginButton";
 import { cn } from "@/lib/utils";
@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
+import errorHandler from "../lib/errorHandler";
 
 const authSchema = z
   .object({
@@ -91,11 +93,11 @@ const Login = () => {
         await login(data.email, data.password);
       }
     } catch (error) {
-      // toast.error("Auth error:", error.response?.data.message);
-      const message =
-        // error.response?.data?.message ||
-        !isLogin ? "Registration failed" : "Login failed";
-      toast.error(message);
+      errorHandler.handle(error, {
+        component: "Login",
+        action: isLogin ? "login" : "signup",
+        email: data.email,
+      });
     } finally {
       setLoading(false);
     }
@@ -205,9 +207,9 @@ const Login = () => {
                             <button
                               href="#"
                               className="ml-auto text-sm underline-offset-4 hover:underline"
-                              onClick={() =>
-                                toast.info("Password reset under development")
-                              }
+                              // onClick={() =>
+                              //   toast.info("Password reset under development")
+                              // }
                             >
                               Forgot your password?
                             </button>
@@ -253,7 +255,15 @@ const Login = () => {
                         className="w-full"
                         disabled={loading}
                       >
-                        {loading ? "Loading..." : isLogin ? "Login" : "Sign up"}
+                        {loading ? (
+                          <>
+                            <Spinner /> Loading...
+                          </>
+                        ) : isLogin ? (
+                          "Login"
+                        ) : (
+                          "Sign up"
+                        )}
                       </Button>
                     </div>
                   </form>

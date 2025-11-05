@@ -1,18 +1,31 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { ShopContext } from "../context/ShopContext";
-import Title from "../components/Title";
-// import axios from "axios";
-import { assets } from "../assets/assets";
-import SmallNavBar from "../components/SmallNavBar";
-import Loader from "../components/CompLoader";
-// import { toast } from "react-toastify";
+
 import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from "@/components/ui/tabs";
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Truck,
   PackageCheck,
-  ArrowRight,
   CircleAlert,
   CircleCheck,
   Ban,
 } from "lucide-react";
+import Loader from "../components/CompLoader";
+import SmallNavBar from "../components/SmallNavBar";
+import { assets } from "../assets/assets";
 
 const Orders = () => {
   const {
@@ -20,9 +33,8 @@ const Orders = () => {
     loadingOrders,
     fetchOrders,
     currency,
-    navigate,
-    refreshOrders,
     token,
+    navigate,
   } = useContext(ShopContext);
 
   const [initialLoad, setInitialLoad] = useState(true);
@@ -36,252 +48,166 @@ const Orders = () => {
     } else {
       navigate("/login");
     }
-  }, [token, fetchOrders, navigate, initialLoad]); // Removed orders.length from dependencies
+  }, [token, fetchOrders, navigate, initialLoad]);
 
-  if (loadingOrders && orders.length === 0) {
-    return <Loader />;
-  }
+  if (loadingOrders && orders.length === 0) return <Loader />;
+
+  const filterOrders = (status) => {
+    switch (status) {
+      case "onShipping":
+        return orders.filter(
+          (o) => o.status !== "Delivered" && o.status !== "Cancelled"
+        );
+      case "arrived":
+        return orders.filter((o) => o.status === "Delivered");
+      case "cancelled":
+        return orders.filter((o) => o.status === "Cancelled");
+      default:
+        return orders;
+    }
+  };
 
   return (
-    <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
+    <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw] pb-10">
       <SmallNavBar navs={["Orders"]} />
+      <div className="border-t pt-6">
+        <h2 className="text-2xl font-semibold mb-6">My Orders</h2>
 
-      <div className="border-t pt-7">
-        <div className="text-2xl">
-          <Title text1={"MY"} text2={"ORDERS"} />
-        </div>
+        {/* Tabs */}
+        <Tabs defaultValue="onShipping" className="w-full">
+          <TabsList className="flex justify-center mb-6 bg-muted/30 rounded-full w-fit mx-auto">
+            <TabsTrigger
+              value="onShipping"
+              className="data-[state=active]:bg-black data-[state=active]:text-white rounded-full"
+            >
+              On Shipping
+            </TabsTrigger>
+            <TabsTrigger
+              value="arrived"
+              className="data-[state=active]:bg-black data-[state=active]:text-white rounded-full"
+            >
+              Arrived
+            </TabsTrigger>
+            <TabsTrigger
+              value="cancelled"
+              className="data-[state=active]:bg-black data-[state=active]:text-white rounded-full"
+            >
+              Cancelled
+            </TabsTrigger>
+          </TabsList>
 
-        {orders?.length === 0 ? (
-          <div className="w-full text-center py-10 text-gray-500">
-            No orders found, Keep Shoping...
-          </div>
-        ) : (
-          <div className="flex flex-col-reverse">
-            {orders?.map((order, index) => (
-              <div
-                key={index}
-                className="grid max-md:grid-cols-[1fr_1fr] md:grid-cols-[0.3fr_0.8fr_0.8fr_1fr_0.8fr] gap-4 items-start border-b-2 border-gray-200 py-5 md:py-8 text-xs text-gray-700 bg-white"
-              >
-                {/* ------------ */}
-                <PackageCheck className="max-md:hidden size-12 self-start" />
-                {/* ------------ */}
-                <div>
-                  {order?.items?.map((item, i) => (
-                    <p className="text-xs md:text-sm text-gray-700" key={i}>
-                      <span className="truncate">{item.name}</span> x{" "}
-                      {item.quantity}{" "}
-                      <span className="px-1 py-0.5 mx-1 rounded bg-gray-100">
-                        {item.size}
-                      </span>
-                      <span className="font-medium">
-                        {currency}
-                        {item.price}
-                      </span>
-                      {i < order?.items?.length - 1 ? "," : ""}
+          {["onShipping", "arrived", "cancelled"].map((tab) => (
+            <TabsContent key={tab} value={tab}>
+              <ScrollArea className="h-[70vh] pr-2">
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filterOrders(tab).length === 0 ? (
+                    <p className="text-center text-muted-foreground py-10 col-span-full">
+                      No orders found.
                     </p>
-                  ))}
-                </div>
-                {/* ------------ */}
-                <div>
-                  <div className="flex items-start flex-col text-xs md:text-md text-gray-700">
-                    <p className="">
-                      Items :{" "}
-                      <span className="text-gray-500">
-                        {order?.items?.length}
-                      </span>
-                    </p>
-                    <p className="text-xs sm:text-[15px] my-2">
-                      Amount:{" "}
-                      <span className="font-bold">
-                        {currency}
-                        {order.amount}
-                      </span>
-                    </p>
-                    <p className="">
-                      Date:{" "}
-                      <span className="text-gray-500">
-                        {new Date(order.date).toDateString()}
-                      </span>
-                    </p>
-                    <p className="">
-                      Payment:{" "}
-                      <span className="text-gray-500">
-                        {order.paymentMethod}
-                      </span>
-                    </p>
-                  </div>
-                </div>
-                {/* ------------------- */}
-                <div
-                  className="flex items-center flex-col text-xs gap-2 border p-2 max-md:col-span-2 font-medium rounded-sm hover:bg-gray-50 active:bg-gray-100 cursor-default"
-                  onClick={() => {
-                    if (
-                      !order.paymentScreenshot ||
-                      (order.isCustomizable && !order.customDesignImage)
-                    ) {
-                      navigate(`/payment/${order._id}`);
-                    }
-                  }}
-                >
-                  <div className="w-full flex items-center justify-between gap-2">
-                    <div className="w-full flex flex-1 items-center justify-start gap-2">
-                      {order.payment === 1 ? (
-                        <>
-                          <img
-                            src={assets.ok_icon}
-                            alt="ok"
-                            width={20}
-                            height={20}
-                            loading="lazy"
-                          />
-                          Payment success
-                        </>
-                      ) : order.payment === -1 ? (
-                        <>
-                          <img
-                            src={assets.process_icon}
-                            alt="processing"
-                            width={20}
-                            height={20}
-                            loading="lazy"
-                          />
-                          Payment Processing
-                        </>
-                      ) : (
-                        <>
-                          <Ban className="w-4 text-gray-400 shrink-0" />
-                          Payment failed
-                        </>
-                      )}
-                    </div>
-                    {(!order.paymentScreenshot ||
-                      (order.isCustomizable && !order.customDesignImage)) && (
-                      <div>
-                        <ArrowRight className="w-5 text-gray-400 shrink-0" />
-                      </div>
-                    )}
-                  </div>
+                  ) : (
+                    filterOrders(tab).map((order, idx) => (
+                      <Card
+                        key={idx}
+                        className="rounded-2xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
+                      >
+                        <CardHeader className="pb-3 flex flex-col gap-2">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <p className="text-xs text-muted-foreground">
+                                Order ID
+                              </p>
+                              <p className="font-semibold">
+                                #{order._id.slice(-9)}
+                              </p>
+                            </div>
+                            <StatusBadge status={order.status} />
+                          </div>
+                          <div className="text-xs text-muted-foreground flex justify-between items-center">
+                            <span>{order.from || "Warehouse"}</span>
+                            <Truck className="w-4 h-4 text-gray-400" />
+                            <span>{order.to || "Your Address"}</span>
+                          </div>
+                        </CardHeader>
 
-                  <div className="w-full flex items-center justify-between gap-3">
-                    {order.paymentMethod === "Google Pay" ? (
-                      <div className="w-full group flex items-center flex-col gap-2 overflow-visible sticky z-0 border p-2 text-xs font-medium rounded-sm">
-                        {order.paymentScreenshot ? (
-                          <span className="flex items-center gap-2">
-                            <CircleCheck className="w-4 text-gray-400 shrink-0" />
-                            Srceenshot uploaded
-                          </span>
-                        ) : (
-                          <span className="flex items-center gap-2">
-                            <CircleAlert className="w-4 text-gray-400 shrink-0" />
-                            Srceenshot not uploaded
-                          </span>
-                        )}
-                      </div>
-                    ) : (
-                      <></>
-                    )}
-                    {order.isCustomizable && (
-                      <div className="w-full group flex items-center flex-col gap-2 overflow-visible sticky z-0 border p-2 text-xs font-medium rounded-sm">
-                        {order.customDesignImage ? (
-                          <span className="flex items-center gap-2">
-                            <CircleCheck className="w-4 text-gray-400 shrink-0" />
-                            Design uploaded
-                          </span>
-                        ) : (
-                          <span className="flex items-center gap-2">
-                            <CircleAlert className="w-4 text-gray-400 shrink-0" />
-                            Design not uploaded
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                        <CardContent className="space-y-3">
+                          {order.items.map((item, i) => (
+                            <div
+                              key={i}
+                              className="flex items-center gap-3 border rounded-md p-2"
+                            >
+                              <img
+                                src={item.image[0]}
+                                alt={item.name}
+                                className="w-14 h-14 object-cover rounded-md"
+                              />
+                              <div>
+                                <p className="text-sm font-medium truncate">
+                                  {item.name}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  Size: {item.size} × {item.quantity}
+                                </p>
+                                <p className="text-sm font-semibold">
+                                  {currency}
+                                  {item.price}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </CardContent>
+
+                        <CardFooter className="flex justify-between items-center border-t pt-3">
+                          <p className="text-sm">
+                            Total:{" "}
+                            <span className="font-semibold">
+                              {currency}
+                              {order.amount}
+                            </span>
+                          </p>
+                          <Button
+                            variant="default"
+                            size="sm"
+                            className="rounded-full px-4"
+                            onClick={() => navigate(`/order/${order._id}`)}
+                          >
+                            Details
+                          </Button>
+                        </CardFooter>
+                      </Card>
+                    ))
+                  )}
                 </div>
-                {/* ------------ */}
-                <div className="flex flex-col items-center justify-evenly max-md:gap-3 gap-5 max-md:col-span-2">
-                  <div className="w-full md:w-[70%] group flex items-center flex-col gap-2 overflow-visible sticky z-0 border pl-3 pr-4 py-2 text-xs font-medium rounded-sm hover:bg-gray-100 cursor-default">
-                    Status
-                    <div className="group-hover:flex hidden absolute -top-24 -right-3 md:-top-24  md:-left-20 bg-white w-fit items-center flex-col gap-2 z-10 border pl-3 pr-4 py-2 text-xs font-medium rounded-sm">
-                      <span className="z-20 absolute top-[15%] left-[16.5px] w-1 h-[70%] align-middle border-gray-300 border-dashed border-2 border-y-0 border-r-0"></span>
-                      <p className="flex z-30 items-center gap-2 w-full">
-                        <img
-                          src={
-                            order.payment === 1 ||
-                            order.status === "Shipped" ||
-                            order.status === "Out for delivery" ||
-                            order.status === "Delivered"
-                              ? assets.ok_icon
-                              : assets.round_icon
-                          }
-                          alt="ok"
-                          width={12}
-                          height={12}
-                          loading="lazy"
-                        />
-                        Order placed
-                      </p>
-                      <p className="flex items-center gap-2 w-full z-30">
-                        <img
-                          src={
-                            order.status === "Shipped" ||
-                            order.status === "Out for delivery" ||
-                            order.status === "Delivered"
-                              ? assets.ok_icon
-                              : assets.round_icon
-                          }
-                          alt="ok"
-                          width={12}
-                          height={12}
-                          loading="lazy"
-                        />
-                        Shipped
-                      </p>
-                      <p className="flex items-center gap-2 w-full z-30">
-                        <img
-                          src={
-                            order.status === "Out for delivery" ||
-                            order.status === "Delivered"
-                              ? assets.ok_icon
-                              : assets.round_icon
-                          }
-                          alt="ok"
-                          width={12}
-                          height={12}
-                          loading="lazy"
-                        />
-                        Out for delivery
-                      </p>
-                      <p className="flex items-center gap-2 w-full z-30">
-                        <img
-                          src={
-                            order.status === "Delivered"
-                              ? assets.ok_icon
-                              : assets.round_icon
-                          }
-                          alt="ok"
-                          width={12}
-                          height={12}
-                          loading="lazy"
-                        />
-                        Delivered
-                      </p>
-                    </div>
-                  </div>
-                  {/* ------------ */}
-                  <button
-                    onClick={() => refreshOrders()}
-                    className="w-full md:w-[70%] border px-4 py-2 text-xs font-medium rounded-sm hover:bg-gray-100 active:bg-gray-200 cursor-default"
-                  >
-                    Track Order
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+              </ScrollArea>
+            </TabsContent>
+          ))}
+        </Tabs>
       </div>
     </div>
   );
+};
+
+// 🏷️ Status Badge Component
+const StatusBadge = ({ status }) => {
+  switch (status) {
+    case "Delivered":
+      return (
+        <Badge variant="outline" className="bg-green-100 text-green-700">
+          <CircleCheck className="w-3 h-3 mr-1" /> Delivered
+        </Badge>
+      );
+    case "Cancelled":
+      return (
+        <Badge variant="outline" className="bg-red-100 text-red-700">
+          <Ban className="w-3 h-3 mr-1" /> Cancelled
+        </Badge>
+      );
+    default:
+      return (
+        <Badge variant="outline" className="bg-blue-100 text-blue-700">
+          <PackageCheck className="w-3 h-3 mr-1" /> On Shipping
+        </Badge>
+      );
+  }
 };
 
 export default Orders;

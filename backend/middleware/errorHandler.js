@@ -1,15 +1,24 @@
+// ✅ Enhanced error handler
 export const errorHandler = (err, req, res, next) => {
-  // Log the error with more context
-  console.error(`[${new Date().toISOString()}] ${req.method} ${req.path}`, {
-    error: err.stack,
-    body: req.body,
-    params: req.params,
-    query: req.query,
-    user: req.user?.id,
-  });
+  // Don't log sensitive data in production
+  if (process.env.NODE_ENV !== "production") {
+    console.error(`[${new Date().toISOString()}] ${req.method} ${req.path}`, {
+      error: err.stack,
+      body: req.body,
+      user: req.user?.id,
+    });
+  } else {
+    // Production: Log to monitoring service (e.g., Sentry)
+    console.error("Error:", {
+      message: err.message,
+      path: req.path,
+      userId: req.user?.id,
+      timestamp: new Date().toISOString(),
+    });
+  }
 
-  // Create audit log for security-related errors
-  if ([401, 403, 429].includes(err.statusCode || err.status)) {
+  // Security audit logging
+  if ([401, 403].includes(err.statusCode)) {
     createAuditLog({
       action: "SECURITY_ERROR",
       userId: req.user?._id,
@@ -17,59 +26,23 @@ export const errorHandler = (err, req, res, next) => {
         error: err.message,
         path: req.path,
         ip: req.ip,
+        userAgent: req.headers["user-agent"],
       },
     }).catch(console.error);
   }
 
-  // Handle different error types
-  let response = {
-    code: "SERVER_ERROR",
-    message: "Something went wrong",
+  // Structured error responses
+  const errorResponse = {
+    code: err.code || "SERVER_ERROR",
+    message: process.env.NODE_ENV === "production" ? err.message : err.stack, // Only show stack in dev
+    timestamp: new Date().toISOString(),
+    path: req.path,
   };
-  let statusCode = 500;
 
-  if (err.name === "ValidationError") {
-    statusCode = 400;
-    response = {
-      code: "VALIDATION_ERROR",
-      message: "Validation failed",
-      errors: Object.entries(err.errors).map(([field, details]) => ({
-        field,
-        message: details.message,
-      })),
-    };
-  } else if (err.code === 11000) {
-    statusCode = 409;
-    const field = Object.keys(err.keyValue)[0];
-    response = {
-      code: "DUPLICATE_ENTRY",
-      message: `${field} already exists`,
-      field,
-    };
-  } else if (err.name === "JsonWebTokenError") {
-    statusCode = 401;
-    response = {
-      code: "INVALID_TOKEN",
-      message: "Invalid authentication token",
-    };
-  } else if (err.name === "TokenExpiredError") {
-    statusCode = 401;
-    response = {
-      code: "TOKEN_EXPIRED",
-      message: "Token expired. Please refresh",
-    };
-  } else if (err.statusCode && err.statusCode >= 400 && err.statusCode < 500) {
-    statusCode = err.statusCode;
-    response = {
-      code: err.code || "CLIENT_ERROR",
-      message: err.message,
-    };
+  // Don't expose internal errors in production
+  if (process.env.NODE_ENV === "production" && !err.isOperational) {
+    errorResponse.message = "An unexpected error occurred";
   }
 
-  // In development, include stack trace
-  if (process.env.NODE_ENV === "development") {
-    response.stack = err.stack;
-  }
-
-  res.status(statusCode).json(response);
+  res.status(err.statusCode || 500).json(errorResponse);
 };

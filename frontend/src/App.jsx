@@ -2,8 +2,6 @@ import { Suspense, lazy } from "react";
 import { Routes, Route } from "react-router-dom";
 import { MainLayout, AuthLayout } from "./layouts/layout";
 import Loading from "./components/Loading";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import NotFound from "./pages/NotFound";
 
 const App = () => {
@@ -21,7 +19,6 @@ const App = () => {
 
   return (
     <Suspense fallback={<Loading />}>
-      <ToastContainer />
       <Routes>
         {/* Routes with Navbar & Footer */}
         <Route

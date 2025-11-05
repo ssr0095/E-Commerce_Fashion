@@ -258,12 +258,11 @@ const Orders = ({ token, setToken }) => {
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Order Placed">Order Placed</SelectItem>
-                      <SelectItem value="Shipped">Shipped</SelectItem>
-                      <SelectItem value="Out for delivery">
-                        Out for delivery
+                      <SelectItem value="On Shipping">
+                        On Shipping
                       </SelectItem>
                       <SelectItem value="Delivered">Delivered</SelectItem>
+                      <SelectItem value="Cancelled">Cancelled</SelectItem>
                     </SelectContent>
                   </Select>
 

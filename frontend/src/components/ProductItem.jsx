@@ -49,7 +49,7 @@ const ProductItem = ({
         <div className="flex-1 flex items-center gap-3">
           <p className="line-through text-md font-medium">
             {currency}
-            {price + Math.ceil((discount / 100) * price)}
+            {Math.ceil((price / (100 - discount)) * 100)}
           </p>
           <p className="text-lg text-gray-800 font-semibold">
             {currency}

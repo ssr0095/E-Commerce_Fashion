@@ -2,7 +2,7 @@ import { useContext } from "react";
 import { ShopContext } from "../context/ShopContext";
 import { useSearchParams } from "react-router-dom";
 import { useEffect } from "react";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import axios from "axios";
 
 const Verify = () => {

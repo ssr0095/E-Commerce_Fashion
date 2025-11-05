@@ -198,8 +198,8 @@ const login = async (req, res, next) => {
     res
       .cookie("refreshToken", refreshToken, {
         httpOnly: true,
-        secure: false, //process.env.NODE_ENV === "production",
-        sameSite: "Lax",
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "Strict" : "Lax",
         maxAge: new Date(
           Date.now() +
             (parseInt(process.env.REFRESH_TOKEN_MAX_AGE) ||
@@ -279,7 +279,7 @@ const register = async (req, res, next) => {
       .cookie("refreshToken", refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "Strict",
+        sameSite: process.env.NODE_ENV === "production" ? "Strict" : "Lax",
         maxAge: new Date(
           Date.now() +
             (parseInt(process.env.REFRESH_TOKEN_MAX_AGE) ||
@@ -304,65 +304,108 @@ const register = async (req, res, next) => {
 
 const refreshToken = async (req, res) => {
   try {
-    // First try to get refreshToken from cookies
     const refreshToken = req.cookies.refreshToken;
-    console.log(refreshToken);
+
     if (!refreshToken) {
-      return res.status(400).json({ message: "Refresh token required" });
+      return res.status(401).json({
+        code: "REFRESH_TOKEN_REQUIRED",
+        message: "Refresh token required",
+      });
     }
 
-    const decoded = tokenService.verifyRefreshToken(refreshToken);
+    let decoded;
+    try {
+      decoded = tokenService.verifyRefreshToken(refreshToken);
+    } catch (error) {
+      // Clear invalid refresh token
+      res.clearCookie("refreshToken");
+      return res.status(401).json({
+        code: "INVALID_REFRESH_TOKEN",
+        message: "Invalid refresh token",
+      });
+    }
 
-    const user = await User.findById(decoded?.id).select("+refreshTokens");
+    const user = await User.findById(decoded.id).select("+refreshTokens");
 
-    if (!user || !user.refreshTokens?.some((rt) => rt.token === refreshToken)) {
-      return res.status(403).json({ message: "Invalid refresh token" });
+    if (!user) {
+      res.clearCookie("refreshToken");
+      return res.status(401).json({
+        code: "USER_NOT_FOUND",
+        message: "User not found",
+      });
+    }
+
+    // Find the specific refresh token
+    const existingTokenIndex = user.refreshTokens.findIndex(
+      (rt) => rt.token === refreshToken
+    );
+
+    if (existingTokenIndex === -1) {
+      // Possible token theft - clear all refresh tokens
+      user.refreshTokens = [];
+      await user.save();
+      res.clearCookie("refreshToken");
+      return res.status(401).json({
+        code: "TOKEN_REVOKED",
+        message: "Security violation detected",
+      });
+    }
+
+    const existingToken = user.refreshTokens[existingTokenIndex];
+
+    // Check if refresh token expired
+    if (existingToken.expiresAt < new Date()) {
+      user.refreshTokens.splice(existingTokenIndex, 1);
+      await user.save();
+      res.clearCookie("refreshToken");
+      return res.status(401).json({
+        code: "REFRESH_TOKEN_EXPIRED",
+        message: "Refresh token expired",
+      });
     }
 
     // Generate new tokens
-    const accessToken = tokenService.generateAccessToken(user);
+    const newAccessToken = tokenService.generateAccessToken(user);
     const newRefreshToken = tokenService.generateRefreshToken(user);
 
-    // Update refresh token list (remove old, add new)
-    user.refreshTokens = [
-      ...user.refreshTokens.filter((rt) => rt.token !== refreshToken),
-      {
-        token: newRefreshToken, // Use the new token
-        provider: "credentials",
-        expiresAt: new Date(
-          Date.now() +
-            (parseInt(process.env.REFRESH_TOKEN_MAX_AGE) ||
-              7 * 24 * 3600 * 1000)
-        ),
-        deviceInfo: req.headers["user-agent"],
-        ipAddress: req.ip,
-      },
-    ];
+    // Replace old refresh token with new one (rotation)
+    user.refreshTokens[existingTokenIndex] = {
+      token: newRefreshToken,
+      provider: existingToken.provider,
+      expiresAt: new Date(
+        Date.now() +
+          (parseInt(process.env.REFRESH_TOKEN_MAX_AGE) || 7 * 24 * 3600 * 1000)
+      ),
+      deviceInfo: req.headers["user-agent"],
+      ipAddress: req.ip,
+      createdAt: new Date(),
+    };
+
+    // Clean up expired tokens
+    user.cleanExpiredRefreshTokens();
 
     await user.save();
 
-    // Set new cookies
-    res
-      .cookie("refreshToken", newRefreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "Strict",
-        maxAge: new Date(
-          Date.now() +
-            (parseInt(process.env.REFRESH_TOKEN_MAX_AGE) ||
-              7 * 24 * 3600 * 1000)
-        ),
-      })
-      .status(200)
-      .json({
-        success: true,
-        accessToken,
-      });
+    // Set new refresh token cookie
+    res.cookie("refreshToken", newRefreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "Strict" : "Lax",
+      maxAge:
+        parseInt(process.env.REFRESH_TOKEN_MAX_AGE) || 7 * 24 * 3600 * 1000,
+    });
+
+    res.json({
+      success: true,
+      accessToken: newAccessToken,
+    });
   } catch (error) {
-    if (error.name === "TokenExpiredError") {
-      return res.status(401).json({ message: "Refresh token expired" });
-    }
-    res.status(403).json({ message: "Invalid token" });
+    console.error("Refresh token error:", error);
+    res.clearCookie("refreshToken");
+    res.status(500).json({
+      code: "SERVER_ERROR",
+      message: "Internal server error",
+    });
   }
 };
 
@@ -436,17 +479,6 @@ const verifyToken = async (req, res) => {
     res.status(401).json({ valid: false });
   }
 };
-// Clean Expired tokens while login/logout/refresh
-// const cleanExpiredRefreshToken = (refreshTokens) => {
-//   return refreshTokens.filter(rt => {
-//     try {
-//       const { expiresAt } =tokenService.verifyRefreshToken(rt.token);
-//       return Date.now() < expiresAt * 1000;
-//     } catch (err) {
-//       return false; // Remove malformed tokens
-//     }
-//   })
-// }
 
 export {
   login,

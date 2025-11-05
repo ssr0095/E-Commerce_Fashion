@@ -10,14 +10,23 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { Spinner } from "@/components/ui/spinner";
 
 const LatestCollection = () => {
-  const { latestProducts } = useContext(ShopContext);
+  const { latestProducts, loading } = useContext(ShopContext);
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
     setProducts(latestProducts.slice(0, 10));
   }, [latestProducts]);
+
+  // if (loading) {
+  //   return (
+  //     <div className="flex justify-center items-center min-h-[50vh]">
+  //       <Spinner className="size-12" />
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="px-2 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
@@ -30,46 +39,39 @@ const LatestCollection = () => {
           </p>
         </div>
 
-        {/* Rendering Products */}
-        <Carousel height={500} className="w-full">
-          <CarouselContent className="-ml-1">
-            {products?.map((item, index) => (
-              <CarouselItem
-                key={index}
-                className="basis-1/2 md:basis-1/3 lg:basis-1/5"
-              >
-                <ProductItem
-                  key={index}
-                  id={item._id}
-                  slug={item.slug}
-                  image={item.image}
-                  name={item.name}
-                  price={item.price}
-                  tag={item.tag}
-                  description={item.description}
-                  discount={item.discount}
-                />
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious className="max-sm:hidden" />
-          <CarouselNext className="max-sm:hidden" />
-        </Carousel>
-
-        {/* <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 max-sm:gap-2 gap-4 max-sm:gap-y-4 gap-y-6">
-          {latestProducts.map((item, index) => (
-            <ProductItem
-              key={index}
-              id={item._id}
-              image={item.image}
-              name={item.name}
-              price={item.price}
-              tag={item.tag}
-              description={item.description}
-            />
-          ))}
-        </div> */}
-        <ShopMore />
+        {products.length > 0 ? (
+          <>
+            <Carousel height={500} className="w-full">
+              <CarouselContent className="-ml-1">
+                {products.map((item, index) => (
+                  <CarouselItem
+                    key={index}
+                    className="basis-1/2 md:basis-1/3 lg:basis-1/5"
+                  >
+                    <ProductItem
+                      key={index}
+                      id={item._id}
+                      slug={item.slug}
+                      image={item.image}
+                      name={item.name}
+                      price={item.price}
+                      tag={item.tag}
+                      description={item.description}
+                      discount={item.discount}
+                    />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="max-sm:hidden" />
+              <CarouselNext className="max-sm:hidden" />
+            </Carousel>
+            <ShopMore />
+          </>
+        ) : (
+          <div className="w-full flex items-center justify-center py-10 text-gray-500">
+            {loading ? <Spinner className="size-9" /> : "No products found."}
+          </div>
+        )}
       </div>
     </div>
   );

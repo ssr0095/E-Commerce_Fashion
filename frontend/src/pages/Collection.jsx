@@ -26,14 +26,16 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-  PaginationEllipsis,
 } from "@/components/ui/pagination";
+import { Spinner } from "@/components/ui/spinner";
 import { Helmet } from "react-helmet-async";
+import { useLocation } from "react-router-dom";
 
 const Collection = () => {
   const {
     products,
-    hasMore,
+    // hasMore,
+    search,
     getProductsData,
     filters,
     filterOptions,
@@ -49,10 +51,11 @@ const Collection = () => {
     subCategory: [],
     theme: [],
     sortBy: "newest",
+    search: "",
   });
 
-  // Initialize pending filters when component mounts
   useEffect(() => {
+    // const searchValue = queryParams.get("search");
     setPendingFilters(filters);
   }, []);
 
@@ -94,6 +97,7 @@ const Collection = () => {
 
   // Apply filters when submit button is clicked
   const applyFilters = async () => {
+    setPendingFilters((prev) => ({ ...prev, search: search }));
     await updateFilters(pendingFilters);
   };
 
@@ -472,42 +476,52 @@ const Collection = () => {
           </div>
 
           {/* Loading state */}
-          {loading && (
-            <div className="flex justify-center items-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+          {loading ? (
+            <div className="flex justify-center items-center min-h-[50vh]">
+              <Spinner className="size-12" />
             </div>
-          )}
-
-          {/* Products List */}
-          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2 gap-y-4">
-            {products.length > 0 ? (
-              products.map((item, index) => (
-                <ProductItem
-                  key={`${item._id}_${index}`}
-                  name={item.name}
-                  id={item._id}
-                  slug={item.slug}
-                  price={item.price}
-                  image={item.image}
-                  tag={item.tag}
-                  description={item.description}
-                  discount={item.discount}
-                />
-              ))
-            ) : (
-              <div className="col-span-full text-center py-10 text-gray-500">
-                {loading ? "Loading products..." : "No products found."}
+          ) : (
+            <>
+              {/* Products List */}
+              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2 gap-y-4">
+                {products?.length > 0 ? (
+                  products.map((item, index) => (
+                    <ProductItem
+                      key={`${item._id}_${index}`}
+                      name={item.name}
+                      id={item._id}
+                      slug={item.slug}
+                      price={item.price}
+                      image={item.image}
+                      tag={item.tag}
+                      description={item.description}
+                      discount={item.discount}
+                    />
+                  ))
+                ) : (
+                  <div className="col-span-full text-center py-10 text-gray-500">
+                    {loading ? (
+                      <>
+                        <Spinner /> Loading products..."
+                      </>
+                    ) : (
+                      "No products found."
+                    )}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
 
-          {/* Pagination Component */}
-          {totalPages > 1 && (
-            <div className="flex justify-center mt-20">
-              <Pagination>
-                <PaginationContent>{renderPaginationItems()}</PaginationContent>
-              </Pagination>
-            </div>
+              {/* Pagination Component */}
+              {totalPages > 1 && (
+                <div className="flex justify-center mt-20">
+                  <Pagination>
+                    <PaginationContent>
+                      {renderPaginationItems()}
+                    </PaginationContent>
+                  </Pagination>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

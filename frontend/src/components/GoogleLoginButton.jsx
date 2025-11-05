@@ -3,8 +3,8 @@
 import { ShopContext } from "@/context/ShopContext";
 import axios from "axios";
 import { useContext, useEffect, useState } from "react";
-import { toast } from "react-toastify";
-import { assets } from "../assets/assets";
+import { toast } from "sonner";
+// import { assets } from "../assets/assets";
 import { Button } from "@/components/ui/button";
 // import { useRouter } from "next/navigation";
 // declare global {
@@ -85,6 +85,11 @@ export default function GoogleLoginButton({ isLogin }) {
               // Send to your backend for verification and token generation
               // or use navigate
             } catch (error) {
+              errorHandler.handle(error, {
+                component: "GoogleLoginButton",
+                action: isLogin ? "login" : "signup",
+                // email: userInfo.data.email,
+              });
               console.error("Error in Google auth flow:", error);
             } finally {
               setLoading(false);
