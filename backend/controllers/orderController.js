@@ -187,7 +187,7 @@ const placeOrderRazorpay = async (req, res) => {
     if (!amount || amount < 1) {
       return res.status(400).json({
         success: false,
-        message: "Invalid amount for payment"
+        message: "Invalid amount for payment",
       });
     }
 
@@ -212,34 +212,33 @@ const placeOrderRazorpay = async (req, res) => {
         orderId: newOrder._id.toString(),
         userId: userId.toString(),
       },
-      payment_capture: 1 // Auto capture payment
+      payment_capture: 1, // Auto capture payment
     };
 
     razorpayInstance.orders.create(options, (error, order) => {
       if (error) {
         console.error("Razorpay order creation error:", error);
-        
+
         // Clean up the order from database
         orderModel.findByIdAndDelete(newOrder._id);
-        
-        return res.status(500).json({ 
-          success: false, 
-          message: error.description || "Failed to create payment order" 
+
+        return res.status(500).json({
+          success: false,
+          message: error.description || "Failed to create payment order",
         });
       }
-      
-      return res.json({ 
-        success: true, 
+
+      return res.json({
+        success: true,
         order,
-        orderId: newOrder._id 
+        orderId: newOrder._id,
       });
     });
-
   } catch (error) {
     console.error("Place order error:", error);
-    return res.status(500).json({ 
-      success: false, 
-      message: "Internal server error" 
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
     });
   }
 };
@@ -257,7 +256,7 @@ const verifyRazorpay = async (req, res) => {
     if (!razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
       return res.status(400).json({
         success: false,
-        message: "Missing payment verification data"
+        message: "Missing payment verification data",
       });
     }
 
@@ -269,66 +268,65 @@ const verifyRazorpay = async (req, res) => {
 
     if (expectedSignature !== razorpay_signature) {
       console.error("Signature verification failed");
-      
+
       // Update order status to failed
       await orderModel.findByIdAndUpdate(orderId, {
         paymentStatus: "failed",
-        failureReason: "Signature verification failed"
+        failureReason: "Signature verification failed",
       });
 
       return res.status(400).json({
         success: false,
-        message: "Payment signature verification failed"
+        message: "Payment signature verification failed",
       });
     }
 
     // Verify payment with Razorpay
     const payment = await razorpayInstance.payments.fetch(razorpay_payment_id);
-    
+
     if (payment.status === "captured" || payment.status === "authorized") {
       // Payment successful
       await orderModel.findByIdAndUpdate(orderId, {
         paymentStatus: "completed",
         razorpayPaymentId: razorpay_payment_id,
         razorpayOrderId: razorpay_order_id,
-        payment: true
+        payment: true,
       });
 
       // Clear user's cart
       await userModel.findByIdAndUpdate(userId, { cartData: {} });
 
-      return res.json({ 
-        success: true, 
+      return res.json({
+        success: true,
         message: "Payment Successful",
-        paymentId: razorpay_payment_id
+        paymentId: razorpay_payment_id,
       });
     } else {
       // Payment failed
       await orderModel.findByIdAndUpdate(orderId, {
         paymentStatus: "failed",
-        failureReason: payment.error_description || "Payment not captured"
+        failureReason: payment.error_description || "Payment not captured",
       });
 
       return res.status(400).json({
         success: false,
-        message: payment.error_description || "Payment failed"
+        message: payment.error_description || "Payment failed",
       });
     }
-
   } catch (error) {
     console.error("Payment verification error:", error);
-    
+
     // Mark order as failed in case of error
     if (orderId) {
       await orderModel.findByIdAndUpdate(orderId, {
         paymentStatus: "failed",
-        failureReason: "Verification error"
+        failureReason: "Verification error",
       });
     }
 
     return res.status(500).json({
       success: false,
-      message: "Payment verification failed"
+      message: "Payment verification failed",
     });
   }
 };
@@ -368,9 +366,9 @@ const getUserOrder = async (req, res) => {
     const { orderId } = req.body;
 
     const order = await orderModel.findById({ _id: orderId });
-    const user = await userModel.findById({ _id: order.userId });
+    // const user = await userModel.findById({ _id: order.userId });
     // console.log("userrrr: " + user);
-    res.json({ success: true, order, user });
+    res.json({ success: true, order });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });

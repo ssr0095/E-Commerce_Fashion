@@ -1,12 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { ShopContext } from "../context/ShopContext";
-
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent,
-} from "@/components/ui/tabs";
+import Title from "../components/Title";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Card,
   CardHeader,
@@ -28,14 +23,8 @@ import SmallNavBar from "../components/SmallNavBar";
 import { assets } from "../assets/assets";
 
 const Orders = () => {
-  const {
-    orders,
-    loadingOrders,
-    fetchOrders,
-    currency,
-    token,
-    navigate,
-  } = useContext(ShopContext);
+  const { orders, loadingOrders, fetchOrders, currency, token, navigate } =
+    useContext(ShopContext);
 
   const [initialLoad, setInitialLoad] = useState(true);
 
@@ -55,13 +44,17 @@ const Orders = () => {
   const filterOrders = (status) => {
     switch (status) {
       case "onShipping":
-        return orders.filter(
-          (o) => o.status !== "Delivered" && o.status !== "Cancelled"
-        );
+        return orders
+          .filter((o) => o.status !== "Delivered" && o.status !== "Cancelled")
+          .sort((a, b) => new Date(b.date) - new Date(a.date));
       case "arrived":
-        return orders.filter((o) => o.status === "Delivered");
+        return orders
+          .filter((o) => o.status === "Delivered")
+          .sort((a, b) => new Date(b.date) - new Date(a.date));
       case "cancelled":
-        return orders.filter((o) => o.status === "Cancelled");
+        return orders
+          .filter((o) => o.status === "Cancelled")
+          .sort((a, b) => new Date(b.date) - new Date(a.date));
       default:
         return orders;
     }
@@ -71,8 +64,10 @@ const Orders = () => {
     <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw] pb-10">
       <SmallNavBar navs={["Orders"]} />
       <div className="border-t pt-6">
-        <h2 className="text-2xl font-semibold mb-6">My Orders</h2>
-
+        {/* <h2 className="text-2xl font-semibold mb-6">My Orders</h2> */}
+        <div className="text-2xl mb-6">
+          <Title text1={"MY"} text2={"ORDERS"} />
+        </div>
         {/* Tabs */}
         <Tabs defaultValue="onShipping" className="w-full">
           <TabsList className="flex justify-center mb-6 bg-muted/30 rounded-full w-fit mx-auto">
@@ -136,9 +131,10 @@ const Orders = () => {
                               className="flex items-center gap-3 border rounded-md p-2"
                             >
                               <img
-                                src={item.image[0]}
+                                // src={item.image[0]}
+                                src={assets.tShirt}
                                 alt={item.name}
-                                className="w-14 h-14 object-cover rounded-md"
+                                className="w-14 h-14 object-contain rounded-md"
                               />
                               <div>
                                 <p className="text-sm font-medium truncate">

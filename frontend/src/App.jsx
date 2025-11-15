@@ -3,6 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import { MainLayout, AuthLayout } from "./layouts/layout";
 import Loading from "./components/Loading";
 import NotFound from "./pages/NotFound";
+import OrderDetail from "./pages/OrderDetail";
 
 const App = () => {
   const Home = lazy(() => import("./pages/Home"));
@@ -101,6 +102,14 @@ const App = () => {
             <AuthLayout>
               <Payment />
             </AuthLayout>
+          }
+        />
+        <Route
+          path="/order/:orderId"
+          element={
+            <MainLayout>
+              <OrderDetail />
+            </MainLayout>
           }
         />
         <Route

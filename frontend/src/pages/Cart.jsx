@@ -13,6 +13,7 @@ const Cart = () => {
   const {
     products,
     customizableProducts,
+    bestSellerProducts,
     currency,
     cartItems,
     updateQuantity,
@@ -26,7 +27,11 @@ const Cart = () => {
     loading,
   } = useContext(ShopContext);
 
-  const allProducts = [...products, ...customizableProducts];
+  const allProducts = [
+    ...products,
+    ...customizableProducts,
+    ...bestSellerProducts,
+  ];
   const [cartData, setCartData] = useState([]);
   const [couponCode, setCouponCode] = useState("");
 
@@ -62,7 +67,11 @@ const Cart = () => {
   };
 
   useEffect(() => {
-    const allProducts = [...products, ...customizableProducts];
+    const allProducts = [
+      ...products,
+      ...customizableProducts,
+      ...bestSellerProducts,
+    ];
     if (allProducts.length > 0) {
       const tempData = [];
 
@@ -80,7 +89,7 @@ const Cart = () => {
 
       setCartData(tempData);
     }
-  }, [cartItems, products, customizableProducts, loading]);
+  }, [cartItems, products, customizableProducts, bestSellerProducts, loading]);
 
   return (
     <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">

@@ -611,7 +611,11 @@ const ShopContextProvider = ({ children }) => {
 
   const getCartAmount = useCallback(() => {
     return Object.entries(state.cartItems).reduce((total, [itemId, sizes]) => {
-      const allProducts = [...state.products, ...state.customizableProducts];
+      const allProducts = [
+        ...state.products,
+        ...state.customizableProducts,
+        ...state.bestSellerProducts,
+      ];
       const itemInfo = allProducts.find((product) => product._id === itemId);
       if (!itemInfo) return total;
       return (
@@ -619,7 +623,12 @@ const ShopContextProvider = ({ children }) => {
         Object.values(sizes).reduce((sum, qty) => sum + qty * itemInfo.price, 0)
       );
     }, 0);
-  }, [state.cartItems, state.products, state.customizableProducts]);
+  }, [
+    state.cartItems,
+    state.products,
+    state.customizableProducts,
+    state.bestSellerProducts,
+  ]);
 
   //#endregion
 
@@ -1033,7 +1042,7 @@ const ShopContextProvider = ({ children }) => {
   const googleLogin = useCallback(
     async (googleData) => {
       try {
-        const { data } = await axiosPOST(
+        const { data } = await axios.post(
           `${backendUrl}/api/auth/google`,
           JSON.stringify(googleData),
           {

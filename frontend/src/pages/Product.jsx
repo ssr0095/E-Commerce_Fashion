@@ -28,8 +28,14 @@ import axios from "axios";
 
 const Product = () => {
   const { slug } = useParams();
-  const { products, currency, addToCart, navigate, customizableProducts, backendUrl } =
-    useContext(ShopContext);
+  const {
+    products,
+    currency,
+    addToCart,
+    navigate,
+    customizableProducts,
+    backendUrl,
+  } = useContext(ShopContext);
   const [productData, setProductData] = useState(false);
   const [image, setImage] = useState("");
   const [size, setSize] = useState(null);
@@ -53,7 +59,9 @@ const Product = () => {
       }
 
       // If not found locally, fetch from API
-      const response = await axios.get(`${backendUrl}/api/product/single/${slug}`);
+      const response = await axios.get(
+        `${backendUrl}/api/product/single/${slug}`
+      );
 
       if (response.data?.success) {
         setProductData(response.data.product);
@@ -235,7 +243,7 @@ const Product = () => {
         <div className="flex gap-5 sm:gap-7 flex-col sm:flex-row">
           {/*---------- Product Images------------- */}
           <div className="flex-1 flex max-sm:flex-col gap-3">
-            <div className="flex sm:flex-col max-sm:order-2 sm:overflow-y-scroll justify-start gap-3 w-[19%]">
+            <div className="flex sm:flex-col max-sm:order-2 justify-start gap-3 w-[19%]">
               {productData?.image.map((item, index) => (
                 <img
                   onClick={() => setImage(item)}

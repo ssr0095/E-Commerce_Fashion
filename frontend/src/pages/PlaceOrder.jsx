@@ -11,7 +11,7 @@ import { Button } from "../components/ui/button";
 import errorHandler from "../lib/errorHandler";
 
 const PlaceOrder = () => {
-  const [method, setMethod] = useState("googlepay");
+  const [method, setMethod] = useState("razorpay");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRazorLoaded, setIsRazorLoaded] = useState(false);
   const [formErrors, setFormErrors] = useState({});
@@ -37,11 +37,16 @@ const PlaceOrder = () => {
     delivery_fee,
     products,
     customizableProducts,
+    bestSellerProducts,
     discount,
     refreshOrders,
   } = useContext(ShopContext);
 
-  const allProducts = [...products, ...customizableProducts];
+  const allProducts = [
+    ...products,
+    ...customizableProducts,
+    bestSellerProducts,
+  ];
 
   const onChangeHandler = (event) => {
     const name = event.target.name;
@@ -55,8 +60,10 @@ const PlaceOrder = () => {
 
     if (!formData.firstName.trim()) errors.firstName = "First name is required";
     if (!formData.email.match(/^\S+@\S+\.\S+$/)) errors.email = "Invalid email";
-    if (!formData.phone.match(/^\d{10}$/)) errors.phone = "Valid phone number (10 digits) required";
-    if (formData.street.trim().length < 5) errors.street = "Street address is too short";
+    if (!formData.phone.match(/^\d{10}$/))
+      errors.phone = "Valid phone number (10 digits) required";
+    if (formData.street.trim().length < 5)
+      errors.street = "Street address is too short";
     if (!formData.city.trim()) errors.city = "City is required";
     if (!formData.zipcode.trim()) errors.zipcode = "Zipcode is required";
     if (!formData.country.trim()) errors.country = "Country is required";
@@ -107,7 +114,9 @@ const PlaceOrder = () => {
       );
 
       if (!response.data?.success || !response.data?.order) {
-        throw new Error(response.data?.message || "Failed to create Razorpay order");
+        throw new Error(
+          response.data?.message || "Failed to create Razorpay order"
+        );
       }
 
       const razorpayOrder = response.data.order;
@@ -153,11 +162,13 @@ const PlaceOrder = () => {
               toast.success("Payment successful!");
               await refreshOrders();
               clearCart();
-              navigate("/orders", { 
-                state: { message: "Order placed successfully!" } 
+              navigate("/orders", {
+                state: { message: "Order placed successfully!" },
               });
             } else {
-              throw new Error(verifyResponse.data.message || "Payment verification failed");
+              throw new Error(
+                verifyResponse.data.message || "Payment verification failed"
+              );
             }
           } catch (error) {
             console.error("Payment verification error:", error);
@@ -170,7 +181,7 @@ const PlaceOrder = () => {
           }
         },
         modal: {
-          ondismiss: function() {
+          ondismiss: function () {
             toast.info("Payment cancelled. You can try again.");
           },
         },
@@ -184,11 +195,10 @@ const PlaceOrder = () => {
       rzp.open();
 
       // Handle Razorpay errors
-      rzp.on('payment.failed', function (response) {
+      rzp.on("payment.failed", function (response) {
         console.error("Razorpay payment failed:", response.error);
         toast.error(`Payment failed: ${response.error.description}`);
       });
-
     } catch (error) {
       console.error("Razorpay initialization error:", error);
       toast.error("Failed to initialize payment. Please try again.");
@@ -263,8 +273,8 @@ const PlaceOrder = () => {
           1, // Minimum amount for Razorpay
           Math.round(
             getCartAmount() +
-            delivery_fee -
-            Math.ceil((getCartAmount() * discount) / 100)
+              delivery_fee -
+              Math.ceil((getCartAmount() * discount) / 100)
           )
         ),
         isCustomizable: hasCustomItem,
@@ -289,8 +299,8 @@ const PlaceOrder = () => {
 
         case "cod":
           clearCart();
-          navigate("/orders", { 
-            state: { message: "Order placed successfully!" } 
+          navigate("/orders", {
+            state: { message: "Order placed successfully!" },
           });
           break;
 
@@ -336,7 +346,7 @@ const PlaceOrder = () => {
       toast.error("Failed to load payment system. Please refresh the page.");
       setIsRazorLoaded(false);
     };
-    
+
     document.head.appendChild(script);
 
     return () => {
@@ -514,26 +524,72 @@ const PlaceOrder = () => {
               <div
                 onClick={() => setMethod("razorpay")}
                 className={`flex items-center gap-3 border p-2 px-3 cursor-pointer ${
-                  method === "razorpay" && "border-green-500 border-2"
+                  method === "razorpay"
+                    ? "border-green-500 border-2 bg-gray-200"
+                    : "border-2 border-gray-300"
                 } ${!isRazorLoaded ? "opacity-50 cursor-not-allowed" : ""}`}
                 title={!isRazorLoaded ? "Payment system loading..." : ""}
+                disabled={!isRazorLoaded}
               >
                 <p
                   className={`min-w-3.5 h-3.5 border rounded-full ${
                     method === "razorpay" ? "bg-green-500" : "bg-gray-400"
                   }`}
                 ></p>
-                <img className="h-5 mx-4" src={assets.razorpay_logo} alt="Razorpay" />
+                <img
+                  className="h-5 mx-4"
+                  src={assets.razorpay_logo}
+                  alt="Razorpay"
+                />
                 {!isRazorLoaded && "Loading..."}
               </div>
-              
-              {/* Other payment methods */}
+              <div
+                onClick={() => setMethod("googlepay")}
+                className={`flex items-center gap-3 border p-2 px-3 cursor-pointer ${
+                  method === "googlepay"
+                    ? "border-green-500 border-2 bg-gray-200"
+                    : "border-2 border-gray-300"
+                }`}
+              >
+                <p
+                  className={`min-w-3.5 h-3.5 border rounded-full ${
+                    method === "googlepay" ? "bg-green-500" : "bg-gray-400"
+                  }`}
+                ></p>
+                <img
+                  className="h-5 ml-4"
+                  src={assets.googlepay_logo}
+                  alt="Google Pay icon by Icons8"
+                />
+                Google Pay
+              </div>
+              <div
+                disabled={true}
+                // onClick={() => setMethod("cod")}
+                className={`flex items-center gap-3 border p-2 px-3 opacity-80 cursor-not-allowed ${
+                  method === "cod"
+                    ? "border-green-500 border-2 bg-gray-200"
+                    : "border-2 border-gray-300"
+                }`}
+                title={"Not available"}
+              >
+                <p
+                  className={`min-w-3.5 h-3.5 border rounded-full ${
+                    method === "cod" ? "bg-green-500" : "bg-gray-400"
+                  }`}
+                ></p>
+                <p className="text-gray-500 text-sm font-medium mx-4">
+                  CASH ON DELIVERY
+                </p>
+              </div>
             </div>
 
             <div className="w-full text-end mt-8">
               <Button
                 type="submit"
-                disabled={isSubmitting || (method === "razorpay" && !isRazorLoaded)}
+                disabled={
+                  isSubmitting || (method === "razorpay" && !isRazorLoaded)
+                }
                 className={`rounded-none my-8 px-8 w-full sm:w-fit py-3 ${
                   isSubmitting ? "opacity-50 cursor-not-allowed" : ""
                 }`}

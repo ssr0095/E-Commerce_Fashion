@@ -1,0 +1,49 @@
+------DISCOUNT issue in home
+------LOADING issue in collection
+------SEARCH LOGIC
+
+AUTH REFRESH LOGIC - refresh aT only or both?
+
+RAZOR PAY issue
+ONLINE PAYMENT GATEWAY - header issue, ADDRess validate
+ORDER page improve
+NOT FOUND
+
+PRIVACY, TERMS & COOKIES PAGE
+COOIKE IMPLEMENT
+GOOGLE API PUBLISH FOR AUTH
+SEO IMPROVE
+
+NEXT.JS CONVERTION
+COMPLETE UI UPDATE
+
+AUTH
+[backend]
+
+- over logic? over validation? over time/space/effort taking?
+- verifyToken controller safe? compare middleware
+  [frontend]
+- propper authentication & authorization flow?
+- proper login, register, logout, token refresh logic, refreshing tab [refresh vs navigate flow]
+- proper error handling? should print on console? better approach?
+
+DB
+
+- race conditions, thread, async, sync
+- optimized query handling
+
+sameSite: "strict" vs "Lax"
+csrf - Protect state-changing routes
+window.location, navigation
+
+need of class over Function & where to use
+
+accessToekn get removed when
+
+- expires
+- logout
+- error
+  refreshToken refreshed when
+- 401 error with token expires
+
+need to get new token when accessToekn expires | not found & refreshToken still valid

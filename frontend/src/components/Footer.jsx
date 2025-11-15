@@ -3,7 +3,7 @@ import { Phone } from "lucide-react";
 const Footer = () => {
   const theme = themeList.slice(0, 4);
   return (
-    <footer className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw] bg-gray-50 border-t mt-40">
+    <footer className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw] bg-gray-50 border-t mt-20">
       <div className="my-6">
         <img
           src="/logo.webp"
