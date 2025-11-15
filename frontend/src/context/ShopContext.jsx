@@ -10,7 +10,8 @@ import axios from "axios";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import errorHandler from "../lib/errorHandler";
-
+import { Badge } from "@/components/ui/badge";
+import { PackageCheck, CircleCheck, Ban } from "lucide-react";
 //#region HELPERS
 
 const cacheManager = {
@@ -1096,6 +1097,30 @@ const ShopContextProvider = ({ children }) => {
 
   //#endregion
 
+  // 🏷️ Status Badge Component
+  const StatusBadge = ({ status }) => {
+    switch (status) {
+      case "Delivered":
+        return (
+          <Badge variant="outline" className="bg-green-100 text-green-700">
+            <CircleCheck className="w-3 h-3 mr-1" /> Delivered
+          </Badge>
+        );
+      case "Cancelled":
+        return (
+          <Badge variant="outline" className="bg-red-100 text-red-700">
+            <Ban className="w-3 h-3 mr-1" /> Cancelled
+          </Badge>
+        );
+      default:
+        return (
+          <Badge variant="outline" className="bg-blue-100 text-blue-700">
+            <PackageCheck className="w-3 h-3 mr-1" /> On Shipping
+          </Badge>
+        );
+    }
+  };
+
   //#region APP INITIALIZE MANAGENT
 
   useEffect(() => {
@@ -1168,6 +1193,7 @@ const ShopContextProvider = ({ children }) => {
       getOrderById,
       updateFilters,
       getCartSyncStatus,
+      StatusBadge,
     }),
     [
       state,
@@ -1198,6 +1224,7 @@ const ShopContextProvider = ({ children }) => {
       getOrderById,
       updateFilters,
       getCartSyncStatus,
+      StatusBadge,
     ]
   );
 

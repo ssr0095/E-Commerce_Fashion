@@ -8,25 +8,35 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Truck,
-  PackageCheck,
-  CircleAlert,
-  CircleCheck,
-  Ban,
-} from "lucide-react";
+import { Truck } from "lucide-react";
 import Loader from "../components/CompLoader";
 import SmallNavBar from "../components/SmallNavBar";
 import { assets } from "../assets/assets";
 
 const Orders = () => {
-  const { orders, loadingOrders, fetchOrders, currency, token, navigate } =
-    useContext(ShopContext);
+  const {
+    orders,
+    loadingOrders,
+    fetchOrders,
+    currency,
+    token,
+    navigate,
+    StatusBadge,
+  } = useContext(ShopContext);
 
   const [initialLoad, setInitialLoad] = useState(true);
+
+  const options = {
+    month: "short", // Full month name (e.g., "November")
+    day: "numeric", // Day of the month (e.g., "15")
+    year: "numeric", // Full year (e.g., "2025")
+    hour: "numeric", // Hour (e.g., "7")
+    minute: "numeric", // Minute (e.g., "20")
+    // second: 'numeric', // Second (e.g., "30")
+    hour12: true, // Use 12-hour format with AM/PM
+  };
 
   useEffect(() => {
     if (token) {
@@ -103,7 +113,7 @@ const Orders = () => {
                     filterOrders(tab).map((order, idx) => (
                       <Card
                         key={idx}
-                        className="rounded-2xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
+                        className="shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
                       >
                         <CardHeader className="pb-3 flex flex-col gap-2">
                           <div className="flex justify-between items-center">
@@ -124,11 +134,11 @@ const Orders = () => {
                           </div>
                         </CardHeader>
 
-                        <CardContent className="space-y-3">
-                          {order.items.map((item, i) => (
+                        <CardContent className="space-y-2">
+                          {/* {order.items.map((item, i) => (
                             <div
                               key={i}
-                              className="flex items-center gap-3 border rounded-md p-2"
+                              className="flex items-center gap-3 border rounded-md p-1"
                             >
                               <img
                                 // src={item.image[0]}
@@ -136,7 +146,7 @@ const Orders = () => {
                                 alt={item.name}
                                 className="w-14 h-14 object-contain rounded-md"
                               />
-                              <div>
+                              <div className="w-full truncate">
                                 <p className="text-sm font-medium truncate">
                                   {item.name}
                                 </p>
@@ -149,7 +159,30 @@ const Orders = () => {
                                 </p>
                               </div>
                             </div>
-                          ))}
+                          ))} */}
+
+                          <div className="flex items-center gap-2 border rounded-md p-1">
+                            <img
+                              // src={item.image[0]}
+                              src={assets.tShirt}
+                              // alt={item.name}
+                              className="size-10 object-contain rounded-md"
+                            />
+                            <div className="w-full truncate">
+                              <p className="text-xs text-muted-foreground">
+                                Items:{" "}
+                                {order.items.reduce(
+                                  (tot, i) => tot + i.quantity,
+                                  0
+                                )}
+                              </p>
+                            </div>
+                          </div>
+                          <p className="text-xs sm:text-sm font-medium text-slate-500">
+                            {Intl.DateTimeFormat("en-US", options).format(
+                              new Date(order.date)
+                            )}
+                          </p>
                         </CardContent>
 
                         <CardFooter className="flex justify-between items-center border-t pt-3">
@@ -180,30 +213,6 @@ const Orders = () => {
       </div>
     </div>
   );
-};
-
-// 🏷️ Status Badge Component
-const StatusBadge = ({ status }) => {
-  switch (status) {
-    case "Delivered":
-      return (
-        <Badge variant="outline" className="bg-green-100 text-green-700">
-          <CircleCheck className="w-3 h-3 mr-1" /> Delivered
-        </Badge>
-      );
-    case "Cancelled":
-      return (
-        <Badge variant="outline" className="bg-red-100 text-red-700">
-          <Ban className="w-3 h-3 mr-1" /> Cancelled
-        </Badge>
-      );
-    default:
-      return (
-        <Badge variant="outline" className="bg-blue-100 text-blue-700">
-          <PackageCheck className="w-3 h-3 mr-1" /> On Shipping
-        </Badge>
-      );
-  }
 };
 
 export default Orders;

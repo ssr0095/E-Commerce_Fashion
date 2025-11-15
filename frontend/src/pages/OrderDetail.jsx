@@ -13,7 +13,6 @@ import { Button } from "../components/ui/button";
 import imageCompression from "browser-image-compression";
 
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -22,7 +21,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
 import {
   Upload,
   QrCode,
@@ -48,6 +46,7 @@ const OrderDetail = () => {
     delivery_fee,
     getCartAmount,
     discount,
+    StatusBadge,
   } = useContext(ShopContext);
 
   const { orderId } = useParams();
@@ -57,6 +56,7 @@ const OrderDetail = () => {
   const [quantity, setQuantity] = useState(0);
   const [isCustom, setIsCustom] = useState(false);
   const [isGoodlePay, setIsGoodlePay] = useState(false);
+  const [cartAmount, setCartAmount] = useState(0);
 
   // Payment image state
   const [paymentImage, setPaymentImage] = useState(null);
@@ -101,7 +101,7 @@ const OrderDetail = () => {
       if (response.data.success) {
         const orderData = response.data.order;
         setOrder(orderData);
-
+        setCartAmount(orderData.amount - delivery_fee);
         // Calculate total quantity
         const totalQuantity = orderData.items.reduce(
           (sum, item) => sum + item.quantity,
@@ -258,8 +258,6 @@ const OrderDetail = () => {
     }
   };
 
-  console.log(order);
-
   useEffect(() => {
     loadOrderData();
   }, [token, orderId]);
@@ -304,23 +302,12 @@ const OrderDetail = () => {
             </p>
           </div>
 
-          <Badge
-            variant={
-              order.status === "Delivered"
-                ? "success"
-                : order.status === "Processing"
-                ? "secondary"
-                : "outline"
-            }
-            className="text-sm"
-          >
-            {order.status}
-          </Badge>
+          <StatusBadge status={order.status}></StatusBadge>
         </div>
 
-        <div className="w-full flex items-start flex-col lg:flex-row gap-3 py-5">
+        <div className="w-full flex items-start flex-col lg:flex-row gap-3 pt-5">
           {/* Items */}
-          <Card className="max-w-xs rounded-2xl shadow-sm border flex-1">
+          <Card className="min-w-xs rounded-2xl shadow-sm border flex-1">
             <CardHeader>
               <h3 className="font-medium">Ordered Items</h3>
             </CardHeader>
@@ -336,10 +323,8 @@ const OrderDetail = () => {
                       alt={item.name}
                       className="w-16 h-16 rounded-md object-cover"
                     />
-                    <div className="">
-                      <p className="font-medium truncate max-w-xs">
-                        {item.name}
-                      </p>
+                    <div className="w-full">
+                      <p className="font-medium">{item.name}</p>
                       <p className="text-xs text-muted-foreground">
                         Size: {item.size} • Qty: {item.quantity}
                       </p>
@@ -348,15 +333,10 @@ const OrderDetail = () => {
                   <p className="font-semibold">₹{item.price}</p>
                 </div>
               ))}
-              <Separator />
-              <div className="flex justify-between font-semibold">
-                <span>Total</span>
-                <span>₹{order?.amount}</span>
-              </div>
             </CardContent>
           </Card>
 
-          <div className="lg:w-[20vw] flex items-start flex-col gap-3">
+          <div className="w-full lg:w-[20vw] flex items-start flex-col gap-3">
             {/* Shipping Address */}
             <Card className="rounded-2xl shadow-sm border w-full">
               <CardHeader className="flex items-center flex-row gap-1">
@@ -386,64 +366,66 @@ const OrderDetail = () => {
                 <p>Same as shipping address</p>
               </CardContent>
             </Card>
-          </div>
-        </div>
 
-        {/* Order summary */}
-        <Card className="rounded-2xl shadow-sm border">
-          <CardHeader className="flex items-center flex-row gap-1">
-            <MapPin className="size-4 text-primary" />
-            <h3 className="font-medium">Order Summary</h3>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col gap-2 mt-2 text-sm">
-              <div className="flex justify-between">
-                <p>Subtotal</p>
-                <p>
-                  {currency} {getCartAmount()}.00
-                </p>
-              </div>
-              <hr />
-              <div className="flex justify-between">
-                <p>Shipping Fee</p>
-                <p>
-                  {currency} {delivery_fee}.00
-                </p>
-              </div>
-              <hr />
-              {discount > 0 && (
-                <>
+            {/* Order summary */}
+            <Card className="rounded-2xl shadow-sm border w-full">
+              <CardHeader className="flex items-center flex-row gap-1">
+                <MapPin className="size-4 text-primary" />
+                <h3 className="font-medium">Order Summary</h3>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col gap-2 mt-2 text-sm">
                   <div className="flex justify-between">
+                    <p>Subtotal</p>
                     <p>
-                      Discount{" "}
-                      <span className="ml-1 text-gray-600">{discount}%</span>
-                    </p>
-                    <p>
-                      - {currency}{" "}
-                      {Math.ceil((getCartAmount() * discount) / 100)}.00
+                      {currency} {cartAmount}.00
                     </p>
                   </div>
                   <hr />
-                </>
-              )}
-              <div className="flex justify-between">
-                <b>Total</b>
-                <b>
-                  {currency}{" "}
-                  {getCartAmount() === 0
-                    ? 0
-                    : getCartAmount() +
-                      delivery_fee -
-                      Math.ceil((getCartAmount() * discount) / 100)}
-                  .00
-                </b>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+                  <div className="flex justify-between">
+                    <p>Shipping Fee</p>
+                    <p>
+                      {currency} {delivery_fee}.00
+                    </p>
+                  </div>
+                  <hr />
+                  {discount > 0 && (
+                    <>
+                      <div className="flex justify-between">
+                        <p>
+                          Discount{" "}
+                          <span className="ml-1 text-gray-600">
+                            {discount}%
+                          </span>
+                        </p>
+                        <p>
+                          - {currency}{" "}
+                          {Math.ceil((cartAmount * discount) / 100)}.00
+                        </p>
+                      </div>
+                      <hr />
+                    </>
+                  )}
+                  <div className="flex justify-between">
+                    <b>Total</b>
+                    <b>
+                      {currency}{" "}
+                      {cartAmount === 0
+                        ? 0
+                        : cartAmount +
+                          delivery_fee -
+                          Math.ceil((cartAmount * discount) / 100)}
+                      .00
+                    </b>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
 
         {/* Order Timeline */}
-        <Card className="rounded-2xl shadow-sm border">
+        {/* <Card className="rounded-2xl shadow-sm border">
           <CardHeader>
             <h3 className="font-medium">Order Status</h3>
           </CardHeader>
@@ -465,10 +447,10 @@ const OrderDetail = () => {
               className="h-2"
             />
           </CardContent>
-        </Card>
+        </Card> */}
 
         {/* Payment Section */}
-        <Card className="rounded-2xl shadow-sm border">
+        {/* <Card className="rounded-2xl shadow-sm border">
           <CardHeader className="flex items-center gap-2">
             <CreditCard className="w-4 h-4 text-primary" />
             <h3 className="font-medium">Payment</h3>
@@ -491,18 +473,16 @@ const OrderDetail = () => {
               Upload Payment Screenshot
             </Button>
           </CardContent>
-        </Card>
+        </Card> */}
 
         {/* QR Dialog */}
-        <Dialog open={showQR} onOpenChange={setShowQR}>
+        {/* <Dialog open={showQR} onOpenChange={setShowQR}>
           <DialogContent className="max-sm:w-[95%] sm:max-w-md rounded-lg">
             <DialogHeader>
-              {/* <DialogTitle>Scan QR to Pay</DialogTitle> */}
               <div className="text-xl sm:text-2xl mb-3">
                 <Title text1="COMPLETE" text2="PAYMENT" />
               </div>
             </DialogHeader>
-            {/* Payment Details */}
             <div className="w-full flex items-center flex-col space-y-6">
               <div className="flex items-center gap-2">
                 <img src={assets.ok_icon} alt="OK" width={24} height={24} />
@@ -521,10 +501,10 @@ const OrderDetail = () => {
               <Button onClick={() => setShowQR(false)}>Close</Button>
             </DialogFooter>
           </DialogContent>
-        </Dialog>
+        </Dialog> */}
 
         {/* Upload Dialog */}
-        <Dialog open={showUpload} onOpenChange={setShowUpload}>
+        {/* <Dialog open={showUpload} onOpenChange={setShowUpload}>
           <DialogContent className="sm:max-w-sm">
             <DialogHeader>
               <div className="text-xl sm:text-2xl text-center mb-3">
@@ -589,7 +569,7 @@ const OrderDetail = () => {
               </div>
             )}
           </DialogContent>
-        </Dialog>
+        </Dialog>  */}
       </div>
     </div>
   );

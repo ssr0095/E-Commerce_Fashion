@@ -543,7 +543,7 @@ const PlaceOrder = () => {
                 />
                 {!isRazorLoaded && "Loading..."}
               </div>
-              <div
+              {/* <div
                 onClick={() => setMethod("googlepay")}
                 className={`flex items-center gap-3 border p-2 px-3 cursor-pointer ${
                   method === "googlepay"
@@ -562,7 +562,7 @@ const PlaceOrder = () => {
                   alt="Google Pay icon by Icons8"
                 />
                 Google Pay
-              </div>
+              </div> */}
               <div
                 disabled={true}
                 // onClick={() => setMethod("cod")}
